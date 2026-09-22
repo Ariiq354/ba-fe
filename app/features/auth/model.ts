@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  username: z.string("Usernam wajib diisi"),
+  username: z.string("Username wajib diisi").min(1, "Username wajib diisi"),
   password: z.string("Password wajib diisi").min(8, "Password minimal 8 karakter"),
   rememberMe: z.boolean(),
 });
@@ -15,8 +15,8 @@ export const initLoginFormdata: Partial<LoginSchema> = {
 };
 
 export const registerSchema = z.object({
-  name: z.string("Nama wajib diisi"),
-  username: z.string("Username wajib diisi"),
+  name: z.string("Nama wajib diisi").min(1, "Nama wajib diisi"),
+  username: z.string("Username wajib diisi").min(1, "Username wajib diisi"),
   password: z.string("Password wajib diisi").min(8, "Password minimal 8 karakter"),
   confirmPassword: z.string("Konfirmasi password wajib diisi").min(8, "Konfirmasi password minimal 8 karakter"),
   idKelompok: z.number("Silahkan pilih kelompok"),
