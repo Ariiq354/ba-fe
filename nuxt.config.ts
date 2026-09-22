@@ -18,6 +18,12 @@ export default defineNuxtConfig({
     "/api/auth/**": {
       proxy: "https://api.ubberkahamanah.my.id/api/auth/**",
     },
+    "/dashboard": {
+      prerender: false,
+    },
+    "/dashboard/**": {
+      prerender: false,
+    },
   },
 
   eslint: {
