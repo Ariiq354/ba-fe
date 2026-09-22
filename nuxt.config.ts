@@ -14,6 +14,12 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
+  routeRules: {
+    "/api/auth/**": {
+      proxy: "https://api.ubberkahamanah.my.id/api/auth/**",
+    },
+  },
+
   eslint: {
     config: {
       standalone: false,
@@ -44,13 +50,6 @@ export default defineNuxtConfig({
           "https://pub-d903c762cae0445d8dce45d854b69f88.r2.dev",
         ],
       },
-    },
-  },
-
-  runtimeConfig: {
-    public: {
-      imageUrl: "https://pub-d903c762cae0445d8dce45d854b69f88.r2.dev",
-      apiUrl: "https://api.ubberkahamanah.my.id",
     },
   },
 

@@ -3,15 +3,13 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { LoginSchema } from "./model";
 import InputPassword from "~/components/input/InputPassword.vue";
 import { useToastError } from "~/composables/toast";
-import { useAuthClient } from "~/utils/auth";
+import { authClient } from "~/utils/auth";
 import { initLoginFormdata, loginSchema } from "./model";
 
 const state = reactive({ ...initLoginFormdata });
 
 const isLoading = ref(false);
 async function onSubmit(event: FormSubmitEvent<LoginSchema>) {
-  const authClient = useAuthClient();
-
   await authClient.signIn.username({
     username: event.data.username,
     password: event.data.password,
