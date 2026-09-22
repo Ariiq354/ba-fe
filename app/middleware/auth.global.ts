@@ -1,7 +1,14 @@
 import { useAuthSession } from "~/composables/auth";
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { session } = await useAuthSession();
+  const { session, error } = await useAuthSession();
+
+  if (error.value && to.path.startsWith("/dashboard")) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: "Authentication service unavailable",
+    });
+  }
 
   if (to.path === "/") {
     if (session.value) {

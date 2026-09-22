@@ -14,6 +14,12 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
+  routeRules: {
+    "/api/auth/**": {
+      proxy: "https://api.ubberkahamanah.my.id/api/auth/**",
+    },
+  },
+
   eslint: {
     config: {
       standalone: false,
