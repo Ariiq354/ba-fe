@@ -47,13 +47,6 @@ export default defineNuxtConfig({
     },
   },
 
-  runtimeConfig: {
-    public: {
-      imageUrl: "https://pub-d903c762cae0445d8dce45d854b69f88.r2.dev",
-      apiUrl: "https://api.ubberkahamanah.my.id",
-    },
-  },
-
   icon: {
     clientBundle: {
       scan: {

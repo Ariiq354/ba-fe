@@ -4,15 +4,13 @@ import type { RegisterSchema } from "./model";
 import InputPassword from "~/components/input/InputPassword.vue";
 import SelectKelompok from "~/components/select/SelectKelompok.vue";
 import { useToastError, useToastSuccess } from "~/composables/toast";
-import { useAuthClient } from "~/utils/auth";
+import { authClient } from "~/utils/auth";
 import { initRegisterFormdata, registerSchema } from "./model";
 
 const state = reactive({ ...initRegisterFormdata });
 
 const isLoading = ref(false);
 async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
-  const authClient = useAuthClient();
-
   await authClient.signUp.email({
     name: event.data.name,
     email: `${event.data.username}@auth.local`,

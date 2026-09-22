@@ -1,9 +1,9 @@
-export const useApi = createUseFetch((options) => {
-  const config = useRuntimeConfig();
+import { API_URL } from "~/constants";
 
+export const useApi = createUseFetch((options) => {
   return {
     ...options,
-    baseURL: config.public.apiUrl,
+    baseURL: API_URL,
 
     headers: {
       ...useRequestHeaders(["cookie"]),

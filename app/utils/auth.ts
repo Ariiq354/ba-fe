@@ -4,25 +4,22 @@ import {
   usernameClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/vue";
+import { API_URL } from "~/constants";
 
-export function useAuthClient() {
-  const config = useRuntimeConfig();
+export const authClient = createAuthClient({
+  baseURL: API_URL,
 
-  return createAuthClient({
-    baseURL: config.public.apiUrl,
-
-    plugins: [
-      usernameClient(),
-      adminClient(),
-      inferAdditionalFields({
-        user: {
-          idKelompok: {
-            type: "number",
-            required: true,
-            input: true,
-          },
+  plugins: [
+    usernameClient(),
+    adminClient(),
+    inferAdditionalFields({
+      user: {
+        idKelompok: {
+          type: "number",
+          required: true,
+          input: true,
         },
-      }),
-    ],
-  });
-}
+      },
+    }),
+  ],
+});
