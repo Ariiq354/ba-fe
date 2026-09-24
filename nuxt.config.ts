@@ -17,22 +17,14 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
-  routeRules: {
-    "/api/auth/**": {
-      proxy: "https://api.ubberkahamanah.my.id/api/auth/**",
-    },
-    "/dashboard": {
-      prerender: false,
-    },
-    "/dashboard/**": {
-      prerender: false,
-    },
-  },
-
   eslint: {
     config: {
       standalone: false,
     },
+  },
+
+  image: {
+    provider: "none",
   },
 
   ui: {
