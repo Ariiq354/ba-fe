@@ -20,7 +20,7 @@ async function onSubmit(event: FormSubmitEvent<LoginSchema>) {
     },
     onSuccess: async () => {
       isLoading.value = false;
-      await navigateTo("/dashboard", { external: true });
+      await navigateTo("/dashboard");
     },
     onError: (err) => {
       isLoading.value = false;

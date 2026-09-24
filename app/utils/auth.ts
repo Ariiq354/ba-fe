@@ -4,8 +4,13 @@ import {
   usernameClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/vue";
+import { API_URL } from "~/constants";
 
 export const authClient = createAuthClient({
+  baseURL: API_URL,
+  fetchOptions: {
+    credentials: "include",
+  },
   plugins: [
     usernameClient(),
     adminClient(),
