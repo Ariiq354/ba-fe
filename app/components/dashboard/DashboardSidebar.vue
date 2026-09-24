@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
-import { useAuthSession } from "~/composables/auth";
 import { openModal } from "~/composables/modal";
 import { useToastError } from "~/composables/toast";
 import { authClient } from "~/utils/auth";
@@ -9,13 +8,13 @@ import ModalChangeProfile from "../modal/ModalChangeProfile.vue";
 import DashboardNavigationMenu from "./DashboardNavigationMenu.vue";
 
 const config = useRuntimeConfig();
-const { session } = await useAuthSession();
+const { data: session } = await authClient.getSession();
 
 async function signOut() {
   try {
     await authClient.signOut();
 
-    await navigateTo("/", { external: true });
+    await navigateTo("/");
   }
   catch {
     useToastError("Gagal Keluar", "Terjadi kesalahan saat keluar, silahkan coba lagi.");
@@ -25,10 +24,10 @@ async function signOut() {
 const items = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: session.value?.user.name ?? "User",
+      label: session?.user.name ?? "User",
       avatar: {
-        src: session.value?.user.image ? `${config.public.imageUrl}/${session.value.user.image}` : undefined,
-        alt: session.value?.user.name ?? "User",
+        src: session?.user.image ? `${config.public.imageUrl}/${session.user.image}` : undefined,
+        alt: session?.user.name ?? "User",
         loading: "lazy",
       },
       type: "label",
