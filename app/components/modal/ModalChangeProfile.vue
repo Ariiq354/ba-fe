@@ -4,6 +4,8 @@ import { z } from "zod";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { useUploadFile } from "~/composables/upload";
+import { API_URL } from "~/constants";
+import { authClient } from "~/utils/auth";
 import InputFile from "../input/InputFile.vue";
 import SelectKecamatan from "../select/SelectKecamatan.vue";
 import SelectKelurahan from "../select/SelectKelurahan.vue";
@@ -23,9 +25,9 @@ interface UserProfile {
   pemilikRekening: string | null;
   jalan: string | null;
   idProvinsi: string | null;
-  idKota: string | null;
+  idKabupatenKota: string | null;
   idKecamatan: string | null;
-  idKelurahan: string | null;
+  idDesaKelurahan: string | null;
 }
 
 const emit = defineEmits<{ close: [] }>();
@@ -45,9 +47,9 @@ const schema = z.object({
   pemilikRekening: z.string().optional(),
   jalan: z.string().optional(),
   idProvinsi: z.string().optional(),
-  idKota: z.string().optional(),
+  idKabupatenKota: z.string().optional(),
   idKecamatan: z.string().optional(),
-  idKelurahan: z.string().optional(),
+  idDesaKelurahan: z.string().optional(),
 });
 type Schema = z.infer<typeof schema>;
 
@@ -67,14 +69,15 @@ watch(userProfile, (userData) => {
       pemilikRekening: userData.pemilikRekening ?? "",
       jalan: userData.jalan ?? "",
       idProvinsi: userData.idProvinsi ?? undefined,
-      idKota: userData.idKota ?? undefined,
+      idKabupatenKota: userData.idKabupatenKota ?? undefined,
       idKecamatan: userData.idKecamatan ?? undefined,
-      idKelurahan: userData.idKelurahan ?? undefined,
+      idDesaKelurahan: userData.idDesaKelurahan ?? undefined,
     };
   }
 }, { immediate: true });
 
 const isLoading = ref(false);
+const session = authClient.useSession();
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   isLoading.value = true;
@@ -90,8 +93,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       imageAction = "remove";
     }
 
-    await $fetch("/api/v1/user/profile", {
-      method: "POST",
+    await $fetch(`${API_URL}/api/v1/pengguna/profile`, {
+      method: "PATCH",
+      credentials: "include",
       body: {
         name: event.data.name,
         image: uploadedImageKey,
@@ -103,13 +107,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         pemilikRekening: event.data.pemilikRekening || undefined,
         jalan: event.data.jalan || undefined,
         idProvinsi: event.data.idProvinsi || undefined,
-        idKota: event.data.idKota || undefined,
+        idKabupatenKota: event.data.idKabupatenKota || undefined,
         idKecamatan: event.data.idKecamatan || undefined,
-        idKelurahan: event.data.idKelurahan || undefined,
+        idDesaKelurahan: event.data.idDesaKelurahan || undefined,
       },
     });
 
-    reloadNuxtApp();
+    await session.value.refetch();
 
     useToastSuccess("Berhasil", "Profil Anda berhasil diperbarui");
     emit("close");
@@ -261,9 +265,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               />
             </UFormField>
 
-            <UFormField label="Kota / Kabupaten" name="idKota">
+            <UFormField label="Kota / Kabupaten" name="idKabupatenKota">
               <SelectKota
-                v-model="state.idKota"
+                v-model="state.idKabupatenKota"
                 :id-provinsi="state.idProvinsi"
                 :disabled="isLoading"
               />
@@ -272,14 +276,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             <UFormField label="Kecamatan" name="idKecamatan">
               <SelectKecamatan
                 v-model="state.idKecamatan"
-                :id-kota="state.idKota"
+                :id-kota="state.idKabupatenKota"
                 :disabled="isLoading"
               />
             </UFormField>
 
-            <UFormField label="Desa / Kelurahan" name="idKelurahan">
+            <UFormField label="Desa / Kelurahan" name="idDesaKelurahan">
               <SelectKelurahan
-                v-model="state.idKelurahan"
+                v-model="state.idDesaKelurahan"
                 :id-kecamatan="state.idKecamatan"
                 :disabled="isLoading"
               />

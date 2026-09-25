@@ -26,6 +26,7 @@ export const registerSchema = z.object({
 });
 
 export const initRegisterFormdata: Partial<RegisterSchema> = {
+  name: undefined,
   username: undefined,
   password: undefined,
   confirmPassword: undefined,
