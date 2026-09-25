@@ -32,7 +32,7 @@ watch(
   (newVal, oldVal) => {
     if (oldVal !== undefined && newVal !== oldVal) {
       selectedKecamatan.value = undefined;
-      if (newVal) {
+      if (newVal && newVal !== oldVal) {
         execute();
       }
     }

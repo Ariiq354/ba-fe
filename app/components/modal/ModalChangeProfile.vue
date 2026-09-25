@@ -5,6 +5,7 @@ import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { useUploadFile } from "~/composables/upload";
 import { API_URL } from "~/constants";
+import { authClient } from "~/utils/auth";
 import InputFile from "../input/InputFile.vue";
 import SelectKecamatan from "../select/SelectKecamatan.vue";
 import SelectKelurahan from "../select/SelectKelurahan.vue";
@@ -76,6 +77,7 @@ watch(userProfile, (userData) => {
 }, { immediate: true });
 
 const isLoading = ref(false);
+const session = authClient.useSession();
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   isLoading.value = true;
@@ -110,6 +112,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         idDesaKelurahan: event.data.idDesaKelurahan || undefined,
       },
     });
+
+    await session.value.refetch();
 
     useToastSuccess("Berhasil", "Profil Anda berhasil diperbarui");
     emit("close");
