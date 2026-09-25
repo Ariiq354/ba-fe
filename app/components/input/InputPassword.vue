@@ -19,6 +19,7 @@ const password = defineModel<string>();
   >
     <template #trailing>
       <UButton
+        type="button"
         color="neutral"
         variant="link"
         size="sm"

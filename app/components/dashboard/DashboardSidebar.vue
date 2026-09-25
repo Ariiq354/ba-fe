@@ -2,13 +2,13 @@
 import type { DropdownMenuItem } from "@nuxt/ui";
 import { openModal } from "~/composables/modal";
 import { useToastError } from "~/composables/toast";
+import { IMAGE_URL } from "~/constants";
 import { authClient } from "~/utils/auth";
 import ModalChangePassword from "../modal/ModalChangePassword.vue";
 import ModalChangeProfile from "../modal/ModalChangeProfile.vue";
 import DashboardNavigationMenu from "./DashboardNavigationMenu.vue";
 
-const config = useRuntimeConfig();
-const { data: session } = await authClient.getSession();
+const session = authClient.useSession();
 
 async function signOut() {
   try {
@@ -24,10 +24,10 @@ async function signOut() {
 const items = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: session?.user.name ?? "User",
+      label: session.value.data?.user.name ?? "User",
       avatar: {
-        src: session?.user.image ? `${config.public.imageUrl}/${session.user.image}` : undefined,
-        alt: session?.user.name ?? "User",
+        src: session.value.data?.user.image ? `${IMAGE_URL}/${session.value.data.user.image}` : undefined,
+        alt: session.value.data?.user.name ?? "User",
         loading: "lazy",
       },
       type: "label",
@@ -50,7 +50,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
       label: "Keluar",
       icon: "i-tabler-logout",
       color: "error",
-      onClick: signOut,
+      onSelect: signOut,
     },
   ],
 ]);
@@ -60,7 +60,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
   <UDashboardSidebar collapsible resizable class="bg-muted" :ui="{ footer: 'border-t border-default', root: 'min-w-0 transition-all duration-300 overflow-hidden' }">
     <template #header>
       <div class="flex h-14 w-full items-center gap-2 overflow-hidden px-3 py-2 text-left text-sm">
-        <NuxtImg src="logo.webp" alt="Berkah Amanah" class="size-8" />
+        <NuxtImg src="/logo.webp" alt="Berkah Amanah" class="size-8" />
 
         <div class="grid flex-1 text-left text-sm leading-tight">
           <span class="truncate font-medium">Berkah Amanah</span>
@@ -75,11 +75,11 @@ const items = computed<DropdownMenuItem[][]>(() => [
       <UDropdownMenu :items="items" :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width)' }">
         <UButton
           :avatar="{
-            src: session?.user.image ? `${config.public.imageUrl}/${session.user.image}` : undefined,
-            alt: session?.user.name ?? 'User',
+            src: session.data?.user.image ? `${IMAGE_URL}/${session.data.user.image}` : undefined,
+            alt: session.data?.user.name ?? 'User',
             loading: 'lazy',
           }"
-          :label="session?.user.name ?? 'User'"
+          :label="session.data?.user.name ?? 'User'"
           color="neutral"
           variant="ghost"
           class="w-full"

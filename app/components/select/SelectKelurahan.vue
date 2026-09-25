@@ -2,9 +2,11 @@
 import { useApi } from "~/composables/fetch";
 
 interface Kelurahan {
-  id: string;
-  idKecamatan: string;
-  kelurahan: string;
+  data: {
+    id: string;
+    idKecamatan: string;
+    desaKelurahan: string;
+  }[];
 }
 
 const props = defineProps<{
@@ -15,7 +17,7 @@ const props = defineProps<{
 const selectedKelurahan = defineModel<string>();
 
 const nuxtApp = useNuxtApp();
-const { data, status, execute } = useApi<Kelurahan[]>("/api/v1/wilayah/kelurahan", {
+const { data, status, execute } = useApi<Kelurahan>("/api/v1/wilayah/desa-kelurahan", {
   key: computed(() => `kelurahan-options-${props.idKecamatan ?? ""}`),
   query: { idKecamatan: computed(() => props.idKecamatan) },
   immediate: Boolean(props.idKecamatan),
@@ -28,7 +30,7 @@ const { data, status, execute } = useApi<Kelurahan[]>("/api/v1/wilayah/kelurahan
 watch(
   () => props.idKecamatan,
   (newVal, oldVal) => {
-    if (newVal !== oldVal) {
+    if (oldVal !== undefined && newVal !== oldVal) {
       selectedKelurahan.value = undefined;
       if (newVal) {
         execute();
@@ -41,8 +43,8 @@ watch(
 <template>
   <USelectMenu
     v-model="selectedKelurahan"
-    :items="data ?? []"
-    label-key="kelurahan"
+    :items="data?.data ?? []"
+    label-key="desaKelurahan"
     value-key="id"
     :disabled="disabled || !idKecamatan || status === 'pending'"
     :loading="status === 'pending'"

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { IMAGE_URL } from "~/constants";
+
 defineProps<{
   disabled: boolean;
   label?: string;
@@ -12,13 +14,11 @@ const foto = defineModel<string | undefined>("foto", {
 const file = defineModel<File | undefined | null>("file", {
   required: true,
 });
-
-const config = useRuntimeConfig();
 </script>
 
 <template>
   <div v-if="foto" class="group relative w-40">
-    <NuxtImg :src="`${config.public.imageUrl}/${foto}`" class="ring-1 ring-muted rounded-lg object-cover object-center aspect-square w-40" />
+    <NuxtImg :src="`${IMAGE_URL}/${foto}`" class="ring-1 ring-muted rounded-lg object-cover object-center aspect-square w-40" />
     <UButton
       v-if="!disabled"
       icon="i-tabler-x"

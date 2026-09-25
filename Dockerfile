@@ -14,7 +14,7 @@ RUN bun run postinstall && bun run generate
 
 FROM nginxinc/nginx-unprivileged:stable-alpine AS production
 
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/.output/public /usr/share/nginx/html
 
 EXPOSE 8080

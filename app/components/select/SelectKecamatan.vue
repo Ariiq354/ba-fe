@@ -2,9 +2,11 @@
 import { useApi } from "~/composables/fetch";
 
 interface Kecamatan {
-  id: string;
-  idKota: string;
-  kecamatan: string;
+  data: {
+    id: string;
+    idKota: string;
+    kecamatan: string;
+  }[];
 }
 
 const props = defineProps<{
@@ -15,9 +17,9 @@ const props = defineProps<{
 const selectedKecamatan = defineModel<string>();
 
 const nuxtApp = useNuxtApp();
-const { data, status, execute } = useApi<Kecamatan[]>("/api/v1/wilayah/kecamatan", {
+const { data, status, execute } = useApi<Kecamatan>("/api/v1/wilayah/kecamatan", {
   key: computed(() => `kecamatan-options-${props.idKota ?? ""}`),
-  query: { idKota: computed(() => props.idKota) },
+  query: { idKabupatenKota: computed(() => props.idKota) },
   immediate: Boolean(props.idKota),
   watch: false,
   getCachedData: (key) => {
@@ -28,7 +30,7 @@ const { data, status, execute } = useApi<Kecamatan[]>("/api/v1/wilayah/kecamatan
 watch(
   () => props.idKota,
   (newVal, oldVal) => {
-    if (newVal !== oldVal) {
+    if (oldVal !== undefined && newVal !== oldVal) {
       selectedKecamatan.value = undefined;
       if (newVal) {
         execute();
@@ -41,7 +43,7 @@ watch(
 <template>
   <USelectMenu
     v-model="selectedKecamatan"
-    :items="data ?? []"
+    :items="data?.data ?? []"
     label-key="kecamatan"
     value-key="id"
     :disabled="disabled || !idKota || status === 'pending'"

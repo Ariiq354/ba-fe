@@ -2,9 +2,11 @@
 import { useApi } from "~/composables/fetch";
 
 interface Kota {
-  id: string;
-  idProvinsi: string;
-  kota: string;
+  data: {
+    id: string;
+    idProvinsi: string;
+    kabupatenKota: string;
+  }[];
 }
 
 const props = defineProps<{
@@ -15,7 +17,7 @@ const props = defineProps<{
 const selectedKota = defineModel<string>();
 
 const nuxtApp = useNuxtApp();
-const { data, status, execute } = useApi<Kota[]>("/api/v1/wilayah/kota", {
+const { data, status, execute } = useApi<Kota>("/api/v1/wilayah/kabupaten-kota", {
   key: computed(() => `kota-options-${props.idProvinsi ?? ""}`),
   query: { idProvinsi: computed(() => props.idProvinsi) },
   immediate: Boolean(props.idProvinsi),
@@ -28,7 +30,7 @@ const { data, status, execute } = useApi<Kota[]>("/api/v1/wilayah/kota", {
 watch(
   () => props.idProvinsi,
   (newVal, oldVal) => {
-    if (newVal !== oldVal) {
+    if (oldVal !== undefined && newVal !== oldVal) {
       selectedKota.value = undefined;
       if (newVal) {
         execute();
@@ -41,8 +43,8 @@ watch(
 <template>
   <USelectMenu
     v-model="selectedKota"
-    :items="data ?? []"
-    label-key="kota"
+    :items="data?.data ?? []"
+    label-key="kabupatenKota"
     value-key="id"
     :disabled="disabled || !idProvinsi || status === 'pending'"
     :loading="status === 'pending'"

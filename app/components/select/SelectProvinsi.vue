@@ -2,8 +2,11 @@
 import { useApi } from "~/composables/fetch";
 
 interface Provinsi {
-  id: string;
-  provinsi: string;
+  data:
+  {
+    id: string;
+    provinsi: string;
+  }[];
 }
 
 defineProps<{
@@ -11,7 +14,7 @@ defineProps<{
 }>();
 
 const nuxtApp = useNuxtApp();
-const { data, status } = useApi<Provinsi[]>("/api/v1/wilayah/provinsi", {
+const { data, status } = useApi<Provinsi>("/api/v1/wilayah/provinsi", {
   key: "provinsi-options",
   getCachedData: (key) => {
     return nuxtApp.payload.data[key] || nuxtApp.static.data[key];
@@ -24,7 +27,7 @@ const selectedProvinsi = defineModel<string>();
 <template>
   <USelectMenu
     v-model="selectedProvinsi"
-    :items="data ?? []"
+    :items="data?.data ?? []"
     label-key="provinsi"
     value-key="id"
     :disabled="disabled || status === 'pending'"

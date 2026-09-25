@@ -16,7 +16,7 @@ defineProps<{
           <template #leading>
             <UDashboardSidebarCollapse />
           </template>
-        </udashboardnavbar>
+        </UDashboardNavbar>
       </template>
       <template #body>
         <slot />

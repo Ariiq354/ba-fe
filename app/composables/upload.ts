@@ -1,12 +1,13 @@
+import { API_URL } from "~/constants";
+
 export async function useUploadFile(
   file: File,
   dir: string,
 ) {
-  const config = useRuntimeConfig();
-
   // 1. Dapatkan presigned upload URL & pending file ID dari server
-  const presigned = await $fetch<{ uploadUrl: string; key: string }>(`${config.public.apiUrl}/api/v1/files/presigned`, {
+  const presigned = await $fetch<{ uploadUrl: string; key: string }>(`${API_URL}/api/v1/files/presigned`, {
     method: "POST",
+    credentials: "include",
     body: {
       dir,
       filename: file.name,
