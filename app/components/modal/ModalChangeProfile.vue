@@ -53,7 +53,7 @@ type Schema = z.infer<typeof schema>;
 
 const state = ref<Partial<Schema>>({});
 
-const { data: userProfile, status } = useApi<UserProfile>("/api/v1/user/profile");
+const { data: userProfile, status } = useApi<UserProfile>("/api/v1/pengguna/profile");
 
 watch(userProfile, (userData) => {
   if (userData) {
