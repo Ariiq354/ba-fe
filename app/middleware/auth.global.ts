@@ -1,5 +1,11 @@
 import { authClient, can } from "~/utils/auth";
 
+const masterResources = {
+  "master-akun": "masterAkun",
+  "master-margin": "masterMargin",
+  "master-saham": "masterSaham",
+} as const;
+
 export default defineNuxtRouteMiddleware(async (to) => {
   const { data: session } = await authClient.getSession();
 
@@ -14,11 +20,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo({ path: "/" });
     }
 
-    if (
-      (to.path === "/dashboard/master-akun" || to.path.startsWith("/dashboard/master-akun/"))
-      && !can(session.user.role, "masterAkun", "view")
-    ) {
-      return navigateTo({ path: "/dashboard" });
+    for (const [route, resource] of Object.entries(masterResources)) {
+      const path = `/dashboard/${route}`;
+      if (
+        (to.path === path || to.path.startsWith(`${path}/`))
+        && !can(session.user.role, resource, "view")
+      ) {
+        return navigateTo({ path: "/dashboard" });
+      }
     }
   }
 });
