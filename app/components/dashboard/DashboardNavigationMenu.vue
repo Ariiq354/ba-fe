@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import { authClient, can } from "~/utils/auth";
 
-const items = ref<NavigationMenuItem[][]>([
+const session = authClient.useSession();
+
+const items = computed<NavigationMenuItem[][]>(() => [
   [
     { label: "Dashboard", type: "label" },
     { label: "Beranda", to: "/dashboard", icon: "i-tabler-layout-dashboard" },
@@ -9,12 +12,17 @@ const items = ref<NavigationMenuItem[][]>([
     // { label: "Pembiayaan Saya", to: "/dashboard/pembiayaan", icon: "i-tabler-file-text" },
     // { label: "Bagi Hasil Usaha", to: "/dashboard/shu", icon: "i-tabler-coins" },
   ],
+  ...(can(session.value.data?.user.role, "masterAkun", "view")
+    ? [[
+        { label: "Master Data", type: "label" as const },
+        { label: "Master Akun", to: "/dashboard/master-akun", icon: "i-tabler-book-2" },
+      ]]
+    : []),
   // [
   //   { label: "Master Data", type: "label" },
   //   { label: "Manajemen Anggota", to: "/dashboard/users", icon: "i-tabler-users" },
   //   { label: "Master Margin", to: "/dashboard/master-margin", icon: "i-tabler-percentage" },
   //   { label: "Master Saham", to: "/dashboard/master-saham", icon: "i-tabler-chart-candle" },
-  //   { label: "Daftar Akun", to: "/dashboard/master-akun", icon: "i-tabler-book-2" },
   //   { label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks" },
   //   { label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" },
   // ],

@@ -48,7 +48,7 @@ export default defineNuxtConfig({
           "'self'",
           "data:",
           "blob:",
-          "https://pub-d903c762cae0445d8dce45d854b69f88.r2.dev",
+          "https://assets.ubberkahamanah.my.id",
         ],
       },
     },

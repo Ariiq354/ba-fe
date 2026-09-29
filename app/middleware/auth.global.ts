@@ -1,4 +1,4 @@
-import { authClient } from "~/utils/auth";
+import { authClient, can } from "~/utils/auth";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const { data: session } = await authClient.getSession();
@@ -12,6 +12,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path.startsWith("/dashboard")) {
     if (!session) {
       return navigateTo({ path: "/" });
+    }
+
+    if (
+      (to.path === "/dashboard/master-akun" || to.path.startsWith("/dashboard/master-akun/"))
+      && !can(session.user.role, "masterAkun", "view")
+    ) {
+      return navigateTo({ path: "/dashboard" });
     }
   }
 });
