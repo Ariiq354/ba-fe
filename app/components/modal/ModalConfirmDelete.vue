@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useToastError, useToastSuccess } from "~/composables/toast";
+import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 
 const props = withDefaults(
   defineProps<{
@@ -44,8 +44,8 @@ async function onClick() {
     await props.refresh?.();
     emit("close", false);
   }
-  catch {
-    useToastError("Gagal Memproses", "Terjadi kesalahan dalam memproses data.");
+  catch (error) {
+    useToastError("Gagal Memproses", extractErrorMessage(error, "Terjadi kesalahan dalam memproses data."));
   }
   finally {
     loading.value = false;

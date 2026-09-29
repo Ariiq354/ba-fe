@@ -1,9 +1,10 @@
 import { authClient, can } from "~/utils/auth";
 
-const masterResources = {
+const routeResources = {
   "master-akun": "masterAkun",
   "master-margin": "masterMargin",
   "master-saham": "masterSaham",
+  "jurnal": "jurnal",
 } as const;
 
 export default defineNuxtRouteMiddleware(async (to) => {
@@ -20,7 +21,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo({ path: "/" });
     }
 
-    for (const [route, resource] of Object.entries(masterResources)) {
+    for (const [route, resource] of Object.entries(routeResources)) {
       const path = `/dashboard/${route}`;
       if (
         (to.path === path || to.path.startsWith(`${path}/`))
