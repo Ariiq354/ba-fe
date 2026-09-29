@@ -12,7 +12,7 @@ const searchDebounced = useDebounceFn((v) => {
   <UInput
     :model-value="searchModel"
     class="flex-5"
-    leading-icon="i-lucide-search"
+    leading-icon="i-tabler-search"
     placeholder="Cari..."
     @update:model-value="searchDebounced"
   />
