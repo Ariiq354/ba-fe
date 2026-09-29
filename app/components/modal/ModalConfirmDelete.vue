@@ -5,7 +5,7 @@ const props = withDefaults(
   defineProps<{
     path?: string;
     body?: object;
-    refresh?: () => void;
+    refresh?: () => Promise<void> | void;
     title?: string;
     description?: string;
     method?: "DELETE" | "PATCH" | "POST" | "PUT";
@@ -41,7 +41,7 @@ async function onClick() {
       });
       useToastSuccess(props.method === "DELETE" ? "Berhasil Hapus Data" : "Berhasil Memproses Data");
     }
-    props.refresh?.();
+    await props.refresh?.();
     emit("close", false);
   }
   catch {

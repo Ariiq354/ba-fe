@@ -143,7 +143,7 @@ const newColumns = computed<TableColumn<any>[]>(() => [
 ]);
 
 watch(
-  () => data,
+  [() => data, page],
   () => {
     rowSelection.value = {};
   },
