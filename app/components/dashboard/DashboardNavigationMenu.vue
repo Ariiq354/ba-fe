@@ -27,11 +27,16 @@ const items = computed<NavigationMenuItem[][]>(() => [
         ...masterItems.value,
       ]]
     : []),
+  ...(can(session.value.data?.user.role, "jurnal", "view")
+    ? [[
+        { label: "Transaksi", type: "label" as const },
+        { label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" },
+      ]]
+    : []),
   // [
   //   { label: "Master Data", type: "label" },
   //   { label: "Manajemen Anggota", to: "/dashboard/users", icon: "i-tabler-users" },
   //   { label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks" },
-  //   { label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" },
   // ],
 ]);
 </script>
