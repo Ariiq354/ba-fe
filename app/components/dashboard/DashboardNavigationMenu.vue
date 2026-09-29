@@ -4,6 +4,15 @@ import { authClient, can } from "~/utils/auth";
 
 const session = authClient.useSession();
 
+const masterItems = computed<NavigationMenuItem[]>(() => {
+  const role = session.value.data?.user.role;
+  return [
+    ...(can(role, "masterAkun", "view") ? [{ label: "Master Akun", to: "/dashboard/master-akun", icon: "i-tabler-book-2" }] : []),
+    ...(can(role, "masterMargin", "view") ? [{ label: "Master Margin", to: "/dashboard/master-margin", icon: "i-tabler-percentage" }] : []),
+    ...(can(role, "masterSaham", "view") ? [{ label: "Master Saham", to: "/dashboard/master-saham", icon: "i-tabler-chart-candle" }] : []),
+  ];
+});
+
 const items = computed<NavigationMenuItem[][]>(() => [
   [
     { label: "Dashboard", type: "label" },
@@ -12,17 +21,15 @@ const items = computed<NavigationMenuItem[][]>(() => [
     // { label: "Pembiayaan Saya", to: "/dashboard/pembiayaan", icon: "i-tabler-file-text" },
     // { label: "Bagi Hasil Usaha", to: "/dashboard/shu", icon: "i-tabler-coins" },
   ],
-  ...(can(session.value.data?.user.role, "masterAkun", "view")
+  ...(masterItems.value.length
     ? [[
         { label: "Master Data", type: "label" as const },
-        { label: "Master Akun", to: "/dashboard/master-akun", icon: "i-tabler-book-2" },
+        ...masterItems.value,
       ]]
     : []),
   // [
   //   { label: "Master Data", type: "label" },
   //   { label: "Manajemen Anggota", to: "/dashboard/users", icon: "i-tabler-users" },
-  //   { label: "Master Margin", to: "/dashboard/master-margin", icon: "i-tabler-percentage" },
-  //   { label: "Master Saham", to: "/dashboard/master-saham", icon: "i-tabler-chart-candle" },
   //   { label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks" },
   //   { label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" },
   // ],
