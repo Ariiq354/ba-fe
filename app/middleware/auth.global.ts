@@ -5,6 +5,7 @@ const routeResources = {
   "master-margin": "masterMargin",
   "master-saham": "masterSaham",
   "jurnal": "jurnal",
+  "users": "pengguna",
 } as const;
 
 export default defineNuxtRouteMiddleware(async (to) => {

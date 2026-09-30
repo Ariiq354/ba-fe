@@ -7,11 +7,15 @@ export const statement = {
   masterMargin: ["view", "manage"],
   masterSaham: ["view", "manage"],
   jurnal: ["view", "manage"],
+  pengguna: ["view", "manage"],
 } as const;
 
 export const ac = createAccessControl(statement);
 
 export const user = ac.newRole({
+});
+
+export const pj = ac.newRole({
 });
 
 export const admin = ac.newRole({
@@ -20,6 +24,7 @@ export const admin = ac.newRole({
   masterMargin: ["view", "manage"],
   masterSaham: ["view", "manage"],
   jurnal: ["view", "manage"],
+  pengguna: ["view", "manage"],
 });
 
-export const roles = { user, admin };
+export const roles = { user, admin, pj };
