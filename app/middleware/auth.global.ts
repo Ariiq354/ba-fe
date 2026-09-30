@@ -6,6 +6,10 @@ const routeResources = {
   "master-saham": "masterSaham",
   "jurnal": "jurnal",
   "users": "pengguna",
+  "simpanan": "simpananSaya",
+  "input-simpanan": "inputSimpanan",
+  "mutasi-simpanan": "mutasiSimpanan",
+  "approval-simpanan": "approvalSimpanan",
 } as const;
 
 export default defineNuxtRouteMiddleware(async (to) => {
