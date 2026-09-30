@@ -33,9 +33,14 @@ const items = computed<NavigationMenuItem[][]>(() => [
         { label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" },
       ]]
     : []),
+  ...(can(session.value.data?.user.role, "pengguna", "view")
+    ? [[
+        { label: "Keanggotaan", type: "label" as const },
+        { label: "Daftar Pengguna", to: "/dashboard/users", icon: "i-tabler-users" },
+      ]]
+    : []),
   // [
   //   { label: "Master Data", type: "label" },
-  //   { label: "Manajemen Anggota", to: "/dashboard/users", icon: "i-tabler-users" },
   //   { label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks" },
   // ],
 ]);
