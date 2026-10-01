@@ -10,6 +10,7 @@ const routeResources = {
   "input-simpanan": "inputSimpanan",
   "mutasi-simpanan": "mutasiSimpanan",
   "approval-simpanan": "approvalSimpanan",
+  "pemindahbukuan": "pemindahbukuan",
 } as const;
 
 export default defineNuxtRouteMiddleware(async (to) => {

@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --fix",
-    "check": "nuxt typecheck"
+    "check": "nuxt typecheck",
+    "test": "vitest run"
   },
   "dependencies": {
     "@iconify-json/tabler": "^1.2.41",
@@ -31,6 +32,7 @@
     "eslint": "^10.11.0",
     "eslint-plugin-format": "^2.0.1",
     "typescript": "6.0.3",
+    "vitest": "^5.0.3",
     "vue-tsc": "^3.3.11"
   }
 }

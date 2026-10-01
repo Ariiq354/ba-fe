@@ -40,7 +40,10 @@ export interface SaldoSimpanan {
   saldoTabungan: number;
   jumlahSaham: number;
   totalPenarikanPending: number;
+  totalPemindahbukuanPending: number;
+  totalSahamPending: number;
   saldoEfektif: number;
+  jumlahSahamEfektif: number;
 }
 
 export interface AnggotaSimpanan {

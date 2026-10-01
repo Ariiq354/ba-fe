@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import type { PemindahbukuanResponse } from "~/features/pemindahbukuan/model";
 import type { MutasiResponse } from "~/features/simpanan/model";
 import { useDocumentVisibility, useIntervalFn, useWindowFocus } from "#imports";
 import { useApi } from "~/composables/fetch";
+import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/keys";
 import { APPROVAL_SIMPANAN_PENDING_KEY } from "~/features/simpanan/keys";
 import { authClient, can } from "~/utils/auth";
 
@@ -25,19 +27,42 @@ watch(canViewApproval, (allowed) => {
     clearPendingApproval();
 });
 
+const canViewPemindahbukuanApproval = computed(() => can(session.value.data?.user.role, "approvalPemindahbukuan", "view"));
+const { data: pendingPemindahbukuan, clear: clearPendingPemindahbukuan } = useApi<PemindahbukuanResponse>("/api/v1/pemindahbukuan", {
+  key: PEMINDAHBUKUAN_PENDING_KEY,
+  query: { status: "pending", page: 1, limit: 1 },
+  pick: ["total"],
+  enabled: canViewPemindahbukuanApproval,
+  watch: [canViewPemindahbukuanApproval],
+});
+const pendingPemindahbukuanBadge = computed<NavigationMenuItem["badge"]>(() => {
+  const total = pendingPemindahbukuan.value?.total ?? 0;
+  return total > 0 ? { label: String(total), color: "warning", variant: "subtle" } : undefined;
+});
+watch(canViewPemindahbukuanApproval, (allowed) => {
+  if (!allowed)
+    clearPendingPemindahbukuan();
+});
+
 const documentVisibility = useDocumentVisibility();
 const windowFocused = useWindowFocus();
 
-function refreshPendingApproval() {
-  if (canViewApproval.value && documentVisibility.value === "visible")
-    void refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY);
+function refreshPendingApprovals() {
+  if (documentVisibility.value !== "visible")
+    return;
+  const keys = [
+    ...(canViewApproval.value ? [APPROVAL_SIMPANAN_PENDING_KEY] : []),
+    ...(canViewPemindahbukuanApproval.value ? [PEMINDAHBUKUAN_PENDING_KEY] : []),
+  ];
+  if (keys.length)
+    void refreshNuxtData(keys);
 }
 
 watch([windowFocused, documentVisibility], ([focused, visibility]) => {
   if (focused && visibility === "visible")
-    refreshPendingApproval();
+    refreshPendingApprovals();
 });
-useIntervalFn(refreshPendingApproval, 60_000);
+useIntervalFn(refreshPendingApprovals, 60_000);
 
 const masterItems = computed<NavigationMenuItem[]>(() => {
   const role = session.value.data?.user.role;
@@ -54,6 +79,7 @@ const transactionItems = computed<NavigationMenuItem[]>(() => {
     ...(can(role, "inputSimpanan", "view") ? [{ label: "Input Simpanan Anggota", to: "/dashboard/input-simpanan", icon: "i-tabler-wallet" }] : []),
     ...(can(role, "mutasiSimpanan", "view") ? [{ label: "Mutasi Simpanan", to: "/dashboard/mutasi-simpanan", icon: "i-tabler-arrows-exchange" }] : []),
     ...(canViewApproval.value ? [{ label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks", badge: pendingApprovalBadge.value }] : []),
+    ...(can(role, "pemindahbukuan", "view") ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer", badge: pendingPemindahbukuanBadge.value }] : []),
     ...(can(role, "jurnal", "view") ? [{ label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" }] : []),
   ];
 });
