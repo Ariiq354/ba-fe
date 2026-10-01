@@ -1,8 +1,43 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import type { MutasiResponse } from "~/features/simpanan/model";
+import { useDocumentVisibility, useIntervalFn, useWindowFocus } from "#imports";
+import { useApi } from "~/composables/fetch";
+import { APPROVAL_SIMPANAN_PENDING_KEY } from "~/features/simpanan/keys";
 import { authClient, can } from "~/utils/auth";
 
 const session = authClient.useSession();
+const canViewApproval = computed(() => can(session.value.data?.user.role, "approvalSimpanan", "view"));
+const { data: pendingApproval, clear: clearPendingApproval } = useApi<MutasiResponse>("/api/v1/simpanan/mutasi", {
+  key: APPROVAL_SIMPANAN_PENDING_KEY,
+  query: { status: "pending", page: 1, limit: 1 },
+  pick: ["total"],
+  enabled: canViewApproval,
+  watch: [canViewApproval],
+});
+const pendingApprovalBadge = computed<NavigationMenuItem["badge"]>(() => {
+  const total = pendingApproval.value?.total ?? 0;
+  return total > 0 ? { label: String(total), color: "warning", variant: "subtle" } : undefined;
+});
+
+watch(canViewApproval, (allowed) => {
+  if (!allowed)
+    clearPendingApproval();
+});
+
+const documentVisibility = useDocumentVisibility();
+const windowFocused = useWindowFocus();
+
+function refreshPendingApproval() {
+  if (canViewApproval.value && documentVisibility.value === "visible")
+    void refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY);
+}
+
+watch([windowFocused, documentVisibility], ([focused, visibility]) => {
+  if (focused && visibility === "visible")
+    refreshPendingApproval();
+});
+useIntervalFn(refreshPendingApproval, 60_000);
 
 const masterItems = computed<NavigationMenuItem[]>(() => {
   const role = session.value.data?.user.role;
@@ -18,7 +53,7 @@ const transactionItems = computed<NavigationMenuItem[]>(() => {
   return [
     ...(can(role, "inputSimpanan", "view") ? [{ label: "Input Simpanan Anggota", to: "/dashboard/input-simpanan", icon: "i-tabler-wallet" }] : []),
     ...(can(role, "mutasiSimpanan", "view") ? [{ label: "Mutasi Simpanan", to: "/dashboard/mutasi-simpanan", icon: "i-tabler-arrows-exchange" }] : []),
-    ...(can(role, "approvalSimpanan", "view") ? [{ label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks" }] : []),
+    ...(canViewApproval.value ? [{ label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks", badge: pendingApprovalBadge.value }] : []),
     ...(can(role, "jurnal", "view") ? [{ label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" }] : []),
   ];
 });

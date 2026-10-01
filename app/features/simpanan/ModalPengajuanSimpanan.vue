@@ -6,6 +6,7 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
+import { APPROVAL_SIMPANAN_PENDING_KEY } from "./keys";
 import { getPengajuanSchema, maxSimpananAmount, pengajuanLabels } from "./model";
 
 const props = defineProps<{
@@ -66,7 +67,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanSimpanan>) {
   }
   useToastSuccess("Pengajuan Berhasil", "Transaksi menunggu persetujuan admin.");
   emit("close");
-  await props.refresh();
+  await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
 }
 </script>
 
