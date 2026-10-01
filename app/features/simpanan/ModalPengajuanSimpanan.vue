@@ -6,6 +6,7 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
+import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "./keys";
 import { getPengajuanSchema, maxSimpananAmount, pengajuanLabels } from "./model";
 
 const props = defineProps<{
@@ -36,6 +37,7 @@ const { data: accounts, status: accountStatus, error: accountError, refresh: ref
 const accountOptions = computed(() => accounts.value?.data.map(account => ({ label: `${account.kodeAkun} · ${account.namaAkun}`, value: account.id })) ?? []);
 const { data: price, status: priceStatus, error: priceError, refresh: refreshPrice } = useApi<HargaSaham>("/api/v1/master-saham/latest", { immediate: props.jenis === "saham", watch: false });
 const { data: balance, status: balanceStatus, error: balanceError, refresh: refreshBalance } = useApi<SaldoSimpanan>("/api/v1/simpanan/saldo", {
+  key: getSaldoSimpananKey(props.userId),
   query: { userId: props.userId },
   immediate: props.jenis === "penarikan",
   watch: false,
@@ -66,7 +68,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanSimpanan>) {
   }
   useToastSuccess("Pengajuan Berhasil", "Transaksi menunggu persetujuan admin.");
   emit("close");
-  await props.refresh();
+  await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
 }
 </script>
 

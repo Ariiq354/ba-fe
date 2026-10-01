@@ -7,6 +7,7 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
+import { JURNAL_LIST_KEY } from "./keys";
 import ModalDetailJurnal from "./ModalDetailJurnal.vue";
 import ModalJurnal from "./ModalJurnal.vue";
 import { groupJurnalRows, jurnalColumns } from "./model";
@@ -22,6 +23,7 @@ watch(search, () => {
 }, { flush: "sync" });
 
 const { data, status, error, refresh } = useApi<JurnalResponse>("/api/v1/jurnal", {
+  key: JURNAL_LIST_KEY,
   query: { page, limit, search },
 });
 const total = computed(() => data.value?.total ?? 0);

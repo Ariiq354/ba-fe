@@ -42,11 +42,6 @@ const totals = computed(() => getJurnalTotals(data.value?.details ?? []));
             </div>
             <div>
               <dt class="text-sm text-muted">
-                Dicatat Oleh
-              </dt><dd>{{ data.userName || '—' }}</dd>
-            </div>
-            <div>
-              <dt class="text-sm text-muted">
                 Keterangan
               </dt><dd class="whitespace-pre-wrap wrap-break-word">
                 {{ data.keterangan || '—' }}

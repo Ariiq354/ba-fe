@@ -40,8 +40,6 @@ export interface JurnalHeader {
   kodeTransaksi: string;
   tanggalTransaksi: string;
   keterangan: string | null;
-  userId: number;
-  userName: string | null;
   createdAt: string;
 }
 
@@ -51,13 +49,19 @@ export interface JurnalDetail {
   akunId: number;
   kodeAkun: string;
   namaAkun: string;
+  userId: number;
+  userName: string;
   debit: number;
   kredit: number;
 }
 
 export type JurnalRow = Omit<JurnalHeader, "id"> & JurnalDetail;
 export type Jurnal = JurnalHeader & { details: JurnalDetail[] };
-export type JurnalSummary = JurnalHeader & { totalDebit: number; totalKredit: number };
+export type JurnalSummary = JurnalHeader & {
+  users: Pick<JurnalDetail, "userId" | "userName">[];
+  totalDebit: number;
+  totalKredit: number;
+};
 
 export interface JurnalResponse {
   total: number;
@@ -107,14 +111,15 @@ export function groupJurnalRows(rows: JurnalRow[]): JurnalSummary[] {
         kodeTransaksi: row.kodeTransaksi,
         tanggalTransaksi: row.tanggalTransaksi,
         keterangan: row.keterangan,
-        userId: row.userId,
-        userName: row.userName,
         createdAt: row.createdAt,
+        users: [],
         totalDebit: 0,
         totalKredit: 0,
       };
       journals.set(row.jurnalId, journal);
     }
+    if (!journal.users.some(user => user.userId === row.userId))
+      journal.users.push({ userId: row.userId, userName: row.userName });
     journal.totalDebit += row.debit;
     journal.totalKredit += row.kredit;
   }
@@ -131,12 +136,13 @@ export const jurnalColumns: TableColumn<JurnalSummary>[] = [
   { accessorKey: "keterangan", header: "Keterangan", cell: ({ row }) => row.original.keterangan || "—" },
   { accessorKey: "totalDebit", header: "Total Debit", cell: ({ row }) => formatRupiah(row.original.totalDebit) },
   { accessorKey: "totalKredit", header: "Total Kredit", cell: ({ row }) => formatRupiah(row.original.totalKredit) },
-  { accessorKey: "userName", header: "Dicatat Oleh", cell: ({ row }) => row.original.userName || "—" },
+  { accessorKey: "users", header: "Pengguna Terkait", cell: ({ row }) => row.original.users.map(user => user.userName).join(", ") || "—" },
 ];
 
 export const jurnalDetailColumns: TableColumn<JurnalDetail>[] = [
   { accessorKey: "kodeAkun", header: "Kode Akun" },
   { accessorKey: "namaAkun", header: "Nama Akun" },
+  { accessorKey: "userName", header: "Pengguna", cell: ({ row }) => row.original.userName || "—" },
   { accessorKey: "debit", header: "Debit", cell: ({ row }) => formatRupiah(row.original.debit) },
   { accessorKey: "kredit", header: "Kredit", cell: ({ row }) => formatRupiah(row.original.kredit) },
 ];
