@@ -33,6 +33,6 @@ function openForm() {
         Ajukan Pemindahbukuan
       </UButton>
     </div>
-    <DaftarPemindahbukuan ref="daftar" scope="history" />
+    <DaftarPemindahbukuan ref="daftar" />
   </div>
 </template>

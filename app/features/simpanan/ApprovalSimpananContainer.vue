@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DaftarMutasiSimpanan from "./DaftarMutasiSimpanan.vue";
+import DaftarApprovalSimpanan from "./DaftarApprovalSimpanan.vue";
 </script>
 
 <template>
@@ -12,6 +12,6 @@ import DaftarMutasiSimpanan from "./DaftarMutasiSimpanan.vue";
         Tinjau pengajuan simpanan yang menunggu persetujuan, lalu setujui atau tolak.
       </p>
     </div>
-    <DaftarMutasiSimpanan scope="approval" />
+    <DaftarApprovalSimpanan />
   </div>
 </template>

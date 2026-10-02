@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DaftarPemindahbukuan from "./DaftarPemindahbukuan.vue";
+import DaftarApprovalPemindahbukuan from "./DaftarApprovalPemindahbukuan.vue";
 </script>
 
 <template>
@@ -12,6 +12,6 @@ import DaftarPemindahbukuan from "./DaftarPemindahbukuan.vue";
         Tinjau pengajuan pemindahbukuan yang menunggu persetujuan, lalu setujui atau tolak.
       </p>
     </div>
-    <DaftarPemindahbukuan scope="approval" />
+    <DaftarApprovalPemindahbukuan />
   </div>
 </template>

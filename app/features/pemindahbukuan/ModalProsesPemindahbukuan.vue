@@ -11,7 +11,7 @@ import { refreshPemindahbukuanData } from "./refresh";
 const props = defineProps<{
   transfer: Pemindahbukuan;
   action: "approve" | "reject" | "cancel";
-  accessibleSourceIds: number[];
+  accessibleSourceIds?: number[];
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
@@ -28,7 +28,7 @@ const canProcess = computed(() => {
     return false;
   const role = session.value.data?.user.role;
   return props.action === "cancel"
-    ? can(role, "pemindahbukuan", "manage") && canCancelPemindahbukuan(props.transfer, Number(session.value.data?.user.id), props.accessibleSourceIds)
+    ? can(role, "pemindahbukuan", "manage") && canCancelPemindahbukuan(props.transfer, Number(session.value.data?.user.id), props.accessibleSourceIds ?? [])
     : can(role, "approvalPemindahbukuan", "manage");
 });
 
