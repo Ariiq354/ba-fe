@@ -6,6 +6,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { getAnggotaOptions, statusMutasiLabels, statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
@@ -45,17 +46,7 @@ const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1
 });
 const total = computed(() => data.value?.total ?? 0);
 
-async function refreshList() {
-  await refreshNuxtData(PEMINDAHBUKUAN_LIST_KEY);
-  if (!error.value) {
-    const lastPage = Math.max(1, Math.ceil(total.value / limit));
-    if (page.value > lastPage) {
-      page.value = lastPage;
-      await nextTick();
-      await refresh({ dedupe: "defer" });
-    }
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 defineExpose({ refreshList });
 
 function viewTransfer(transfer: Pemindahbukuan) {

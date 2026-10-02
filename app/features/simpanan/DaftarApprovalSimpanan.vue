@@ -5,6 +5,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailMutasi from "./ModalDetailMutasi.vue";
 import ModalProsesMutasi from "./ModalProsesMutasi.vue";
@@ -38,17 +39,7 @@ const { data, status, error, refresh } = useApi<MutasiResponse>("/api/v1/simpana
 });
 const total = computed(() => data.value?.total ?? 0);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    const lastPage = Math.max(1, Math.ceil(total.value / limit));
-    if (page.value > lastPage) {
-      page.value = lastPage;
-      await nextTick();
-      await refresh({ dedupe: "defer" });
-    }
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function viewMutasi(mutasi: MutasiSimpanan) {
   openModal(ModalDetailMutasi, { mutasi });
