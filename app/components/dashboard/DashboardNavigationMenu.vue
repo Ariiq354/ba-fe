@@ -79,7 +79,8 @@ const transactionItems = computed<NavigationMenuItem[]>(() => {
     ...(can(role, "inputSimpanan", "view") ? [{ label: "Input Simpanan Anggota", to: "/dashboard/input-simpanan", icon: "i-tabler-wallet" }] : []),
     ...(can(role, "mutasiSimpanan", "view") ? [{ label: "Mutasi Simpanan", to: "/dashboard/mutasi-simpanan", icon: "i-tabler-arrows-exchange" }] : []),
     ...(canViewApproval.value ? [{ label: "Approval Simpanan", to: "/dashboard/approval-simpanan", icon: "i-tabler-checks", badge: pendingApprovalBadge.value }] : []),
-    ...(can(role, "pemindahbukuan", "view") ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer", badge: pendingPemindahbukuanBadge.value }] : []),
+    ...(can(role, "pemindahbukuan", "view") ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer" }] : []),
+    ...(canViewPemindahbukuanApproval.value ? [{ label: "Approval Pemindahbukuan", to: "/dashboard/approval-pemindahbukuan", icon: "i-tabler-checks", badge: pendingPemindahbukuanBadge.value }] : []),
     ...(can(role, "jurnal", "view") ? [{ label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" }] : []),
   ];
 });
