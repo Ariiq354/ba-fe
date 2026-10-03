@@ -5,6 +5,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailMutasi from "./ModalDetailMutasi.vue";
 import ModalProsesMutasi from "./ModalProsesMutasi.vue";
@@ -14,7 +15,7 @@ const props = defineProps<{ scope: MutasiScope; userId?: number }>();
 const emit = defineEmits<{ changed: [] }>();
 const page = ref(1);
 const search = ref("");
-const statusFilter = ref<"all" | StatusMutasi>(props.scope === "approval" ? "pending" : "all");
+const statusFilter = ref<"all" | StatusMutasi>("all");
 const jenisSimpanan = ref<"all" | "tabungan" | "saham">("all");
 const jenisTransaksi = ref<"all" | "setoran" | "penarikan">("all");
 const selectedUserId = ref<number | "all">("all");
@@ -22,7 +23,6 @@ const limit = 10;
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
 const canManage = computed(() => can(session.value.data?.user.role, props.scope === "personal" ? "simpananSaya" : "mutasiSimpanan", "manage"));
-const canApprove = computed(() => can(session.value.data?.user.role, "approvalSimpanan", "manage"));
 
 const { data: members, status: membersStatus, error: membersError, refresh: refreshMembers } = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", { immediate: props.scope !== "personal", watch: false });
 const memberOptions = computed(() => [{ label: "Semua anggota", value: "all" }, ...getAnggotaOptions(members.value?.data ?? [])]);
@@ -38,17 +38,7 @@ const { data, status, error, refresh } = useApi<MutasiResponse>("/api/v1/simpana
 const total = computed(() => data.value?.total ?? 0);
 const columns = computed(() => props.scope === "personal" ? mutasiColumns.filter(column => !("accessorKey" in column && column.accessorKey === "memberName")) : mutasiColumns);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    const lastPage = Math.max(1, Math.ceil(total.value / limit));
-    if (page.value > lastPage) {
-      page.value = lastPage;
-      await nextTick();
-      await refresh({ dedupe: "defer" });
-    }
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 defineExpose({ refreshList });
 
 async function refreshAfterChange() {
@@ -60,27 +50,19 @@ function viewMutasi(mutasi: MutasiSimpanan) {
   openModal(ModalDetailMutasi, { mutasi });
 }
 
-function processMutasi(mutasi: MutasiSimpanan, action: "approve" | "reject" | "cancel") {
+function cancelMutasi(mutasi: MutasiSimpanan) {
   if (status.value === "pending" || mutasi.statusApproved !== "pending")
     return;
-  if (action === "cancel" ? !canManage.value || !canCancelMutasi(mutasi, actorId.value) : !canApprove.value)
+  if (!canManage.value || !canCancelMutasi(mutasi, actorId.value))
     return;
-  openModal(ModalProsesMutasi, { mutasi, action, refresh: refreshAfterChange });
+  openModal(ModalProsesMutasi, { mutasi, action: "cancel", refresh: refreshAfterChange });
 }
 
 function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
-  if (mutasi.statusApproved !== "pending")
+  if (!canManage.value || !canCancelMutasi(mutasi, actorId.value))
     return [];
   return [
-    ...(props.scope === "approval" && canApprove.value
-      ? [
-          { label: "Setujui", icon: "i-tabler-check", onSelect: () => processMutasi(mutasi, "approve") },
-          { label: "Tolak", icon: "i-tabler-x", color: "error" as const, onSelect: () => processMutasi(mutasi, "reject") },
-        ]
-      : []),
-    ...(props.scope !== "approval" && canManage.value && canCancelMutasi(mutasi, actorId.value)
-      ? [{ label: "Batalkan Pengajuan", icon: "i-tabler-ban", color: "warning" as const, onSelect: () => processMutasi(mutasi, "cancel") }]
-      : []),
+    { label: "Batalkan Pengajuan", icon: "i-tabler-ban", color: "warning", onSelect: () => cancelMutasi(mutasi) },
   ];
 }
 </script>
@@ -93,7 +75,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
         <USelectMenu v-if="scope !== 'personal'" v-model="selectedUserId" :items="memberOptions" value-key="value" :loading="membersStatus === 'pending'" :disabled="membersStatus !== 'success'" aria-label="Filter anggota" class="w-full lg:w-80" />
       </div>
       <div class="grid gap-3 sm:grid-cols-3">
-        <USelect v-if="scope !== 'approval'" v-model="statusFilter" :items="statusMutasiOptions" aria-label="Filter status transaksi" class="w-full" />
+        <USelect v-model="statusFilter" :items="statusMutasiOptions" aria-label="Filter status transaksi" class="w-full" />
         <USelect v-model="jenisSimpanan" :items="jenisSimpananOptions" aria-label="Filter jenis simpanan" class="w-full" />
         <USelect v-model="jenisTransaksi" :items="jenisTransaksiOptions" aria-label="Filter jenis transaksi" class="w-full" />
       </div>
@@ -126,7 +108,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
           <div class="py-8 text-center">
             <UIcon name="i-tabler-wallet" class="mb-2 size-8 text-dimmed" />
             <p class="font-medium text-highlighted">
-              {{ scope === 'approval' ? 'Tidak ada pengajuan yang menunggu persetujuan' : 'Tidak ada mutasi simpanan' }}
+              Tidak ada mutasi simpanan
             </p>
             <p class="mt-1 text-sm text-muted">
               Coba kata kunci atau filter lain untuk melihat transaksi.

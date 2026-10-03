@@ -34,7 +34,7 @@ export type PengajuanSimpanan = z.output<typeof setoranTabunganSchema> | z.outpu
 export type RejectMutasiSchema = z.output<typeof rejectMutasiSchema>;
 export type JenisPengajuan = "tabungan" | "saham" | "penarikan";
 export type StatusMutasi = "pending" | "approved" | "rejected";
-export type MutasiScope = "personal" | "members" | "approval";
+export type MutasiScope = "personal" | "members";
 
 export interface SaldoSimpanan {
   saldoTabungan: number;
