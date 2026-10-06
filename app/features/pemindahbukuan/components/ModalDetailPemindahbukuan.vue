@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { Pemindahbukuan } from "./model";
+import type { Pemindahbukuan } from "../model";
 import { openModal } from "~/composables/modal";
-import ModalDetailJurnal from "~/features/jurnal/ModalDetailJurnal.vue";
+import ModalDetailJurnal from "~/features/jurnal/components/ModalDetailJurnal.vue";
 import { formatSimpananDate, formatSimpananTimestamp, statusMutasiLabels } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { formatPemindahbukuanValue, tipePemindahbukuanLabels } from "./model";
+import { formatPemindahbukuanValue, tipePemindahbukuanLabels } from "../model";
 
 const props = defineProps<{ transfer: Pemindahbukuan }>();
 const emit = defineEmits<{ close: [] }>();

@@ -2,10 +2,10 @@
 import type { JenisPengajuan } from "./model";
 import { openModal } from "~/composables/modal";
 import { authClient, can } from "~/utils/auth";
-import DaftarMutasiSimpanan from "./DaftarMutasiSimpanan.vue";
-import ModalPengajuanSimpanan from "./ModalPengajuanSimpanan.vue";
+import DaftarMutasiSimpanan from "./components/DaftarMutasiSimpanan.vue";
+import ModalPengajuanSimpanan from "./components/ModalPengajuanSimpanan.vue";
+import RingkasanSaldo from "./components/RingkasanSaldo.vue";
 import { pengajuanLabels } from "./model";
-import RingkasanSaldo from "./RingkasanSaldo.vue";
 
 const session = authClient.useSession();
 const userId = computed(() => Number(session.value.data?.user.id));

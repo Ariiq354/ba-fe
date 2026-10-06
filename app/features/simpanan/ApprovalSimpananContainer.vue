@@ -7,8 +7,8 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { authClient, can } from "~/utils/auth";
-import ModalDetailMutasi from "./ModalDetailMutasi.vue";
-import ModalProsesMutasi from "./ModalProsesMutasi.vue";
+import ModalDetailMutasi from "./components/ModalDetailMutasi.vue";
+import ModalProsesMutasi from "./components/ModalProsesMutasi.vue";
 import { getAnggotaOptions, jenisSimpananOptions, jenisTransaksiOptions, mutasiColumns, statusMutasiLabels } from "./model";
 
 const page = ref(1);

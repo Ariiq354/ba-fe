@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Pengguna, VerifikasiPenggunaResponse } from "./model";
+import type { Pengguna, VerifikasiPenggunaResponse } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
-import { getPenggunaStatus } from "./model";
+import { getPenggunaStatus } from "../model";
 
 const props = defineProps<{
   pengguna: Pengguna;

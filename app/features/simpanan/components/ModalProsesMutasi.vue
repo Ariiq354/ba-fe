@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { MutasiSimpanan, RejectMutasiSchema } from "./model";
+import type { MutasiSimpanan, RejectMutasiSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { APPROVAL_SIMPANAN_PENDING_KEY } from "./keys";
-import { canCancelMutasi, rejectMutasiSchema } from "./model";
+import { APPROVAL_SIMPANAN_PENDING_KEY } from "../data";
+import { canCancelMutasi, rejectMutasiSchema } from "../model";
 
 const props = defineProps<{
   mutasi: MutasiSimpanan;

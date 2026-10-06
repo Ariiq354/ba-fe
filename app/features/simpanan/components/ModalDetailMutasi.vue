@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { MutasiSimpanan } from "./model";
+import type { MutasiSimpanan } from "../model";
 import { openModal } from "~/composables/modal";
-import ModalDetailJurnal from "~/features/jurnal/ModalDetailJurnal.vue";
+import ModalDetailJurnal from "~/features/jurnal/components/ModalDetailJurnal.vue";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { formatSimpananDate, formatSimpananTimestamp, statusMutasiLabels } from "./model";
+import { formatSimpananDate, formatSimpananTimestamp, statusMutasiLabels } from "../model";
 
 const props = defineProps<{ mutasi: MutasiSimpanan }>();
 const emit = defineEmits<{ close: [] }>();

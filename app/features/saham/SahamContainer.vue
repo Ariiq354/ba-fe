@@ -4,7 +4,7 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { authClient, can } from "~/utils/auth";
-import ModalSaham from "./ModalSaham.vue";
+import ModalSaham from "./components/ModalSaham.vue";
 import { sahamColumns } from "./model";
 
 const page = ref(1);

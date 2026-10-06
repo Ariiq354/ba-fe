@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DaftarMutasiSimpanan from "./DaftarMutasiSimpanan.vue";
+import DaftarMutasiSimpanan from "./components/DaftarMutasiSimpanan.vue";
 </script>
 
 <template>

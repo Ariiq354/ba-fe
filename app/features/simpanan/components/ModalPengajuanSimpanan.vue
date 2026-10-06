@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { HargaSaham, JenisPengajuan, PaymentAccountsResponse, PengajuanSimpanan, SaldoSimpanan } from "./model";
+import type { HargaSaham, JenisPengajuan, PaymentAccountsResponse, PengajuanSimpanan, SaldoSimpanan } from "../model";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "./keys";
-import { getPengajuanSchema, maxSimpananAmount, pengajuanLabels } from "./model";
+import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "../data";
+import { getPengajuanSchema, maxSimpananAmount, pengajuanLabels } from "../model";
 
 const props = defineProps<{
   userId: number;

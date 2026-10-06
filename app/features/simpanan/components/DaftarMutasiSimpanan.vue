@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
-import type { AnggotaOptionsResponse, MutasiResponse, MutasiScope, MutasiSimpanan, StatusMutasi } from "./model";
+import type { AnggotaOptionsResponse, MutasiResponse, MutasiScope, MutasiSimpanan, StatusMutasi } from "../model";
 import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { authClient, can } from "~/utils/auth";
+import { canCancelMutasi, getAnggotaOptions, jenisSimpananOptions, jenisTransaksiOptions, mutasiColumns, statusMutasiLabels, statusMutasiOptions } from "../model";
 import ModalDetailMutasi from "./ModalDetailMutasi.vue";
 import ModalProsesMutasi from "./ModalProsesMutasi.vue";
-import { canCancelMutasi, getAnggotaOptions, jenisSimpananOptions, jenisTransaksiOptions, mutasiColumns, statusMutasiLabels, statusMutasiOptions } from "./model";
 
 const props = defineProps<{ scope: MutasiScope; userId?: number }>();
 const emit = defineEmits<{ changed: [] }>();

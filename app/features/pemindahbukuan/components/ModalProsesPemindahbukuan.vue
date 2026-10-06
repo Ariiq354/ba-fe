@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { Pemindahbukuan, RejectPemindahbukuan } from "./model";
+import type { Pemindahbukuan, RejectPemindahbukuan } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { canCancelPemindahbukuan, formatPemindahbukuanValue, rejectPemindahbukuanSchema, tipePemindahbukuanLabels } from "./model";
-import { refreshPemindahbukuanData } from "./refresh";
+import { refreshPemindahbukuanData } from "../data";
+import { canCancelPemindahbukuan, formatPemindahbukuanValue, rejectPemindahbukuanSchema, tipePemindahbukuanLabels } from "../model";
 
 const props = defineProps<{
   transfer: Pemindahbukuan;
