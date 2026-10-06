@@ -7,6 +7,9 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "preview:cloudflare": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler versions upload",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --fix",
     "check": "nuxt typecheck",
@@ -33,6 +36,7 @@
     "eslint-plugin-format": "^2.0.1",
     "typescript": "6.0.3",
     "vitest": "^5.0.3",
-    "vue-tsc": "^3.3.11"
+    "vue-tsc": "^3.3.11",
+    "wrangler": "^4.147.0"
   }
 }
