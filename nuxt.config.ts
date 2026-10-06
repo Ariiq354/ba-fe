@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   ssr: false,
   spaLoadingTemplate: true,
 
+  nitro: {
+    // Keep static output when Workers CI auto-detects the Cloudflare preset.
+    preset: "static",
+  },
+
   modules: [
     "@nuxt/eslint",
     "nuxt-security",
