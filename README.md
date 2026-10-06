@@ -29,6 +29,10 @@ Output statis ada di `.output/public`. Preview Cloudflare lokal tersedia di
 sehingga URL halaman bisa dibuka langsung atau di-refresh. Header HTTP ada di
 `public/_headers`; cache immutable hanya diterapkan pada aset build `/_nuxt/`.
 
+Preset Nitro ditetapkan ke `static` di `nuxt.config.ts` agar environment Workers
+CI tetap menghasilkan website statis. Script Wrangler memakai konfigurasi root
+secara eksplisit agar redirect konfigurasi sisa build server tidak ikut dipakai.
+
 ## Deploy ke Cloudflare dari Git
 
 Hubungkan repository ini melalui dashboard **Workers & Pages → Create
