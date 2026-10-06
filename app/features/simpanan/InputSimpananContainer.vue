@@ -3,9 +3,9 @@ import type { AnggotaOptionsResponse, JenisPengajuan } from "./model";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { authClient, can } from "~/utils/auth";
-import ModalPengajuanSimpanan from "./ModalPengajuanSimpanan.vue";
+import ModalPengajuanSimpanan from "./components/ModalPengajuanSimpanan.vue";
+import RingkasanSaldo from "./components/RingkasanSaldo.vue";
 import { getAnggotaOptions, pengajuanLabels } from "./model";
-import RingkasanSaldo from "./RingkasanSaldo.vue";
 
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "inputSimpanan", "manage"));

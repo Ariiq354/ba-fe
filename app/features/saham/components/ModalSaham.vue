@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { SahamSchema } from "./model";
+import type { SahamSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { initSahamFormdata, sahamSchema } from "./model";
+import { initSahamFormdata, sahamSchema } from "../model";
 
 const props = defineProps<{
   refresh: () => Promise<void>;

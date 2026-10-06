@@ -5,8 +5,8 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { authClient, can } from "~/utils/auth";
-import ModalPjPengguna from "./ModalPjPengguna.vue";
-import ModalVerifikasiPengguna from "./ModalVerifikasiPengguna.vue";
+import ModalPjPengguna from "./components/ModalPjPengguna.vue";
+import ModalVerifikasiPengguna from "./components/ModalVerifikasiPengguna.vue";
 import { canSetPenggunaPj, getPenggunaStatus, isPenggunaPj, penggunaColumns, statusFilterOptions, statusPenggunaLabels } from "./model";
 
 const page = ref(1);

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { JurnalAkun, JurnalAkunResponse, JurnalSchema } from "./model";
+import type { JurnalAkun, JurnalAkunResponse, JurnalSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { formatRupiah } from "~/utils/format";
-import { getJurnalTotals, initJurnalFormdata, jurnalSchema, maxJurnalAmount } from "./model";
+import { getJurnalTotals, initJurnalFormdata, jurnalSchema, maxJurnalAmount } from "../model";
 
 const props = defineProps<{ refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();

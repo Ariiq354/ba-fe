@@ -6,7 +6,7 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
-import ModalMargin from "./ModalMargin.vue";
+import ModalMargin from "./components/ModalMargin.vue";
 import { marginColumns } from "./model";
 
 const page = ref(1);

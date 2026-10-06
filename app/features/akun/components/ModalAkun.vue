@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { Akun, AkunSchema } from "./model";
+import type { Akun, AkunSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { akunSchema, initAkunFormdata, kategoriOptions, normalBalanceOptions } from "./model";
+import { akunSchema, initAkunFormdata, kategoriOptions, normalBalanceOptions } from "../model";
 
 const props = defineProps<{
   akun?: Akun;

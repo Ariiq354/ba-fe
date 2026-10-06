@@ -4,8 +4,8 @@ import type { PemindahbukuanResponse } from "~/features/pemindahbukuan/model";
 import type { MutasiResponse } from "~/features/simpanan/model";
 import { useDocumentVisibility, useIntervalFn, useWindowFocus } from "#imports";
 import { useApi } from "~/composables/fetch";
-import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/keys";
-import { APPROVAL_SIMPANAN_PENDING_KEY } from "~/features/simpanan/keys";
+import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/data";
+import { APPROVAL_SIMPANAN_PENDING_KEY } from "~/features/simpanan/data";
 import { authClient, can } from "~/utils/auth";
 
 const session = authClient.useSession();

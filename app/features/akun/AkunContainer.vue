@@ -7,7 +7,7 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
-import ModalAkun from "./ModalAkun.vue";
+import ModalAkun from "./components/ModalAkun.vue";
 import { akunColumns, kategoriFilterOptions } from "./model";
 
 const page = ref(1);

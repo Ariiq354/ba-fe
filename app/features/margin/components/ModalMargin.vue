@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { Margin, MarginSchema } from "./model";
+import type { Margin, MarginSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { initMarginFormdata, jaminanOptions, marginSchema } from "./model";
+import { initMarginFormdata, jaminanOptions, marginSchema } from "../model";
 
 const props = defineProps<{
   margin?: Margin;

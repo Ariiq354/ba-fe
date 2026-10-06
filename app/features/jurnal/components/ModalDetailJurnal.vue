@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Jurnal } from "./model";
+import type { Jurnal } from "../model";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { formatRupiah } from "~/utils/format";
-import { formatJurnalDate, getJurnalTotals, jurnalDetailColumns } from "./model";
+import { formatJurnalDate, getJurnalTotals, jurnalDetailColumns } from "../model";
 
 const props = defineProps<{ id: number }>();
 const emit = defineEmits<{ close: [] }>();

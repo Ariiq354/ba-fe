@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { SaldoSimpanan } from "./model";
+import type { SaldoSimpanan } from "../model";
 import { useApi } from "~/composables/fetch";
 import { formatRupiah } from "~/utils/format";
-import { getSaldoSimpananKey } from "./keys";
+import { getSaldoSimpananKey } from "../data";
 
 const props = defineProps<{ userId: number }>();
 const { data, status, error, refresh } = useApi<SaldoSimpanan>("/api/v1/simpanan/saldo", {

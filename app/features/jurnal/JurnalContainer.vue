@@ -7,9 +7,9 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
-import { JURNAL_LIST_KEY } from "./keys";
-import ModalDetailJurnal from "./ModalDetailJurnal.vue";
-import ModalJurnal from "./ModalJurnal.vue";
+import ModalDetailJurnal from "./components/ModalDetailJurnal.vue";
+import ModalJurnal from "./components/ModalJurnal.vue";
+import { JURNAL_LIST_KEY } from "./data";
 import { groupJurnalRows, jurnalColumns } from "./model";
 
 const page = ref(1);

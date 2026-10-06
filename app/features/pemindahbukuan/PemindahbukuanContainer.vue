@@ -10,10 +10,10 @@ import { usePaginatedRefresh } from "~/composables/pagination";
 import { getAnggotaOptions, statusMutasiLabels, statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { PEMINDAHBUKUAN_LIST_KEY } from "./keys";
-import ModalDetailPemindahbukuan from "./ModalDetailPemindahbukuan.vue";
-import ModalPengajuanPemindahbukuan from "./ModalPengajuanPemindahbukuan.vue";
-import ModalProsesPemindahbukuan from "./ModalProsesPemindahbukuan.vue";
+import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
+import ModalPengajuanPemindahbukuan from "./components/ModalPengajuanPemindahbukuan.vue";
+import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
+import { PEMINDAHBUKUAN_LIST_KEY } from "./data";
 import { canCancelPemindahbukuan, formatPemindahbukuanValue, pemindahbukuanColumns, tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
