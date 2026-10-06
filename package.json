@@ -7,13 +7,10 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "preview:cloudflare": "wrangler dev --config wrangler.jsonc",
     "deploy": "wrangler deploy --config wrangler.jsonc",
-    "deploy:preview": "wrangler versions upload --config wrangler.jsonc",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --fix",
-    "check": "nuxt typecheck",
-    "test": "vitest run"
+    "check": "nuxt typecheck"
   },
   "dependencies": {
     "@iconify-json/tabler": "^1.2.41",
@@ -35,7 +32,6 @@
     "eslint": "^10.11.0",
     "eslint-plugin-format": "^2.0.1",
     "typescript": "6.0.3",
-    "vitest": "^5.0.3",
     "vue-tsc": "^3.3.11",
     "wrangler": "^4.147.0"
   }
