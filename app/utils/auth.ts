@@ -18,6 +18,11 @@ export const authClient = createAuthClient({
     adminClient({ ac, roles }),
     inferAdditionalFields({
       user: {
+        noHp: {
+          type: "string",
+          required: true,
+          input: true,
+        },
         idKelompok: {
           type: "number",
           required: true,

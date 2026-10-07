@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Pengguna, SetPenggunaPjSchema } from "../model";
+import type { Pengguna } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
-import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { canSetPenggunaPj, isPenggunaPj } from "../model";
 
@@ -19,15 +18,13 @@ async function onConfirm() {
   if (isLoading.value || !canManage.value || !canSetPenggunaPj(props.pengguna))
     return;
   isLoading.value = true;
-  const body: SetPenggunaPjSchema = { isPj };
-
   try {
-    await $fetch(`/api/v1/pengguna/${props.pengguna.id}/pj`, {
-      baseURL: API_URL,
-      method: "PATCH",
-      credentials: "include",
-      body,
+    const { error } = await authClient.admin.setRole({
+      userId: String(props.pengguna.id),
+      role: isPj ? "pj" : "user",
     });
+    if (error)
+      throw new Error(error.message || "Status PJ kelompok gagal diubah.");
   }
   catch (error) {
     useToastError("Gagal Mengubah PJ Kelompok", extractErrorMessage(error, "Status PJ kelompok gagal diubah. Silakan coba lagi."));

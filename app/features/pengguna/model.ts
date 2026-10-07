@@ -26,15 +26,10 @@ export const verifikasiPenggunaResponseSchema = z.object({
   noAnggota: z.string().min(1),
 });
 
-export const setPenggunaPjSchema = z.object({
-  isPj: z.boolean(),
-});
-
 export type Pengguna = z.output<typeof penggunaSchema>;
 export type PenggunaResponse = z.output<typeof penggunaResponseSchema>;
 export type StatusPenggunaFilter = z.output<typeof statusFilterSchema>;
 export type VerifikasiPenggunaResponse = z.output<typeof verifikasiPenggunaResponseSchema>;
-export type SetPenggunaPjSchema = z.output<typeof setPenggunaPjSchema>;
 
 export const statusFilterOptions = [
   { label: "Semua status", value: "all" },
@@ -70,6 +65,7 @@ const roleLabels: Record<string, string> = {
   admin: "Admin",
   user: "Anggota",
   pj: "PJ Kelompok",
+  wanhat: "Wanhat",
 };
 
 export function formatPenggunaRole(role: string | null) {
