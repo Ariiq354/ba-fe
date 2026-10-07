@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import type { Pengguna, PenggunaResponse, StatusPenggunaFilter } from "./model";
+import type { Pengguna, PenggunaResponse, RolePengguna, StatusPenggunaFilter } from "./model";
 import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
+import { IMAGE_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
-import ModalPjPengguna from "./components/ModalPjPengguna.vue";
-import ModalVerifikasiPengguna from "./components/ModalVerifikasiPengguna.vue";
-import { canSetPenggunaPj, getPenggunaStatus, isPenggunaPj, penggunaColumns, statusFilterOptions, statusPenggunaLabels } from "./model";
+import ModalDetailPengguna from "./components/ModalDetailPengguna.vue";
+import { canChangePenggunaRole, formatPenggunaRole, getPenggunaStatus, penggunaColumns, rolePenggunaOptions, rolePenggunaSchema, statusFilterOptions, statusPenggunaLabels } from "./model";
 
 const page = ref(1);
 const search = ref("");
@@ -15,6 +16,7 @@ const statusFilter = ref<StatusPenggunaFilter>("all");
 const limit = 10;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "pengguna", "manage"));
+const pendingRoles = ref<Partial<Record<number, RolePengguna>>>({});
 
 watch([search, statusFilter], () => {
   page.value = 1;
@@ -32,16 +34,53 @@ async function refreshList() {
   }
 }
 
-function verifyPengguna(pengguna: Pengguna) {
-  if (!canManage.value || getPenggunaStatus(pengguna) !== "pending")
-    return;
-  openModal(ModalVerifikasiPengguna, { pengguna, refresh: refreshList });
+function viewPengguna(pengguna: Pengguna) {
+  openModal(ModalDetailPengguna, { pengguna, refresh: refreshList });
 }
 
-function setPenggunaPj(pengguna: Pengguna) {
-  if (!canManage.value || !canSetPenggunaPj(pengguna))
+function getRoleOptions(pengguna: Pengguna) {
+  return rolePenggunaOptions.map(option => ({
+    ...option,
+    disabled: !canChangePenggunaRole(pengguna, option.value),
+  }));
+}
+
+async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
+  const result = rolePenggunaSchema.safeParse(value);
+  if (!result.success || !canManage.value || pendingRoles.value[pengguna.id] || status.value === "pending")
     return;
-  openModal(ModalPjPengguna, { pengguna, refresh: refreshList });
+  const role = result.data;
+  if (role === (pengguna.role ?? "user") || !canChangePenggunaRole(pengguna, role))
+    return;
+
+  pendingRoles.value[pengguna.id] = role;
+  try {
+    const { error } = await authClient.admin.setRole({
+      userId: String(pengguna.id),
+      role,
+    });
+    if (error)
+      throw new Error(error.message || "Role pengguna gagal diubah.");
+  }
+  catch (error) {
+    useToastError("Gagal Mengubah Role", extractErrorMessage(error, "Role pengguna gagal diubah. Silakan coba lagi."));
+    delete pendingRoles.value[pengguna.id];
+    return;
+  }
+
+  pengguna.role = role;
+  useToastSuccess("Role Berhasil Diubah", `${pengguna.name} sekarang menjadi ${formatPenggunaRole(role)}.`);
+  try {
+    if (String(session.value.data?.user.id) === String(pengguna.id))
+      await session.value.refetch();
+    await refreshList();
+  }
+  catch {
+    useToastError("Gagal Memuat Ulang Data", "Role sudah tersimpan, tetapi data terbaru belum dapat dimuat. Silakan muat ulang halaman.");
+  }
+  finally {
+    delete pendingRoles.value[pengguna.id];
+  }
 }
 </script>
 
@@ -53,7 +92,7 @@ function setPenggunaPj(pengguna: Pengguna) {
           Daftar Pengguna
         </h1>
         <p class="mt-1 text-sm text-muted">
-          Lihat data pengguna, verifikasi pendaftaran, dan kelola PJ kelompok.
+          Lihat profil pengguna, verifikasi pendaftaran, dan kelola role pengguna.
         </p>
       </div>
     </div>
@@ -91,16 +130,21 @@ function setPenggunaPj(pengguna: Pengguna) {
           pagination
         >
           <template #name-cell="{ row }">
-            <div class="space-y-0.5">
-              <p class="font-medium">
-                {{ row.original.name }}
-              </p>
-              <p v-if="row.original.username" class="text-sm text-muted">
-                @{{ row.original.username }}
-              </p>
-              <p class="text-xs text-muted">
-                {{ row.original.email }}
-              </p>
+            <div class="flex items-center gap-3">
+              <UAvatar
+                :src="row.original.image ? `${IMAGE_URL}/${row.original.image}` : undefined"
+                :alt="row.original.name"
+                size="lg"
+                loading="lazy"
+              />
+              <div class="space-y-0.5">
+                <p class="font-medium">
+                  {{ row.original.name }}
+                </p>
+                <p v-if="row.original.username" class="text-sm text-muted">
+                  @{{ row.original.username }}
+                </p>
+              </div>
             </div>
           </template>
           <template #noAnggota-cell="{ row }">
@@ -114,6 +158,20 @@ function setPenggunaPj(pengguna: Pengguna) {
               </p>
             </div>
           </template>
+          <template #role-cell="{ row }">
+            <USelect
+              v-if="canManage"
+              :model-value="pendingRoles[row.original.id] ?? row.original.role ?? 'user'"
+              :items="getRoleOptions(row.original)"
+              :loading="!!pendingRoles[row.original.id]"
+              :disabled="status === 'pending' || !!pendingRoles[row.original.id] || row.original.banned === true"
+              :aria-label="`Role ${row.original.name}`"
+              size="sm"
+              class="w-40"
+              @update:model-value="setPenggunaRole(row.original, $event)"
+            />
+            <span v-else>{{ formatPenggunaRole(row.original.role) }}</span>
+          </template>
           <template #status-cell="{ row }">
             <div class="space-y-1">
               <UBadge :color="statusPenggunaLabels[getPenggunaStatus(row.original)].color" variant="subtle">
@@ -126,27 +184,15 @@ function setPenggunaPj(pengguna: Pengguna) {
           </template>
           <template #pengelolaan-cell="{ row }">
             <UButton
-              v-if="canManage && getPenggunaStatus(row.original) === 'pending'"
-              icon="i-tabler-user-check"
+              :icon="canManage && getPenggunaStatus(row.original) === 'pending' ? 'i-tabler-user-check' : 'i-tabler-eye'"
+              :color="canManage && getPenggunaStatus(row.original) === 'pending' ? 'primary' : 'neutral'"
               size="sm"
               variant="soft"
               :disabled="status === 'pending'"
-              @click="verifyPengguna(row.original)"
+              @click="viewPengguna(row.original)"
             >
-              Verifikasi
+              {{ canManage && getPenggunaStatus(row.original) === 'pending' ? 'Verifikasi' : 'Lihat Profil' }}
             </UButton>
-            <UButton
-              v-else-if="canManage && canSetPenggunaPj(row.original)"
-              :icon="isPenggunaPj(row.original) ? 'i-tabler-user-minus' : 'i-tabler-users-group'"
-              :color="isPenggunaPj(row.original) ? 'warning' : 'primary'"
-              size="sm"
-              variant="soft"
-              :disabled="status === 'pending'"
-              @click="setPenggunaPj(row.original)"
-            >
-              {{ isPenggunaPj(row.original) ? 'Lepas PJ' : 'Jadikan PJ Kelompok' }}
-            </UButton>
-            <span v-else class="text-muted">—</span>
           </template>
           <template #empty>
             <div class="py-8 text-center">

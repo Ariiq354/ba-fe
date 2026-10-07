@@ -12,6 +12,23 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>();
 const state = reactive({ ...initMarginFormdata, ...props.margin });
 const isLoading = ref(false);
+const form = useTemplateRef("form");
+let previousMaxNominal = state.maxNominal ?? undefined;
+const isUnlimited = computed({
+  get: () => state.maxNominal === null,
+  set(value: boolean) {
+    if (value === (state.maxNominal === null))
+      return;
+    if (value) {
+      previousMaxNominal = state.maxNominal ?? undefined;
+      state.maxNominal = null;
+    }
+    else {
+      state.maxNominal = previousMaxNominal;
+    }
+    form.value?.clear("maxNominal");
+  },
+});
 
 async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
   if (isLoading.value)
@@ -46,14 +63,17 @@ async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
     <template #body>
-      <UForm id="form-margin" :schema="marginSchema" :state="state" :disabled="isLoading" class="space-y-4" @submit="onSubmit">
+      <UForm id="form-margin" ref="form" :schema="marginSchema" :state="state" :disabled="isLoading" class="space-y-4" @submit="onSubmit">
         <div class="grid gap-4 sm:grid-cols-2">
           <UFormField label="Nominal Minimum (Rp)" name="minNominal" required>
             <UInputNumber v-model="state.minNominal" :min="0" :step="1" placeholder="0" class="w-full" />
           </UFormField>
-          <UFormField label="Nominal Maksimum (Rp)" name="maxNominal" required>
-            <UInputNumber v-model="state.maxNominal" :min="0" :step="1" placeholder="0" class="w-full" />
-          </UFormField>
+          <div class="space-y-2">
+            <UFormField label="Nominal Maksimum (Rp)" name="maxNominal" :required="!isUnlimited">
+              <UInputNumber v-model.optional="state.maxNominal" :min="0" :step="1" :disabled="isUnlimited" :placeholder="isUnlimited ? 'Seterusnya' : '0'" class="w-full" />
+            </UFormField>
+            <UCheckbox v-model="isUnlimited" label="Tanpa batas maksimum (seterusnya)" />
+          </div>
         </div>
         <UFormField label="Margin per Tahun (%)" name="persenMarginTahun" required>
           <UInputNumber v-model="state.persenMarginTahun" :min="0" :step="1" placeholder="0" class="w-full" />
