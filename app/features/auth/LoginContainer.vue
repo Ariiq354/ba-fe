@@ -41,7 +41,7 @@ async function onSubmit(event: FormSubmitEvent<LoginSchema>) {
 </script>
 
 <template>
-  <UCard :ui="{ body: 'p-0 sm:p-0 grid md:grid-cols-2' }">
+  <UCard :ui="{ body: 'p-0 sm:p-0 grid md:grid-cols-2 max-w-sm md:max-w-4xl' }">
     <div class="flex flex-col items-center justify-center space-y-8 p-4 md:p-8">
       <div class="text-center">
         <NuxtImg

@@ -7,7 +7,9 @@ export default defineNuxtConfig({
   spaLoadingTemplate: true,
 
   nitro: {
-    // Keep static output when Workers CI auto-detects the Cloudflare preset.
+    externals: {
+      inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/],
+    },
     preset: "static",
   },
 

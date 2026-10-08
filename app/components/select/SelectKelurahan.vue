@@ -32,9 +32,9 @@ watch(
   (newVal, oldVal) => {
     if (oldVal !== undefined && newVal !== oldVal) {
       selectedKelurahan.value = undefined;
-      if (newVal && newVal !== oldVal) {
-        execute();
-      }
+    }
+    if (newVal && newVal !== oldVal) {
+      execute();
     }
   },
 );

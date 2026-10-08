@@ -44,4 +44,6 @@ export const admin = ac.newRole({
   approvalPemindahbukuan: ["view", "manage"],
 });
 
-export const roles = { user, admin, pj };
+export const wanhat = ac.newRole({});
+
+export const roles = { user, admin, pj, wanhat };

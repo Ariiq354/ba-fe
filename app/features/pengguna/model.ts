@@ -1,11 +1,15 @@
 import type { TableColumn } from "@nuxt/ui";
 import { z } from "zod";
 
+export const rolePenggunaSchema = z.enum(["admin", "user", "pj", "wanhat"]);
+
 export const penggunaSchema = z.object({
   id: z.number().int().positive(),
   name: z.string(),
   username: z.string().nullable(),
   email: z.string(),
+  image: z.string(),
+  noHp: z.string(),
   role: z.string().nullable(),
   banned: z.boolean().nullable(),
   banReason: z.string().nullable(),
@@ -26,15 +30,11 @@ export const verifikasiPenggunaResponseSchema = z.object({
   noAnggota: z.string().min(1),
 });
 
-export const setPenggunaPjSchema = z.object({
-  isPj: z.boolean(),
-});
-
 export type Pengguna = z.output<typeof penggunaSchema>;
+export type RolePengguna = z.output<typeof rolePenggunaSchema>;
 export type PenggunaResponse = z.output<typeof penggunaResponseSchema>;
 export type StatusPenggunaFilter = z.output<typeof statusFilterSchema>;
 export type VerifikasiPenggunaResponse = z.output<typeof verifikasiPenggunaResponseSchema>;
-export type SetPenggunaPjSchema = z.output<typeof setPenggunaPjSchema>;
 
 export const statusFilterOptions = [
   { label: "Semua status", value: "all" },
@@ -51,13 +51,8 @@ export function getPenggunaStatus(pengguna: Pick<Pengguna, "banned" | "banReason
   return pengguna.banReason === pendingVerificationBanReason ? "pending" : "banned";
 }
 
-export function isPenggunaPj(pengguna: Pick<Pengguna, "role">) {
-  return pengguna.role?.split(",").some(role => role.trim() === "pj") ?? false;
-}
-
-export function canSetPenggunaPj(pengguna: Pick<Pengguna, "role" | "banned" | "noAnggota">) {
-  const isAdmin = pengguna.role?.split(",").some(role => role.trim() === "admin") ?? false;
-  return !isAdmin && pengguna.banned !== true && !!pengguna.noAnggota;
+export function canChangePenggunaRole(pengguna: Pick<Pengguna, "banned" | "noAnggota">, role: RolePengguna) {
+  return pengguna.banned !== true && (role !== "pj" || !!pengguna.noAnggota);
 }
 
 export const statusPenggunaLabels = {
@@ -70,15 +65,25 @@ const roleLabels: Record<string, string> = {
   admin: "Admin",
   user: "Anggota",
   pj: "PJ Kelompok",
+  wanhat: "Wanhat",
 };
+
+export const rolePenggunaOptions = rolePenggunaSchema.options.map(value => ({
+  label: roleLabels[value],
+  value,
+}));
 
 export function formatPenggunaRole(role: string | null) {
   if (!role)
     return "Anggota";
-  return role.split(",").map(value => roleLabels[value.trim()] ?? value.trim()).join(", ");
+  return roleLabels[role] ?? role;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" });
+
+export function formatPenggunaDate(date: string) {
+  return dateFormatter.format(new Date(date));
+}
 
 export const penggunaColumns: TableColumn<Pengguna>[] = [
   { accessorKey: "name", header: "Pengguna" },
@@ -86,6 +91,6 @@ export const penggunaColumns: TableColumn<Pengguna>[] = [
   { id: "kelompok", header: "Kelompok" },
   { accessorKey: "role", header: "Role", cell: ({ row }) => formatPenggunaRole(row.original.role) },
   { id: "status", header: "Status" },
-  { accessorKey: "createdAt", header: "Tanggal Daftar", cell: ({ row }) => dateFormatter.format(new Date(row.original.createdAt)) },
+  { accessorKey: "createdAt", header: "Tanggal Daftar", cell: ({ row }) => formatPenggunaDate(row.original.createdAt) },
   { id: "pengelolaan", header: "Aksi" },
 ];
