@@ -21,15 +21,11 @@ defineExpose({ refresh });
     variant="subtle"
     :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refresh() }]"
   />
-  <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+  <div v-else class="grid gap-4 sm:grid-cols-2">
     <UCard
       v-for="item in [
         { label: 'Saldo Tabungan', value: data ? formatRupiah(data.saldoTabungan) : '—', icon: 'i-tabler-wallet' },
-        { label: 'Saldo Efektif', value: data ? formatRupiah(data.saldoEfektif) : '—', icon: 'i-tabler-cash-banknote' },
-        { label: 'Tabungan Dicadangkan', value: data ? formatRupiah(data.totalPenarikanPending + data.totalPemindahbukuanPending) : '—', icon: 'i-tabler-clock' },
         { label: 'Jumlah Saham', value: data ? `${data.jumlahSaham.toLocaleString('id-ID')} lembar` : '—', icon: 'i-tabler-chart-candle' },
-        { label: 'Saham Tersedia', value: data ? `${data.jumlahSahamEfektif.toLocaleString('id-ID')} lembar` : '—', icon: 'i-tabler-chart-pie' },
-        { label: 'Saham Dicadangkan', value: data ? `${data.totalSahamPending.toLocaleString('id-ID')} lembar` : '—', icon: 'i-tabler-clock' },
       ]" :key="item.label"
     >
       <div class="flex items-center gap-2 text-muted">

@@ -1,5 +1,5 @@
 import { createAccessControl } from "better-auth/plugins/access";
-import { adminAc, defaultStatements } from "better-auth/plugins/admin/access";
+import { defaultStatements } from "better-auth/plugins/admin/access";
 
 export const statement = {
   ...defaultStatements,
@@ -30,19 +30,7 @@ export const pj = ac.newRole({
   pemindahbukuan: ["view", "manage"],
 });
 
-export const admin = ac.newRole({
-  ...adminAc.statements,
-  masterAkun: ["view", "manage"],
-  masterMargin: ["view", "manage"],
-  masterSaham: ["view", "manage"],
-  jurnal: ["view", "manage"],
-  pengguna: ["view", "manage"],
-  inputSimpanan: ["view", "manage"],
-  mutasiSimpanan: ["view", "manage"],
-  approvalSimpanan: ["view", "manage"],
-  pemindahbukuan: ["view", "manage"],
-  approvalPemindahbukuan: ["view", "manage"],
-});
+export const admin = ac.newRole(statement);
 
 export const wanhat = ac.newRole({});
 
