@@ -7,9 +7,6 @@ export default defineNuxtConfig({
   spaLoadingTemplate: true,
 
   nitro: {
-    externals: {
-      inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/],
-    },
     preset: "static",
   },
 
@@ -18,7 +15,6 @@ export default defineNuxtConfig({
     "nuxt-security",
     "@nuxt/ui",
     "@nuxt/image",
-    "nuxt-charts",
     "@vueuse/nuxt",
   ],
 
