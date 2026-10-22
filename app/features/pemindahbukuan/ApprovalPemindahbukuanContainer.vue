@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 import type { Pemindahbukuan, PemindahbukuanResponse, TipePemindahbukuan } from "./model";
-import type { AnggotaOptionsResponse, StatusMutasi } from "~/features/simpanan/model";
+import type { AnggotaOptionsResponse } from "~/features/simpanan/model";
 import InputSearch from "~/components/input/InputSearch.vue";
-import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
-import { getAnggotaOptions, statusMutasiLabels } from "~/features/simpanan/model";
+import { getAnggotaOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
-import { formatRupiah } from "~/utils/format";
 import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
 import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
+import TabelPemindahbukuan from "./components/TabelPemindahbukuan.vue";
 import { PEMINDAHBUKUAN_APPROVAL_LIST_KEY } from "./data";
-import {
-  formatPemindahbukuanValue,
-  pemindahbukuanColumns,
-  tipePemindahbukuanOptions,
-} from "./model";
+import { tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
 const canView = computed(() =>
@@ -98,9 +93,9 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Approval Pemindahbukuan</h1>
+      <h1 class="text-xl font-semibold text-highlighted">Persetujuan pemindahbukuan</h1>
       <p class="mt-1 text-sm text-muted">
-        Tinjau pengajuan pemindahbukuan yang menunggu persetujuan, lalu setujui atau tolak.
+        Periksa sumber, tujuan, dan nominal sebelum menyetujui pengajuan.
       </p>
     </div>
     <UCard>
@@ -136,71 +131,23 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
         />
         <UAlert
           v-if="error"
-          title="Gagal Memuat Approval Pemindahbukuan"
+          title="Pengajuan pemindahbukuan gagal dimuat"
           description="Pengajuan belum dapat dimuat. Silakan coba lagi."
           color="error"
           variant="subtle"
           :actions="[{ label: 'Coba lagi', color: 'error', onClick: refreshList }]"
         />
-        <DataTable
+        <TabelPemindahbukuan
           v-else
           v-model:page="page"
           :data="data?.data ?? []"
-          :columns="pemindahbukuanColumns"
           :loading="status === 'pending'"
           :total="total"
           :dropdown-items="getDropdownItems"
-          viewable
-          enumerate
-          pagination
+          empty-title="Tidak ada pemindahbukuan yang menunggu persetujuan"
+          empty-description="Coba filter lain untuk melihat pengajuan."
           @view="viewTransfer"
-        >
-          <template #kodeTransaksi-cell="{ row }">
-            <UButton
-              color="neutral"
-              variant="link"
-              class="p-0 font-mono"
-              @click="viewTransfer(row.original)"
-            >
-              {{ row.original.kodeTransaksi }}
-            </UButton>
-          </template>
-          <template #members-cell="{ row }">
-            <p class="font-medium">
-              {{ row.original.sourceMemberName }}
-            </p>
-            <p class="text-sm text-muted">→ {{ row.original.destinationMemberName }}</p>
-          </template>
-          <template #nominal-cell="{ row }">
-            <p class="font-medium">
-              {{ formatPemindahbukuanValue(row.original) }}
-            </p>
-            <p
-              v-if="row.original.tipePemindahbukuan !== 'tabungan_ke_tabungan'"
-              class="text-sm text-muted"
-            >
-              {{ row.original.tipePemindahbukuan === "saham_ke_saham" ? "Referensi: " : ""
-              }}{{ formatRupiah(row.original.nominal) }}
-            </p>
-          </template>
-          <template #statusApproved-cell="{ row }">
-            <UBadge
-              :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"
-              variant="subtle"
-            >
-              {{ statusMutasiLabels[row.original.statusApproved as StatusMutasi].label }}
-            </UBadge>
-          </template>
-          <template #empty>
-            <div class="py-8 text-center">
-              <UIcon name="i-tabler-transfer" class="mb-2 size-8 text-dimmed" />
-              <p class="font-medium text-highlighted">
-                Tidak ada pemindahbukuan yang menunggu persetujuan
-              </p>
-              <p class="mt-1 text-sm text-muted">Coba filter lain untuk melihat pengajuan.</p>
-            </div>
-          </template>
-        </DataTable>
+        />
       </div>
     </UCard>
   </div>

@@ -4,6 +4,7 @@ import ModalConfirmDelete from "~/components/modal/ModalConfirmDelete.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalMargin from "./components/ModalMargin.vue";
@@ -18,12 +19,7 @@ const { data, status, error, refresh } = useApi<MarginResponse>("/api/v1/master-
 });
 const total = computed(() => data.value?.total ?? 0);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    page.value = Math.min(page.value, Math.max(1, Math.ceil(total.value / limit)));
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm(margin?: Margin) {
   if (!canManage.value) return;
@@ -48,13 +44,13 @@ function deleteMargin(ids: number[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Master Margin</h1>
+        <h1 class="text-xl font-semibold text-highlighted">Master margin</h1>
         <p class="mt-1 text-sm text-muted">
-          Kelola margin, jaminan, dan biaya akad berdasarkan rentang nominal pembiayaan.
+          Ketentuan margin dan biaya akad berdasarkan nominal pembiayaan.
         </p>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
-        Tambah Margin
+        Tambah margin
       </UButton>
     </div>
     <UCard>

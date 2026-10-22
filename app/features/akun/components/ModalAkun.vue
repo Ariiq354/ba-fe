@@ -46,8 +46,7 @@ async function onSubmit(event: FormSubmitEvent<AkunSchema>) {
 
 <template>
   <UModal
-    :title="akun ? 'Edit Akun' : 'Tambah Akun'"
-    description="Lengkapi informasi akun untuk pencatatan keuangan."
+    :title="akun ? 'Edit akun' : 'Tambah akun'"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
@@ -85,7 +84,7 @@ async function onSubmit(event: FormSubmitEvent<AkunSchema>) {
           Batal
         </UButton>
         <UButton type="submit" form="form-akun" icon="i-tabler-check" :loading="isLoading">
-          Simpan
+          Simpan akun
         </UButton>
       </div>
     </template>

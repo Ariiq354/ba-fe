@@ -5,6 +5,7 @@ import ModalConfirmDelete from "~/components/modal/ModalConfirmDelete.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalAkun from "./components/ModalAkun.vue";
@@ -30,12 +31,7 @@ const { data, status, error, refresh } = useApi<AkunResponse>("/api/v1/master-ak
 });
 const total = computed(() => Number(data.value?.total) || 0);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    page.value = Math.min(page.value, Math.max(1, Math.ceil(total.value / limit)));
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm(akun?: Akun) {
   if (!canManage.value) return;
@@ -60,11 +56,10 @@ function deleteAkun(ids: string[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Master Akun</h1>
-        <p class="mt-1 text-sm text-muted">Kelola daftar akun untuk pencatatan keuangan.</p>
+        <h1 class="text-xl font-semibold text-highlighted">Master akun</h1>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
-        Tambah Akun
+        Tambah akun
       </UButton>
     </div>
 

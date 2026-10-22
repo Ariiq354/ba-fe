@@ -159,17 +159,20 @@ export const jenisSimpananOptions = [
 ];
 export const pengajuanLabels = {
   tabungan: {
-    title: "Setor Tabungan",
+    title: "Setor tabungan",
+    submit: "Ajukan setoran",
     icon: "i-tabler-wallet",
     description: "Ajukan setoran tabungan untuk anggota pilihan.",
   },
   saham: {
-    title: "Beli Saham",
+    title: "Beli saham",
+    submit: "Ajukan pembelian",
     icon: "i-tabler-chart-candle",
     description: "Ajukan pembelian saham menggunakan harga terbaru.",
   },
   penarikan: {
-    title: "Tarik Tabungan",
+    title: "Tarik tabungan",
+    submit: "Ajukan penarikan",
     icon: "i-tabler-cash-banknote",
     description: "Ajukan penarikan berdasarkan saldo efektif anggota.",
   },
@@ -227,6 +230,7 @@ export const mutasiColumns: TableColumn<MutasiSimpanan>[] = [
   {
     accessorKey: "nilaiTransaksi",
     header: "Nominal",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.nilaiTransaksi),
   },
   { accessorKey: "accountName", header: "Kas / Bank" },

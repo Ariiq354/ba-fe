@@ -61,13 +61,13 @@ async function onVerify() {
 
 <template>
   <UModal
-    :title="canVerify ? 'Verifikasi Pengguna' : 'Profil Pengguna'"
+    :title="canVerify ? 'Verifikasi pengguna' : 'Profil pengguna'"
     :description="
       canVerify
         ? 'Periksa profil sebelum mengaktifkan akun.'
         : 'Informasi kontak dan keanggotaan pengguna.'
     "
-    :ui="{ content: 'sm:max-w-xl rounded-2xl', header: 'pr-12 sm:pr-12', footer: 'bg-muted/30' }"
+    :ui="{ content: 'sm:max-w-xl', header: 'pr-12 sm:pr-12' }"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
@@ -78,10 +78,10 @@ async function onVerify() {
             <UAvatar
               :src="imageSrc"
               :alt="pengguna.name"
-              size="3xl"
+              size="2xl"
               :ui="{
-                root: 'flex size-24 rounded-xl ring ring-default',
-                image: 'rounded-xl object-cover',
+                root: 'size-16 rounded-md',
+                image: 'rounded-md object-cover',
               }"
             />
             <a
@@ -91,23 +91,22 @@ async function onVerify() {
               rel="noopener noreferrer"
               :aria-label="`Lihat foto penuh ${pengguna.name}`"
               title="Lihat foto penuh"
-              class="absolute inset-0 rounded-xl transition-colors hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+              class="absolute inset-0 rounded-md hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               <span
-                class="absolute right-1.5 bottom-1.5 flex size-6 items-center justify-center rounded-md bg-default/90 text-highlighted shadow-sm"
+                class="absolute right-1 bottom-1 flex size-5 items-center justify-center rounded-sm bg-default text-highlighted"
               >
                 <UIcon name="i-tabler-arrows-maximize" class="size-3.5" />
               </span>
             </a>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-xl leading-tight font-semibold text-highlighted wrap-break-word">
+            <p class="text-lg leading-tight font-semibold text-highlighted wrap-break-word">
               {{ pengguna.name }}
             </p>
-            <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
               <span>{{ formatPenggunaRole(pengguna.role) }}</span>
               <template v-if="pengguna.username">
-                <span aria-hidden="true">·</span>
                 <span class="wrap-break-word">@{{ pengguna.username }}</span>
               </template>
             </div>
@@ -117,11 +116,9 @@ async function onVerify() {
           </div>
         </div>
 
-        <div
-          class="grid divide-y divide-default overflow-hidden rounded-xl border border-default sm:grid-cols-2 sm:divide-x sm:divide-y-0"
-        >
-          <section class="min-w-0 space-y-4 p-4">
-            <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">Kontak</h3>
+        <div class="grid gap-6 border-t border-default pt-5 sm:grid-cols-2">
+          <section class="min-w-0 space-y-4">
+            <h3 class="text-sm font-medium text-highlighted">Kontak</h3>
             <dl class="space-y-4 text-sm">
               <div class="space-y-1">
                 <dt class="text-muted">Nomor HP</dt>
@@ -141,8 +138,8 @@ async function onVerify() {
               </div>
             </dl>
           </section>
-          <section class="min-w-0 space-y-4 p-4">
-            <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">Keanggotaan</h3>
+          <section class="min-w-0 space-y-4">
+            <h3 class="text-sm font-medium text-highlighted">Keanggotaan</h3>
             <dl class="space-y-4 text-sm">
               <div class="space-y-1">
                 <dt class="text-muted">Kelompok</dt>
@@ -181,7 +178,7 @@ async function onVerify() {
           :loading="isLoading"
           @click="onVerify"
         >
-          Verifikasi Pengguna
+          Verifikasi pengguna
         </UButton>
       </div>
     </template>

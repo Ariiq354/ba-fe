@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
 import { z } from "zod";
+import InputPassword from "~/components/input/InputPassword.vue";
 import { useToastError, useToastSuccess } from "~/composables/toast";
 import { authClient } from "~/utils/auth";
-import InputPassword from "../input/InputPassword.vue";
 
 const emit = defineEmits<{ close: [] }>();
 
@@ -56,7 +56,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UModal title="Ubah Password" description="Masukkan password lama dan password baru Anda.">
+  <UModal title="Ubah password">
     <template #body>
       <UForm
         id="form-password"
@@ -85,7 +85,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         Batal
       </UButton>
       <UButton type="submit" form="form-password" icon="i-tabler-check" :loading="isLoading">
-        Simpan
+        Ubah password
       </UButton>
     </template>
   </UModal>

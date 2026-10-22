@@ -2,9 +2,9 @@
 import ApprovalSimpananContainer from "~/features/simpanan/ApprovalSimpananContainer.vue";
 
 definePageMeta({
-  layout: { name: "default", props: { title: "Approval Simpanan" } },
+  layout: { name: "default", props: { title: "Persetujuan simpanan" } },
 });
-useHead({ title: "Approval Simpanan · Berkah Amanah" });
+useHead({ title: "Persetujuan simpanan · Berkah Amanah" });
 </script>
 
 <template>

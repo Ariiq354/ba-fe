@@ -23,32 +23,31 @@ defineExpose({ refresh });
       { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refresh() },
     ]"
   />
-  <div v-else class="grid gap-4 sm:grid-cols-2">
-    <UCard
-      v-for="item in [
-        {
-          label: 'Saldo Tabungan',
-          value: data ? formatRupiah(data.saldoTabungan) : '—',
-          icon: 'i-tabler-wallet',
-        },
-        {
-          label: 'Jumlah Saham',
-          value: data ? `${data.jumlahSaham.toLocaleString('id-ID')} lembar` : '—',
-          icon: 'i-tabler-chart-candle',
-        },
-      ]"
-      :key="item.label"
-    >
-      <div class="flex items-center gap-2 text-muted">
-        <UIcon :name="item.icon" class="size-5" />
-        <p class="text-sm">
-          {{ item.label }}
-        </p>
-      </div>
-      <USkeleton v-if="status === 'pending'" class="mt-3 h-7 w-32" />
-      <p v-else class="mt-3 text-xl font-semibold text-highlighted">
-        {{ item.value }}
-      </p>
-    </UCard>
-  </div>
+  <dl
+    v-else
+    class="grid divide-y divide-default rounded-lg border border-default bg-default sm:grid-cols-2 sm:divide-x sm:divide-y-0"
+    aria-label="Ringkasan simpanan"
+  >
+    <div class="p-5">
+      <dt class="text-sm text-muted">Saldo tabungan</dt>
+      <dd class="mt-2">
+        <USkeleton v-if="status === 'pending'" class="h-8 w-44" />
+        <span v-else class="text-2xl font-semibold tracking-tight text-highlighted tabular-nums">
+          {{ data ? formatRupiah(data.saldoTabungan) : "—" }}
+        </span>
+      </dd>
+    </div>
+    <div class="p-5">
+      <dt class="text-sm text-muted">Kepemilikan saham</dt>
+      <dd class="mt-2">
+        <USkeleton v-if="status === 'pending'" class="h-8 w-32" />
+        <template v-else>
+          <span class="text-2xl font-semibold tracking-tight text-highlighted tabular-nums">
+            {{ data ? data.jumlahSaham.toLocaleString("id-ID") : "—" }}
+          </span>
+          <span class="ml-1.5 text-sm text-muted">lembar</span>
+        </template>
+      </dd>
+    </div>
+  </dl>
 </template>

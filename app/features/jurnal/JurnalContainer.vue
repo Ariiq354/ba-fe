@@ -5,6 +5,7 @@ import ModalConfirmDelete from "~/components/modal/ModalConfirmDelete.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailJurnal from "./components/ModalDetailJurnal.vue";
@@ -33,12 +34,7 @@ const { data, status, error, refresh } = useApi<JurnalResponse>("/api/v1/jurnal"
 const total = computed(() => data.value?.total ?? 0);
 const journals = computed(() => groupJurnalRows(data.value?.data ?? []));
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    page.value = Math.min(page.value, Math.max(1, Math.ceil(total.value / limit)));
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm() {
   if (!canManage.value) return;
@@ -67,13 +63,10 @@ function deleteJurnal(ids: number[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Jurnal Transaksi</h1>
-        <p class="mt-1 text-sm text-muted">
-          Kelola pencatatan transaksi dan rincian debit–kredit setiap jurnal.
-        </p>
+        <h1 class="text-xl font-semibold text-highlighted">Jurnal transaksi</h1>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm">
-        Tambah Jurnal
+        Tambah jurnal
       </UButton>
     </div>
     <UCard>

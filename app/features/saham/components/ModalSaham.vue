@@ -32,7 +32,7 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
     return;
   }
 
-  useToastSuccess("Harga Saham Berhasil Ditambahkan");
+  useToastSuccess("Harga saham berhasil ditetapkan");
   emit("close");
   await props.refresh();
 }
@@ -40,8 +40,8 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
 
 <template>
   <UModal
-    title="Tambah Harga Saham"
-    description="Harga jual baru akan berlaku sebagai harga terbaru dan tercatat dalam riwayat."
+    title="Tetapkan harga saham"
+    description="Harga ini berlaku untuk pengajuan baru dan tercatat dalam riwayat."
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
@@ -72,7 +72,7 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
           Batal
         </UButton>
         <UButton type="submit" form="form-saham" icon="i-tabler-check" :loading="isLoading">
-          Simpan
+          Tetapkan harga
         </UButton>
       </div>
     </template>

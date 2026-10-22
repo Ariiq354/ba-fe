@@ -35,10 +35,8 @@ function openForm(jenis: JenisPengajuan) {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Simpanan Saya</h1>
-      <p class="mt-1 text-sm text-muted">
-        Lihat saldo, kepemilikan saham, dan riwayat simpanan pribadi.
-      </p>
+      <h1 class="text-xl font-semibold text-highlighted">Simpanan saya</h1>
+      <p class="mt-1 text-sm text-muted">Saldo dan riwayat transaksi Anda.</p>
     </div>
     <template v-if="userId">
       <RingkasanSaldo ref="saldo" :user-id="userId" />
@@ -47,6 +45,8 @@ function openForm(jenis: JenisPengajuan) {
           v-for="jenis in ['tabungan', 'saham', 'penarikan'] as const"
           :key="jenis"
           :icon="pengajuanLabels[jenis].icon"
+          color="neutral"
+          variant="outline"
           @click="openForm(jenis)"
         >
           {{ pengajuanLabels[jenis].title }}

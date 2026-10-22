@@ -36,13 +36,11 @@ function openForm() {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Master Saham</h1>
-        <p class="mt-1 text-sm text-muted">
-          Kelola harga jual saham dan lihat riwayat penetapan harga, dari yang terbaru.
-        </p>
+        <h1 class="text-xl font-semibold text-highlighted">Master saham</h1>
+        <p class="mt-1 text-sm text-muted">Riwayat harga jual, diurutkan dari penetapan terbaru.</p>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm">
-        Tambah Harga Saham
+        Tetapkan harga
       </UButton>
     </div>
     <UCard>
@@ -74,7 +72,7 @@ function openForm() {
             <p class="mt-1 text-sm text-muted">
               {{
                 canManage
-                  ? "Klik Tambah Harga Saham untuk menetapkan harga pertama."
+                  ? "Pilih Tetapkan harga untuk menambahkan harga pertama."
                   : "Belum ada riwayat harga saham yang tersedia."
               }}
             </p>

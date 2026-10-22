@@ -2,9 +2,9 @@
 import ApprovalPemindahbukuanContainer from "~/features/pemindahbukuan/ApprovalPemindahbukuanContainer.vue";
 
 definePageMeta({
-  layout: { name: "default", props: { title: "Approval Pemindahbukuan" } },
+  layout: { name: "default", props: { title: "Persetujuan pemindahbukuan" } },
 });
-useHead({ title: "Approval Pemindahbukuan · Berkah Amanah" });
+useHead({ title: "Persetujuan pemindahbukuan · Berkah Amanah" });
 </script>
 
 <template>

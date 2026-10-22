@@ -115,7 +115,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanSimpanan>) {
 <template>
   <UModal
     :title="pengajuanLabels[jenis].title"
-    :description="`Pengajuan untuk ${memberName}.`"
+    :description="memberName"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
@@ -178,9 +178,9 @@ async function onSubmit(event: FormSubmitEvent<PengajuanSimpanan>) {
               class="w-full"
             />
           </UFormField>
-          <div v-if="price" class="rounded-lg bg-elevated p-4" aria-live="polite">
-            <p class="text-sm text-muted">Estimasi Total Pembelian</p>
-            <p class="text-xl font-semibold">
+          <div v-if="price" class="transaction-summary" aria-live="polite">
+            <p class="text-sm text-muted">Estimasi pembelian</p>
+            <p class="mt-1 text-xl font-semibold tabular-nums">
               {{ formatRupiah(estimatedTotal) }}
             </p>
             <p class="mt-1 text-xs text-muted">
@@ -254,7 +254,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanSimpanan>) {
           :loading="isLoading"
           :disabled="!ready"
         >
-          Ajukan
+          {{ pengajuanLabels[jenis].submit }}
         </UButton>
       </div>
     </template>

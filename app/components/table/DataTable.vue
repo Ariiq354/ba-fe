@@ -31,6 +31,12 @@ const emit = defineEmits<{
 const slots = useSlots();
 const page = defineModel("page", { default: 1 });
 const rowSelection = ref<Record<string, boolean>>({});
+const selectedIds = computed(() =>
+  Object.keys(rowSelection.value)
+    .filter((key) => rowSelection.value[key])
+    .map((key) => data?.[Number(key)]?.id)
+    .filter((id) => id != null),
+);
 
 const UButton = resolveComponent("UButton");
 const UCheckbox = resolveComponent("UCheckbox");
@@ -48,14 +54,14 @@ const newColumns = computed<TableColumn<any>[]>(() => [
                 : table.getIsAllPageRowsSelected(),
               "onUpdate:modelValue": (value: boolean | "indeterminate") =>
                 table.toggleAllPageRowsSelected(!!value),
-              "aria-label": "Select all",
+              "aria-label": "Pilih semua baris",
             }),
           cell: ({ row }) =>
             h(UCheckbox, {
               modelValue: row.getIsSelected(),
               "onUpdate:modelValue": (value: boolean | "indeterminate") =>
                 row.toggleSelected(!!value),
-              "aria-label": "Select row",
+              "aria-label": "Pilih baris",
             }),
         } as TableColumn<any>,
       ]
@@ -132,7 +138,7 @@ const newColumns = computed<TableColumn<any>[]>(() => [
                     icon: "i-tabler-dots-vertical",
                     color: "neutral",
                     variant: "ghost",
-                    "aria-label": "Actions dropdown",
+                    "aria-label": "Tindakan untuk baris ini",
                   }),
               ),
             );
@@ -149,58 +155,39 @@ watch([() => data, page], () => {
 
 <template>
   <div class="w-full space-y-4">
-    <!-- Floating Action Bar for Bulk Selection -->
-    <Teleport to="body">
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="translate-y-10 opacity-0"
-        enter-to-class="translate-y-0 opacity-100"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="translate-y-0 opacity-100"
-        leave-to-class="translate-y-10 opacity-0"
-      >
-        <div
-          v-if="Object.keys(rowSelection).length > 0"
-          class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2.5 rounded-full shadow-2xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md"
+    <div
+      v-if="selectedIds.length"
+      class="flex flex-wrap items-center justify-between gap-3 rounded-md bg-muted px-3 py-2"
+    >
+      <p class="text-sm font-medium" role="status" aria-live="polite">
+        {{ selectedIds.length }} dipilih
+      </p>
+      <div class="flex items-center gap-2">
+        <UButton color="neutral" variant="ghost" size="sm" @click="rowSelection = {}">
+          Batal pilih
+        </UButton>
+        <UButton
+          v-if="deletable"
+          icon="i-tabler-trash"
+          color="error"
+          variant="soft"
+          size="sm"
+          @click="emit('delete', selectedIds)"
         >
-          <UButton
-            icon="i-tabler-x"
-            color="neutral"
-            variant="subtle"
-            size="sm"
-            class="rounded-full font-medium"
-            @click="rowSelection = {}"
-          >
-            {{ Object.keys(rowSelection).length }} Terpilih
-          </UButton>
-          <UButton
-            icon="i-tabler-trash"
-            color="error"
-            size="sm"
-            class="rounded-full font-medium"
-            @click="
-              emit(
-                'delete',
-                Object.keys(rowSelection)
-                  .map((k) => data?.[Number(k)]?.id)
-                  .filter((id) => id != null),
-              )
-            "
-          >
-            Hapus
-          </UButton>
-        </div>
-      </Transition>
-    </Teleport>
+          Hapus yang dipilih
+        </UButton>
+      </div>
+    </div>
     <UTable
       v-model:row-selection="rowSelection"
-      class="border-accented rounded-lg border"
+      class="border-y border-default"
       :data="data"
       :columns="newColumns"
       :loading="loading"
       :ui="{
-        th: 'text-muted font-medium',
-        td: 'text-highlighted',
+        th: 'px-3 py-3 text-xs text-muted font-medium bg-muted/50',
+        td: 'px-3 py-3 text-sm text-highlighted',
+        tr: 'data-[selected=true]:bg-primary/5',
       }"
     >
       <template v-for="(_, slotName) in slots" :key="slotName" #[slotName]="slotData">
@@ -209,7 +196,7 @@ watch([() => data, page], () => {
     </UTable>
 
     <div v-if="pagination" class="mt-2 flex items-center justify-center md:justify-between">
-      <p class="text-muted hidden px-2 text-sm md:block">
+      <p class="text-muted hidden text-xs tabular-nums md:block">
         Menampilkan {{ total === 0 ? 0 : (page - 1) * 10 + 1 }} sampai
         {{ Math.min((page - 1) * 10 + 10, total) }} dari {{ total }} item
       </p>

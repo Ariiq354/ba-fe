@@ -184,6 +184,7 @@ export const pemindahbukuanColumns: TableColumn<Pemindahbukuan>[] = [
   {
     accessorKey: "nominal",
     header: "Nilai",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatPemindahbukuanValue(row.original),
   },
   { accessorKey: "statusApproved", header: "Status" },

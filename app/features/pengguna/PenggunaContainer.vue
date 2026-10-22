@@ -4,6 +4,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { IMAGE_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
@@ -40,12 +41,7 @@ const { data, status, error, refresh } = useApi<PenggunaResponse>("/api/v1/pengg
 });
 const total = computed(() => data.value?.total ?? 0);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    page.value = Math.min(page.value, Math.max(1, Math.ceil(total.value / limit)));
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function viewPengguna(pengguna: Pengguna) {
   openModal(ModalDetailPengguna, { pengguna, refresh: refreshList });
@@ -109,10 +105,8 @@ async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Daftar Pengguna</h1>
-        <p class="mt-1 text-sm text-muted">
-          Lihat profil pengguna, verifikasi pendaftaran, dan kelola role pengguna.
-        </p>
+        <h1 class="text-xl font-semibold text-highlighted">Pengguna</h1>
+        <p class="mt-1 text-sm text-muted">Verifikasi pendaftaran dan atur hak akses pengguna.</p>
       </div>
     </div>
 

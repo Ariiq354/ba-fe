@@ -35,10 +35,8 @@ function openForm(jenis: JenisPengajuan) {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Input Simpanan Anggota</h1>
-      <p class="mt-1 text-sm text-muted">
-        Ajukan transaksi untuk anggota yang berada dalam cakupan akses Anda.
-      </p>
+      <h1 class="text-xl font-semibold text-highlighted">Input simpanan anggota</h1>
+      <p class="mt-1 text-sm text-muted">Pilih anggota, lalu buat pengajuan transaksi.</p>
     </div>
     <UCard>
       <UAlert
@@ -53,7 +51,7 @@ function openForm(jenis: JenisPengajuan) {
       />
       <UFormField
         v-else
-        label="Pilih Anggota"
+        label="Anggota"
         description="Pengguna yang belum memiliki nomor anggota belum dapat dipilih."
       >
         <USelectMenu
@@ -77,24 +75,22 @@ function openForm(jenis: JenisPengajuan) {
         </p>
       </div>
       <RingkasanSaldo :key="selectedMember.id" ref="saldo" :user-id="selectedMember.id" />
-      <div class="grid gap-4 md:grid-cols-3">
-        <UCard v-for="jenis in ['tabungan', 'saham', 'penarikan'] as const" :key="jenis">
-          <UIcon :name="pengajuanLabels[jenis].icon" class="size-8 text-primary" />
-          <h3 class="mt-3 font-semibold">
-            {{ pengajuanLabels[jenis].title }}
-          </h3>
-          <p class="mt-1 text-sm text-muted">
-            {{ pengajuanLabels[jenis].description }}
-          </p>
-          <UButton class="mt-4" :disabled="!canManage" @click="openForm(jenis)">
-            {{ pengajuanLabels[jenis].title }}
-          </UButton>
-        </UCard>
+      <div class="flex flex-wrap items-center gap-2">
+        <UButton
+          v-for="jenis in ['tabungan', 'saham', 'penarikan'] as const"
+          :key="jenis"
+          :icon="pengajuanLabels[jenis].icon"
+          color="neutral"
+          variant="outline"
+          :disabled="!canManage"
+          @click="openForm(jenis)"
+        >
+          {{ pengajuanLabels[jenis].title }}
+        </UButton>
       </div>
     </template>
     <div v-else-if="status === 'success'" class="py-8 text-center">
-      <UIcon name="i-tabler-users" class="mb-2 size-8 text-dimmed" />
-      <p class="font-medium">Pilih anggota untuk memulai pengajuan</p>
+      <p class="font-medium">Belum ada anggota dipilih</p>
       <p class="mt-1 text-sm text-muted">
         Saldo dan pilihan transaksi akan tampil setelah anggota dipilih.
       </p>

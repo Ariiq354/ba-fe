@@ -3,9 +3,9 @@ import type { DropdownMenuItem } from "@nuxt/ui";
 import { openModal } from "~/composables/modal";
 import { useToastError } from "~/composables/toast";
 import { IMAGE_URL } from "~/constants";
+import ModalChangePassword from "~/features/auth/components/ModalChangePassword.vue";
+import ModalChangeProfile from "~/features/pengguna/components/ModalChangeProfile.vue";
 import { authClient } from "~/utils/auth";
-import ModalChangePassword from "../modal/ModalChangePassword.vue";
-import ModalChangeProfile from "../modal/ModalChangeProfile.vue";
 import DashboardNavigationMenu from "./DashboardNavigationMenu.vue";
 
 const session = authClient.useSession();
@@ -61,10 +61,14 @@ const items = computed<DropdownMenuItem[][]>(() => [
   <UDashboardSidebar
     collapsible
     resizable
+    :min-size="16"
+    :default-size="17"
+    :max-size="22"
+    :collapsed-size="4"
     class="bg-muted"
     :ui="{
       footer: 'border-t border-default',
-      root: 'min-w-0 transition-all duration-300 overflow-hidden',
+      root: 'min-w-0 overflow-hidden motion-reduce:transition-none',
     }"
   >
     <template #header>

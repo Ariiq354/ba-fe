@@ -7,7 +7,6 @@ import type {
   HargaSaham,
   SaldoSimpanan,
 } from "~/features/simpanan/model";
-import { refDebounced } from "#imports";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
@@ -22,6 +21,7 @@ import {
   hargaNominalSaham,
   tipePemindahbukuanOptions,
 } from "../model";
+import PemilihTujuanPemindahbukuan from "./PemilihTujuanPemindahbukuan.vue";
 
 const props = defineProps<{ refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
@@ -65,66 +65,23 @@ watch(
   { immediate: true },
 );
 
-const destinationSearch = ref("");
-const debouncedDestinationSearch = refDebounced(destinationSearch, 300);
-const destinationGroup = ref<number | "all">("all");
-const destinationEnabled = computed(() => canManage.value && !conversion.value);
-const {
-  data: destinations,
-  status: destinationStatus,
-  error: destinationError,
-  refresh: refreshDestinations,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pemindahbukuan/pengguna/options", {
-  query: {
-    search: debouncedDestinationSearch,
-    idKelompok: computed(() =>
-      destinationGroup.value === "all" ? undefined : destinationGroup.value,
-    ),
-  },
-  enabled: destinationEnabled,
-  watch: [destinationEnabled],
-});
 const selectedDestination = ref<AnggotaSimpanan>();
 watch(
-  () => state.idUserTujuan,
-  (id) => {
-    selectedDestination.value =
-      destinations.value?.data.find((member) => member.id === id) ??
-      (selectedDestination.value?.id === id ? selectedDestination.value : undefined);
+  selectedDestination,
+  (member) => {
+    if (!conversion.value) state.idUserTujuan = member?.id;
   },
   { flush: "sync" },
 );
 const destinationMember = computed(() =>
   conversion.value ? sourceMember.value : selectedDestination.value,
 );
-watch(destinationGroup, () => {
-  state.idUserTujuan = undefined;
-  destinationSearch.value = "";
-});
-const destinationOptions = computed(() => {
-  const members = new Map((destinations.value?.data ?? []).map((member) => [member.id, member]));
-  if (selectedDestination.value)
-    members.set(selectedDestination.value.id, selectedDestination.value);
-  return getAnggotaOptions(
-    [...members.values()].filter((member) => member.id !== state.idUserSumber),
-  );
-});
-const {
-  data: groups,
-  status: groupStatus,
-  error: groupError,
-  refresh: refreshGroups,
-} = useApi<{ data: { id: number; namaKelompok: string }[] }>("/api/v1/kelompok/options");
-const groupOptions = computed(() => [
-  { label: "Semua kelompok", value: "all" },
-  ...(groups.value?.data.map((group) => ({ label: group.namaKelompok, value: group.id })) ?? []),
-]);
-
 watch(
   () => state.tipePemindahbukuan,
   () => {
     state.nominal = undefined;
     state.jumlahSaham = undefined;
+    selectedDestination.value = undefined;
     state.idUserTujuan = conversion.value ? state.idUserSumber : undefined;
   },
 );
@@ -132,7 +89,7 @@ watch(
   () => state.idUserSumber,
   (id) => {
     if (conversion.value) state.idUserTujuan = id;
-    else if (state.idUserTujuan === id) state.idUserTujuan = undefined;
+    else if (selectedDestination.value?.id === id) selectedDestination.value = undefined;
   },
 );
 
@@ -213,8 +170,8 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
 
 <template>
   <UModal
-    title="Ajukan Pemindahbukuan"
-    description="Pindahkan simpanan berdasarkan saldo atau saham yang tersedia."
+    title="Ajukan pemindahbukuan"
+    description="Pilih sumber dan tujuan, lalu isi nilai yang akan dipindahkan."
     :ui="{ content: 'sm:max-w-4xl' }"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
@@ -236,7 +193,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
           />
         </UFormField>
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="space-y-3 rounded-lg border border-default p-4">
+          <div class="space-y-3 border-t border-default pt-4">
             <div class="flex items-center justify-between gap-2">
               <h3 class="font-medium text-highlighted">Sumber</h3>
               <UButton
@@ -290,7 +247,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
                 {{ shareTransfer ? "Saham tersedia" : "Saldo tabungan tersedia" }}
               </p>
               <USkeleton v-if="balanceStatus === 'pending'" class="h-6 w-32" />
-              <p v-else class="text-lg font-semibold">
+              <p v-else class="text-lg font-semibold tabular-nums">
                 {{
                   balance
                     ? shareTransfer
@@ -308,78 +265,13 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
               </p>
             </template>
           </div>
-          <div class="space-y-3 rounded-lg border border-default p-4">
-            <h3 class="font-medium text-highlighted">Tujuan</h3>
-            <UFormField
-              v-if="conversion"
-              label="Anggota Tujuan"
-              name="idUserTujuan"
-              description="Konversi tabungan ke saham dilakukan untuk anggota yang sama."
-              required
-            >
-              <UInput
-                :model-value="
-                  sourceMember ? `${sourceMember.name} · ${sourceMember.noAnggota}` : ''
-                "
-                placeholder="Pilih anggota sumber terlebih dahulu"
-                readonly
-                class="w-full"
-              />
-            </UFormField>
-            <template v-else>
-              <UFormField label="Kelompok Tujuan">
-                <USelect
-                  v-model="destinationGroup"
-                  :items="groupOptions"
-                  :loading="groupStatus === 'pending'"
-                  :disabled="groupStatus !== 'success' || isLoading"
-                  class="w-full"
-                />
-              </UFormField>
-              <UAlert
-                v-if="groupError"
-                title="Gagal Memuat Kelompok"
-                color="error"
-                variant="subtle"
-                :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshGroups() }]"
-              />
-              <UFormField
-                label="Anggota Tujuan"
-                name="idUserTujuan"
-                description="Cari nama atau nomor anggota; tujuan dapat berasal dari kelompok lain."
-                required
-              >
-                <USelectMenu
-                  v-model="state.idUserTujuan"
-                  v-model:search-term="destinationSearch"
-                  :items="destinationOptions"
-                  value-key="value"
-                  placeholder="Pilih anggota tujuan"
-                  :search-input="{ placeholder: 'Cari nama atau nomor anggota...' }"
-                  :loading="destinationStatus === 'pending'"
-                  :disabled="isLoading"
-                  ignore-filter
-                  class="w-full"
-                />
-              </UFormField>
-              <UAlert
-                v-if="destinationError"
-                title="Gagal Memuat Anggota Tujuan"
-                color="error"
-                variant="subtle"
-                :actions="[
-                  { label: 'Coba lagi', color: 'error', onClick: () => refreshDestinations() },
-                ]"
-              />
-            </template>
-            <p class="text-sm text-muted">
-              {{
-                state.tipePemindahbukuan === "tabungan_ke_tabungan"
-                  ? "Menerima tabungan"
-                  : "Menerima saham"
-              }}
-            </p>
-          </div>
+          <PemilihTujuanPemindahbukuan
+            v-model="selectedDestination"
+            :source="sourceMember"
+            :tipe="state.tipePemindahbukuan"
+            :enabled="canManage"
+            :disabled="isLoading"
+          />
         </div>
         <UFormField
           v-if="state.tipePemindahbukuan === 'tabungan_ke_tabungan'"
@@ -437,7 +329,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
         </UFormField>
         <div
           v-if="sourceMember && destinationMember && balanceStatus === 'success'"
-          class="space-y-2 rounded-lg bg-elevated p-4"
+          class="transaction-summary space-y-2"
           aria-live="polite"
         >
           <p class="font-medium">{{ sourceMember.name }} → {{ destinationMember.name }}</p>
@@ -484,7 +376,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
           :loading="isLoading"
           :disabled="!ready"
         >
-          Ajukan
+          Ajukan pemindahbukuan
         </UButton>
       </div>
     </template>
