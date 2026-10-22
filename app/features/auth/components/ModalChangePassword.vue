@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
 import { z } from "zod";
+import InputPassword from "~/components/input/InputPassword.vue";
 import { useToastError, useToastSuccess } from "~/composables/toast";
 import { authClient } from "~/utils/auth";
-import InputPassword from "../input/InputPassword.vue";
 
 const emit = defineEmits<{ close: [] }>();
 

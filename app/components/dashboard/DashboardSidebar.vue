@@ -3,9 +3,9 @@ import type { DropdownMenuItem } from "@nuxt/ui";
 import { openModal } from "~/composables/modal";
 import { useToastError } from "~/composables/toast";
 import { IMAGE_URL } from "~/constants";
+import ModalChangePassword from "~/features/auth/components/ModalChangePassword.vue";
+import ModalChangeProfile from "~/features/pengguna/components/ModalChangeProfile.vue";
 import { authClient } from "~/utils/auth";
-import ModalChangePassword from "../modal/ModalChangePassword.vue";
-import ModalChangeProfile from "../modal/ModalChangeProfile.vue";
 import DashboardNavigationMenu from "./DashboardNavigationMenu.vue";
 
 const session = authClient.useSession();

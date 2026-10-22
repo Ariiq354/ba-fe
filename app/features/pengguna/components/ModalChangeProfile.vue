@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
 import { z } from "zod";
+import InputFile from "~/components/input/InputFile.vue";
+import SelectKecamatan from "~/components/select/SelectKecamatan.vue";
+import SelectKelurahan from "~/components/select/SelectKelurahan.vue";
+import SelectKota from "~/components/select/SelectKota.vue";
+import SelectProvinsi from "~/components/select/SelectProvinsi.vue";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { useUploadFile } from "~/composables/upload";
 import { API_URL } from "~/constants";
 import { authClient } from "~/utils/auth";
-import InputFile from "../input/InputFile.vue";
-import SelectKecamatan from "../select/SelectKecamatan.vue";
-import SelectKelurahan from "../select/SelectKelurahan.vue";
-import SelectKota from "../select/SelectKota.vue";
-import SelectProvinsi from "../select/SelectProvinsi.vue";
 
 interface UserProfile {
   id: number;

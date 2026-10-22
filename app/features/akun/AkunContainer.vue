@@ -5,6 +5,7 @@ import ModalConfirmDelete from "~/components/modal/ModalConfirmDelete.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalAkun from "./components/ModalAkun.vue";
@@ -30,12 +31,7 @@ const { data, status, error, refresh } = useApi<AkunResponse>("/api/v1/master-ak
 });
 const total = computed(() => Number(data.value?.total) || 0);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    page.value = Math.min(page.value, Math.max(1, Math.ceil(total.value / limit)));
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm(akun?: Akun) {
   if (!canManage.value) return;

@@ -4,6 +4,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { usePaginatedRefresh } from "~/composables/pagination";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { IMAGE_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
@@ -40,12 +41,7 @@ const { data, status, error, refresh } = useApi<PenggunaResponse>("/api/v1/pengg
 });
 const total = computed(() => data.value?.total ?? 0);
 
-async function refreshList() {
-  await refresh();
-  if (!error.value) {
-    page.value = Math.min(page.value, Math.max(1, Math.ceil(total.value / limit)));
-  }
-}
+const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function viewPengguna(pengguna: Pengguna) {
   openModal(ModalDetailPengguna, { pengguna, refresh: refreshList });
