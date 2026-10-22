@@ -95,7 +95,7 @@ function onReject(event: FormSubmitEvent<RejectMutasiSchema>) {
   >
     <template #body>
       <div class="space-y-4">
-        <dl class="space-y-3 rounded-lg bg-elevated p-4">
+        <dl class="transaction-summary grid gap-4 sm:grid-cols-2">
           <div>
             <dt class="text-sm text-muted">Anggota</dt>
             <dd class="font-medium">
@@ -108,7 +108,7 @@ function onReject(event: FormSubmitEvent<RejectMutasiSchema>) {
           </div>
           <div>
             <dt class="text-sm text-muted">Nominal</dt>
-            <dd class="font-semibold">
+            <dd class="text-lg font-semibold tabular-nums">
               {{ formatRupiah(mutasi.nilaiTransaksi) }}
             </dd>
           </div>

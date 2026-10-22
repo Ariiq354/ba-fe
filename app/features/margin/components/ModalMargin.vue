@@ -59,8 +59,7 @@ async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
 
 <template>
   <UModal
-    :title="margin ? 'Edit Margin' : 'Tambah Margin'"
-    description="Atur rentang nominal dan ketentuan margin pembiayaan."
+    :title="margin ? 'Edit margin' : 'Tambah margin'"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
@@ -121,7 +120,7 @@ async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
           Batal
         </UButton>
         <UButton type="submit" form="form-margin" icon="i-tabler-check" :loading="isLoading">
-          Simpan
+          Simpan margin
         </UButton>
       </div>
     </template>

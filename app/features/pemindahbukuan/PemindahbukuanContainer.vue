@@ -110,13 +110,13 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Pemindahbukuan</h1>
+        <h1 class="text-xl font-semibold text-highlighted">Pemindahbukuan</h1>
         <p class="mt-1 text-sm text-muted">
           Pindahkan tabungan atau saham antaranggota, atau konversikan tabungan menjadi saham.
         </p>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm">
-        Ajukan Pemindahbukuan
+        Ajukan pemindahbukuan
       </UButton>
     </div>
     <UCard>

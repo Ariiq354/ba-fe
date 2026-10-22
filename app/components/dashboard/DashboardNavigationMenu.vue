@@ -106,7 +106,7 @@ const transactionItems = computed<NavigationMenuItem[]>(() => {
     ...(canViewApproval.value
       ? [
           {
-            label: "Approval Simpanan",
+            label: "Persetujuan simpanan",
             to: "/dashboard/approval-simpanan",
             icon: "i-tabler-checks",
             badge: pendingApprovalBadge.value,
@@ -119,7 +119,7 @@ const transactionItems = computed<NavigationMenuItem[]>(() => {
     ...(canViewPemindahbukuanApproval.value
       ? [
           {
-            label: "Approval Pemindahbukuan",
+            label: "Persetujuan pemindahbukuan",
             to: "/dashboard/approval-pemindahbukuan",
             icon: "i-tabler-checks",
             badge: pendingPemindahbukuanBadge.value,

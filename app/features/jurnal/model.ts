@@ -166,11 +166,13 @@ export const jurnalColumns: TableColumn<JurnalSummary>[] = [
   {
     accessorKey: "totalDebit",
     header: "Total Debit",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.totalDebit),
   },
   {
     accessorKey: "totalKredit",
     header: "Total Kredit",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.totalKredit),
   },
   {
@@ -184,6 +186,16 @@ export const jurnalDetailColumns: TableColumn<JurnalDetail>[] = [
   { accessorKey: "kodeAkun", header: "Kode Akun" },
   { accessorKey: "namaAkun", header: "Nama Akun" },
   { accessorKey: "userName", header: "Pengguna", cell: ({ row }) => row.original.userName || "—" },
-  { accessorKey: "debit", header: "Debit", cell: ({ row }) => formatRupiah(row.original.debit) },
-  { accessorKey: "kredit", header: "Kredit", cell: ({ row }) => formatRupiah(row.original.kredit) },
+  {
+    accessorKey: "debit",
+    header: "Debit",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
+    cell: ({ row }) => formatRupiah(row.original.debit),
+  },
+  {
+    accessorKey: "kredit",
+    header: "Kredit",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
+    cell: ({ row }) => formatRupiah(row.original.kredit),
+  },
 ];

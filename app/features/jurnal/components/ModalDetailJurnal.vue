@@ -13,8 +13,7 @@ const totals = computed(() => getJurnalTotals(data.value?.details ?? []));
 
 <template>
   <UModal
-    title="Detail Jurnal"
-    description="Informasi transaksi dan rincian pencatatan debit–kredit."
+    title="Detail jurnal"
     :ui="{ content: 'sm:max-w-4xl' }"
     :close="{ onClick: () => emit('close') }"
   >
@@ -53,7 +52,7 @@ const totals = computed(() => getJurnalTotals(data.value?.details ?? []));
             </div>
           </dl>
           <DataTable :data="data.details" :columns="jurnalDetailColumns" />
-          <div class="grid gap-3 rounded-lg bg-elevated p-4 sm:grid-cols-2">
+          <div class="transaction-summary grid gap-4 sm:grid-cols-2">
             <p>
               <span class="text-sm text-muted">Total Debit</span><br /><strong>{{
                 formatRupiah(totals.debit)

@@ -7,12 +7,16 @@ defineProps<{
 </script>
 
 <template>
-  <UDashboardGroup>
+  <UDashboardGroup unit="rem" class="dashboard-shell">
     <DashboardSidebar />
 
     <UDashboardPanel>
       <template #header>
-        <UDashboardNavbar :title="title">
+        <UDashboardNavbar
+          :title="title"
+          :as="{ root: 'header', title: 'span' }"
+          :ui="{ title: 'text-sm font-medium text-muted' }"
+        >
           <template #leading>
             <UDashboardSidebarCollapse />
           </template>

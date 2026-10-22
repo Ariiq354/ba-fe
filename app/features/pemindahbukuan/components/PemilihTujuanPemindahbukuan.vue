@@ -63,7 +63,7 @@ watch(group, () => {
 </script>
 
 <template>
-  <div class="space-y-3 rounded-lg border border-default p-4">
+  <div class="space-y-3 border-t border-default pt-4">
     <h3 class="font-medium text-highlighted">Tujuan</h3>
     <UFormField
       v-if="conversion"

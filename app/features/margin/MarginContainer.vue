@@ -44,13 +44,13 @@ function deleteMargin(ids: number[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Master Margin</h1>
+        <h1 class="text-xl font-semibold text-highlighted">Master margin</h1>
         <p class="mt-1 text-sm text-muted">
-          Kelola margin, jaminan, dan biaya akad berdasarkan rentang nominal pembiayaan.
+          Ketentuan margin dan biaya akad berdasarkan nominal pembiayaan.
         </p>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
-        Tambah Margin
+        Tambah margin
       </UButton>
     </div>
     <UCard>

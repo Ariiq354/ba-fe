@@ -170,8 +170,8 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
 
 <template>
   <UModal
-    title="Ajukan Pemindahbukuan"
-    description="Pindahkan simpanan berdasarkan saldo atau saham yang tersedia."
+    title="Ajukan pemindahbukuan"
+    description="Pilih sumber dan tujuan, lalu isi nilai yang akan dipindahkan."
     :ui="{ content: 'sm:max-w-4xl' }"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
@@ -193,7 +193,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
           />
         </UFormField>
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="space-y-3 rounded-lg border border-default p-4">
+          <div class="space-y-3 border-t border-default pt-4">
             <div class="flex items-center justify-between gap-2">
               <h3 class="font-medium text-highlighted">Sumber</h3>
               <UButton
@@ -247,7 +247,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
                 {{ shareTransfer ? "Saham tersedia" : "Saldo tabungan tersedia" }}
               </p>
               <USkeleton v-if="balanceStatus === 'pending'" class="h-6 w-32" />
-              <p v-else class="text-lg font-semibold">
+              <p v-else class="text-lg font-semibold tabular-nums">
                 {{
                   balance
                     ? shareTransfer
@@ -329,7 +329,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
         </UFormField>
         <div
           v-if="sourceMember && destinationMember && balanceStatus === 'success'"
-          class="space-y-2 rounded-lg bg-elevated p-4"
+          class="transaction-summary space-y-2"
           aria-live="polite"
         >
           <p class="font-medium">{{ sourceMember.name }} → {{ destinationMember.name }}</p>
@@ -376,7 +376,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
           :loading="isLoading"
           :disabled="!ready"
         >
-          Ajukan
+          Ajukan pemindahbukuan
         </UButton>
       </div>
     </template>

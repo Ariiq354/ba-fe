@@ -96,9 +96,9 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Approval Simpanan</h1>
+      <h1 class="text-xl font-semibold text-highlighted">Persetujuan simpanan</h1>
       <p class="mt-1 text-sm text-muted">
-        Tinjau pengajuan simpanan yang menunggu persetujuan, lalu setujui atau tolak.
+        Periksa anggota dan nominal sebelum menyetujui pengajuan.
       </p>
     </div>
     <UCard>
@@ -142,7 +142,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
         />
         <UAlert
           v-if="error"
-          title="Gagal Memuat Approval Simpanan"
+          title="Pengajuan simpanan gagal dimuat"
           description="Pengajuan belum dapat dimuat. Silakan coba lagi."
           color="error"
           variant="subtle"

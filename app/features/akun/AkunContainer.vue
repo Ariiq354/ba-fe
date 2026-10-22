@@ -56,11 +56,10 @@ function deleteAkun(ids: string[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Master Akun</h1>
-        <p class="mt-1 text-sm text-muted">Kelola daftar akun untuk pencatatan keuangan.</p>
+        <h1 class="text-xl font-semibold text-highlighted">Master akun</h1>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
-        Tambah Akun
+        Tambah akun
       </UButton>
     </div>
 

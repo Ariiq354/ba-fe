@@ -93,9 +93,9 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Approval Pemindahbukuan</h1>
+      <h1 class="text-xl font-semibold text-highlighted">Persetujuan pemindahbukuan</h1>
       <p class="mt-1 text-sm text-muted">
-        Tinjau pengajuan pemindahbukuan yang menunggu persetujuan, lalu setujui atau tolak.
+        Periksa sumber, tujuan, dan nominal sebelum menyetujui pengajuan.
       </p>
     </div>
     <UCard>
@@ -131,7 +131,7 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
         />
         <UAlert
           v-if="error"
-          title="Gagal Memuat Approval Pemindahbukuan"
+          title="Pengajuan pemindahbukuan gagal dimuat"
           description="Pengajuan belum dapat dimuat. Silakan coba lagi."
           color="error"
           variant="subtle"

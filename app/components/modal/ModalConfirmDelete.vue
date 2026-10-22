@@ -58,42 +58,17 @@ async function onClick() {
 <template>
   <UModal
     :close="{ onClick: () => emit('close', false) }"
-    :ui="{ body: 'sm:max-w-lg' }"
+    :ui="{ content: 'sm:max-w-md' }"
     :title="title"
   >
     <template #body>
-      <div class="space-y-5">
-        <div class="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-200">
-          <UIcon
-            :name="confirmColor === 'error' ? 'i-tabler-alert-triangle' : 'i-tabler-help-circle'"
-            size="36"
-            :class="confirmColor === 'error' ? 'text-red-500' : 'text-primary'"
-            class="shrink-0"
-          />
-          <div>
-            {{ description }}
-          </div>
-        </div>
-      </div>
+      <p class="text-sm leading-relaxed text-default">{{ description }}</p>
     </template>
     <template #footer>
-      <UButton
-        icon="i-tabler-x"
-        :disabled="loading"
-        class="text-base"
-        variant="ghost"
-        color="neutral"
-        @click="emit('close')"
-      >
+      <UButton :disabled="loading" variant="ghost" color="neutral" @click="emit('close')">
         {{ cancelText }}
       </UButton>
-      <UButton
-        icon="i-tabler-check"
-        :loading="loading"
-        :color="confirmColor"
-        class="text-base"
-        @click="onClick"
-      >
+      <UButton :loading="loading" :color="confirmColor" @click="onClick">
         {{ confirmText }}
       </UButton>
     </template>

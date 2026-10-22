@@ -111,14 +111,14 @@ function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
   >
     <template #body>
       <div class="space-y-4">
-        <div class="space-y-2 rounded-lg bg-elevated p-4">
+        <div class="transaction-summary space-y-2">
           <p class="font-medium">
             {{ transfer.sourceMemberName }} → {{ transfer.destinationMemberName }}
           </p>
           <p class="text-sm text-muted">
             {{ tipePemindahbukuanLabels[transfer.tipePemindahbukuan] }}
           </p>
-          <p class="text-lg font-semibold">
+          <p class="text-xl font-semibold tabular-nums">
             {{ formatPemindahbukuanValue(transfer) }}
           </p>
           <p

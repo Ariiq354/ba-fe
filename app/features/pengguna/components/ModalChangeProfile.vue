@@ -129,7 +129,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UModal title="Ubah Profil" description="Perbarui informasi profil Anda." class="max-w-2xl">
+  <UModal title="Ubah profil" :ui="{ content: 'sm:max-w-2xl' }">
     <template #body>
       <div v-if="status === 'pending'" class="space-y-6">
         <USkeleton class="aspect-square w-40 rounded-lg" />
@@ -179,7 +179,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </UFormField>
         <!-- Informasi Pribadi -->
         <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">Informasi Pribadi</h3>
+          <h3 class="text-sm font-medium text-highlighted">Informasi pribadi</h3>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField label="Nama Lengkap" name="name" required class="sm:col-span-2">
               <UInput
@@ -200,10 +200,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </div>
 
         <!-- Informasi Rekening Bank -->
-        <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">
-            Informasi Rekening Bank
-          </h3>
+        <div class="space-y-4 border-t border-default pt-5">
+          <h3 class="text-sm font-medium text-highlighted">Rekening bank</h3>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField label="Nama Bank" name="namaBank">
               <UInput
@@ -232,8 +230,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </div>
 
         <!-- Informasi Alamat & Wilayah -->
-        <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">Alamat & Wilayah</h3>
+        <div class="space-y-4 border-t border-default pt-5">
+          <h3 class="text-sm font-medium text-highlighted">Alamat dan wilayah</h3>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField label="Alamat / Jalan" name="jalan" class="sm:col-span-2">
               <UInput
@@ -285,7 +283,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         :loading="isLoading"
         :disabled="status === 'pending'"
       >
-        Simpan
+        Simpan profil
       </UButton>
     </template>
   </UModal>

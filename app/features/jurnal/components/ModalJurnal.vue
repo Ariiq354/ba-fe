@@ -77,8 +77,8 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
 
 <template>
   <UModal
-    title="Tambah Jurnal"
-    description="Catat transaksi dengan minimal dua baris akun dan total debit–kredit yang seimbang."
+    title="Tambah jurnal"
+    description="Gunakan minimal dua baris akun. Total debit dan kredit harus sama."
     :ui="{ content: 'sm:max-w-4xl' }"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
@@ -127,11 +127,11 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
         />
 
         <UFormField label="Rincian Akun" name="details" required>
-          <div class="space-y-3">
+          <div class="divide-y divide-default border-y border-default">
             <div
               v-for="(detail, index) in state.details"
               :key="detail.key"
-              class="grid gap-3 rounded-lg border border-default p-3 sm:grid-cols-12"
+              class="grid gap-3 py-4 sm:grid-cols-12"
             >
               <UFormField
                 :label="`Akun ${index + 1}`"
@@ -191,26 +191,27 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
             <UButton
               icon="i-tabler-plus"
               color="neutral"
-              variant="outline"
+              variant="ghost"
+              class="my-2"
               :disabled="isLoading"
               @click="addRow"
             >
-              Tambah Baris
+              Tambah baris
             </UButton>
           </div>
         </UFormField>
 
-        <div class="space-y-3 rounded-lg bg-elevated p-4" aria-live="polite">
+        <div class="transaction-summary space-y-3" aria-live="polite">
           <div class="grid gap-3 sm:grid-cols-2">
             <div>
               <p class="text-sm text-muted">Total Debit</p>
-              <p class="font-semibold">
+              <p class="mt-1 text-lg font-semibold tabular-nums">
                 {{ formatRupiah(totals.debit) }}
               </p>
             </div>
             <div>
               <p class="text-sm text-muted">Total Kredit</p>
-              <p class="font-semibold">
+              <p class="mt-1 text-lg font-semibold tabular-nums">
                 {{ formatRupiah(totals.kredit) }}
               </p>
             </div>
@@ -239,7 +240,7 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
           :loading="isLoading"
           :disabled="!accountsReady"
         >
-          Simpan
+          Simpan jurnal
         </UButton>
       </div>
     </template>

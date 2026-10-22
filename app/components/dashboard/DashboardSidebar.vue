@@ -61,10 +61,14 @@ const items = computed<DropdownMenuItem[][]>(() => [
   <UDashboardSidebar
     collapsible
     resizable
+    :min-size="16"
+    :default-size="17"
+    :max-size="22"
+    :collapsed-size="4"
     class="bg-muted"
     :ui="{
       footer: 'border-t border-default',
-      root: 'min-w-0 transition-all duration-300 overflow-hidden',
+      root: 'min-w-0 overflow-hidden motion-reduce:transition-none',
     }"
   >
     <template #header>
