@@ -2,8 +2,7 @@
 import { useApi } from "~/composables/fetch";
 
 interface Provinsi {
-  data:
-  {
+  data: {
     id: string;
     provinsi: string;
   }[];

@@ -46,12 +46,14 @@ export const statusFilterOptions = [
 const pendingVerificationBanReason = "Pengguna belum terverifikasi";
 
 export function getPenggunaStatus(pengguna: Pick<Pengguna, "banned" | "banReason">) {
-  if (pengguna.banned !== true)
-    return "verified";
+  if (pengguna.banned !== true) return "verified";
   return pengguna.banReason === pendingVerificationBanReason ? "pending" : "banned";
 }
 
-export function canChangePenggunaRole(pengguna: Pick<Pengguna, "banned" | "noAnggota">, role: RolePengguna) {
+export function canChangePenggunaRole(
+  pengguna: Pick<Pengguna, "banned" | "noAnggota">,
+  role: RolePengguna,
+) {
   return pengguna.banned !== true && (role !== "pj" || !!pengguna.noAnggota);
 }
 
@@ -68,14 +70,13 @@ const roleLabels: Record<string, string> = {
   wanhat: "Wanhat",
 };
 
-export const rolePenggunaOptions = rolePenggunaSchema.options.map(value => ({
+export const rolePenggunaOptions = rolePenggunaSchema.options.map((value) => ({
   label: roleLabels[value],
   value,
 }));
 
 export function formatPenggunaRole(role: string | null) {
-  if (!role)
-    return "Anggota";
+  if (!role) return "Anggota";
   return roleLabels[role] ?? role;
 }
 
@@ -87,10 +88,18 @@ export function formatPenggunaDate(date: string) {
 
 export const penggunaColumns: TableColumn<Pengguna>[] = [
   { accessorKey: "name", header: "Pengguna" },
-  { accessorKey: "noAnggota", header: "Nomor Anggota", cell: ({ row }) => row.original.noAnggota || "—" },
+  {
+    accessorKey: "noAnggota",
+    header: "Nomor Anggota",
+    cell: ({ row }) => row.original.noAnggota || "—",
+  },
   { id: "kelompok", header: "Kelompok" },
   { accessorKey: "role", header: "Role", cell: ({ row }) => formatPenggunaRole(row.original.role) },
   { id: "status", header: "Status" },
-  { accessorKey: "createdAt", header: "Tanggal Daftar", cell: ({ row }) => formatPenggunaDate(row.original.createdAt) },
+  {
+    accessorKey: "createdAt",
+    header: "Tanggal Daftar",
+    cell: ({ row }) => formatPenggunaDate(row.original.createdAt),
+  },
   { id: "pengelolaan", header: "Aksi" },
 ];

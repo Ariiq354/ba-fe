@@ -18,7 +18,7 @@ const nuxtApp = useNuxtApp();
 const { data, status } = useApi("/api/v1/kelompok/options", {
   key: "kelompok-options",
   transform: (data: Kelompok) =>
-    data.data.map(item => ({
+    data.data.map((item) => ({
       label: `${item.kodeKelompok} - ${item.namaKelompok}`,
       value: item.id,
     })),

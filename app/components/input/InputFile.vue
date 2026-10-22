@@ -18,14 +18,21 @@ const file = defineModel<File | undefined | null>("file", {
 
 <template>
   <div v-if="foto" class="group relative w-40">
-    <NuxtImg :src="`${IMAGE_URL}/${foto}`" class="ring-1 ring-muted rounded-lg object-cover object-center aspect-square w-40" />
+    <NuxtImg
+      :src="`${IMAGE_URL}/${foto}`"
+      class="ring-1 ring-muted rounded-lg object-cover object-center aspect-square w-40"
+    />
     <UButton
       v-if="!disabled"
       icon="i-tabler-x"
       color="neutral"
       :ui="{ leadingIcon: 'size-4' }"
       class="absolute -inset-e-1.5 -top-1.5 rounded-full p-1 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-      @click="() => { foto = undefined }"
+      @click="
+        () => {
+          foto = undefined;
+        }
+      "
     />
   </div>
   <UFileUpload

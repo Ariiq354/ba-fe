@@ -43,7 +43,7 @@ const newColumns = computed<TableColumn<any>[]>(() => [
           id: "select",
           header: ({ table }) =>
             h(UCheckbox, {
-              "modelValue": table.getIsSomePageRowsSelected()
+              modelValue: table.getIsSomePageRowsSelected()
                 ? "indeterminate"
                 : table.getIsAllPageRowsSelected(),
               "onUpdate:modelValue": (value: boolean | "indeterminate") =>
@@ -52,7 +52,7 @@ const newColumns = computed<TableColumn<any>[]>(() => [
             }),
           cell: ({ row }) =>
             h(UCheckbox, {
-              "modelValue": row.getIsSelected(),
+              modelValue: row.getIsSelected(),
               "onUpdate:modelValue": (value: boolean | "indeterminate") =>
                 row.toggleSelected(!!value),
               "aria-label": "Select row",
@@ -129,9 +129,9 @@ const newColumns = computed<TableColumn<any>[]>(() => [
                 },
                 () =>
                   h(UButton, {
-                    "icon": "i-tabler-dots-vertical",
-                    "color": "neutral",
-                    "variant": "ghost",
+                    icon: "i-tabler-dots-vertical",
+                    color: "neutral",
+                    variant: "ghost",
                     "aria-label": "Actions dropdown",
                   }),
               ),
@@ -142,12 +142,9 @@ const newColumns = computed<TableColumn<any>[]>(() => [
     : []),
 ]);
 
-watch(
-  [() => data, page],
-  () => {
-    rowSelection.value = {};
-  },
-);
+watch([() => data, page], () => {
+  rowSelection.value = {};
+});
 </script>
 
 <template>
@@ -206,11 +203,7 @@ watch(
         td: 'text-highlighted',
       }"
     >
-      <template
-        v-for="(_, slotName) in slots"
-        :key="slotName"
-        #[slotName]="slotData"
-      >
+      <template v-for="(_, slotName) in slots" :key="slotName" #[slotName]="slotData">
         <slot :name="slotName" v-bind="slotData ?? {}" />
       </template>
     </UTable>

@@ -3,35 +3,54 @@ import { z } from "zod";
 import { formatRupiah } from "~/utils/format";
 
 export const maxJurnalAmount = 2147483647;
-const amountSchema = z.number("Nominal wajib diisi")
+const amountSchema = z
+  .number("Nominal wajib diisi")
   .int("Nominal harus berupa bilangan bulat")
   .min(0, "Nominal tidak boleh negatif")
   .max(maxJurnalAmount, "Nominal maksimal Rp2.147.483.647 per baris");
 
 export function getJurnalTotals(details: { debit?: number; kredit?: number }[]) {
-  return details.reduce<{ debit: number; kredit: number }>((total, detail) => ({
-    debit: total.debit + (Number.isFinite(detail.debit) ? detail.debit! : 0),
-    kredit: total.kredit + (Number.isFinite(detail.kredit) ? detail.kredit! : 0),
-  }), { debit: 0, kredit: 0 });
+  return details.reduce<{ debit: number; kredit: number }>(
+    (total, detail) => ({
+      debit: total.debit + (Number.isFinite(detail.debit) ? detail.debit! : 0),
+      kredit: total.kredit + (Number.isFinite(detail.kredit) ? detail.kredit! : 0),
+    }),
+    { debit: 0, kredit: 0 },
+  );
 }
 
-export const jurnalSchema = z.object({
-  tanggalTransaksi: z.iso.date("Tanggal transaksi tidak valid").refine(value => !value.startsWith("0000-"), "Tanggal transaksi tidak valid"),
-  keterangan: z.string().trim(),
-  details: z.array(z.object({
-    akunId: z.number().optional().pipe(z.number("Pilih akun").int().positive("Pilih akun")),
-    debit: z.number().optional().pipe(amountSchema),
-    kredit: z.number().optional().pipe(amountSchema),
-  })).min(2, "Minimal dua baris akun diperlukan"),
-}).superRefine((data, ctx) => {
-  const total = getJurnalTotals(data.details);
-  if (total.debit <= 0 || total.kredit <= 0) {
-    ctx.addIssue({ code: "custom", path: ["details"], message: "Total debit dan kredit harus lebih dari nol" });
-  }
-  else if (total.debit !== total.kredit) {
-    ctx.addIssue({ code: "custom", path: ["details"], message: "Total debit dan kredit harus sama" });
-  }
-});
+export const jurnalSchema = z
+  .object({
+    tanggalTransaksi: z.iso
+      .date("Tanggal transaksi tidak valid")
+      .refine((value) => !value.startsWith("0000-"), "Tanggal transaksi tidak valid"),
+    keterangan: z.string().trim(),
+    details: z
+      .array(
+        z.object({
+          akunId: z.number().optional().pipe(z.number("Pilih akun").int().positive("Pilih akun")),
+          debit: z.number().optional().pipe(amountSchema),
+          kredit: z.number().optional().pipe(amountSchema),
+        }),
+      )
+      .min(2, "Minimal dua baris akun diperlukan"),
+  })
+  .superRefine((data, ctx) => {
+    const total = getJurnalTotals(data.details);
+    if (total.debit <= 0 || total.kredit <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["details"],
+        message: "Total debit dan kredit harus lebih dari nol",
+      });
+    } else if (total.debit !== total.kredit) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["details"],
+        message: "Total debit dan kredit harus sama",
+      });
+    }
+  });
 
 export type JurnalSchema = z.output<typeof jurnalSchema>;
 
@@ -118,7 +137,7 @@ export function groupJurnalRows(rows: JurnalRow[]): JurnalSummary[] {
       };
       journals.set(row.jurnalId, journal);
     }
-    if (!journal.users.some(user => user.userId === row.userId))
+    if (!journal.users.some((user) => user.userId === row.userId))
       journal.users.push({ userId: row.userId, userName: row.userName });
     journal.totalDebit += row.debit;
     journal.totalKredit += row.kredit;
@@ -127,16 +146,38 @@ export function groupJurnalRows(rows: JurnalRow[]): JurnalSummary[] {
 }
 
 export function formatJurnalDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(`${value}T00:00:00`));
+  return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(
+    new Date(`${value}T00:00:00`),
+  );
 }
 
 export const jurnalColumns: TableColumn<JurnalSummary>[] = [
   { accessorKey: "kodeTransaksi", header: "Kode Transaksi" },
-  { accessorKey: "tanggalTransaksi", header: "Tanggal", cell: ({ row }) => formatJurnalDate(row.original.tanggalTransaksi) },
-  { accessorKey: "keterangan", header: "Keterangan", cell: ({ row }) => row.original.keterangan || "—" },
-  { accessorKey: "totalDebit", header: "Total Debit", cell: ({ row }) => formatRupiah(row.original.totalDebit) },
-  { accessorKey: "totalKredit", header: "Total Kredit", cell: ({ row }) => formatRupiah(row.original.totalKredit) },
-  { accessorKey: "users", header: "Pengguna Terkait", cell: ({ row }) => row.original.users.map(user => user.userName).join(", ") || "—" },
+  {
+    accessorKey: "tanggalTransaksi",
+    header: "Tanggal",
+    cell: ({ row }) => formatJurnalDate(row.original.tanggalTransaksi),
+  },
+  {
+    accessorKey: "keterangan",
+    header: "Keterangan",
+    cell: ({ row }) => row.original.keterangan || "—",
+  },
+  {
+    accessorKey: "totalDebit",
+    header: "Total Debit",
+    cell: ({ row }) => formatRupiah(row.original.totalDebit),
+  },
+  {
+    accessorKey: "totalKredit",
+    header: "Total Kredit",
+    cell: ({ row }) => formatRupiah(row.original.totalKredit),
+  },
+  {
+    accessorKey: "users",
+    header: "Pengguna Terkait",
+    cell: ({ row }) => row.original.users.map((user) => user.userName).join(", ") || "—",
+  },
 ];
 
 export const jurnalDetailColumns: TableColumn<JurnalDetail>[] = [

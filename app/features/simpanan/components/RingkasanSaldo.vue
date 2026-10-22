@@ -19,14 +19,25 @@ defineExpose({ refresh });
     description="Pastikan pengguna sudah menjadi anggota, lalu coba muat kembali."
     color="error"
     variant="subtle"
-    :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refresh() }]"
+    :actions="[
+      { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refresh() },
+    ]"
   />
   <div v-else class="grid gap-4 sm:grid-cols-2">
     <UCard
       v-for="item in [
-        { label: 'Saldo Tabungan', value: data ? formatRupiah(data.saldoTabungan) : '—', icon: 'i-tabler-wallet' },
-        { label: 'Jumlah Saham', value: data ? `${data.jumlahSaham.toLocaleString('id-ID')} lembar` : '—', icon: 'i-tabler-chart-candle' },
-      ]" :key="item.label"
+        {
+          label: 'Saldo Tabungan',
+          value: data ? formatRupiah(data.saldoTabungan) : '—',
+          icon: 'i-tabler-wallet',
+        },
+        {
+          label: 'Jumlah Saham',
+          value: data ? `${data.jumlahSaham.toLocaleString('id-ID')} lembar` : '—',
+          icon: 'i-tabler-chart-candle',
+        },
+      ]"
+      :key="item.label"
     >
       <div class="flex items-center gap-2 text-muted">
         <UIcon :name="item.icon" class="size-5" />

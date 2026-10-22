@@ -15,8 +15,7 @@ async function signOut() {
     await authClient.signOut();
 
     await navigateTo("/");
-  }
-  catch {
+  } catch {
     useToastError("Gagal Keluar", "Terjadi kesalahan saat keluar, silahkan coba lagi.");
   }
 }
@@ -26,7 +25,9 @@ const items = computed<DropdownMenuItem[][]>(() => [
     {
       label: session.value.data?.user.name ?? "User",
       avatar: {
-        src: session.value.data?.user.image ? `${IMAGE_URL}/${session.value.data.user.image}` : undefined,
+        src: session.value.data?.user.image
+          ? `${IMAGE_URL}/${session.value.data.user.image}`
+          : undefined,
         alt: session.value.data?.user.name ?? "User",
         loading: "lazy",
       },
@@ -57,7 +58,15 @@ const items = computed<DropdownMenuItem[][]>(() => [
 </script>
 
 <template>
-  <UDashboardSidebar collapsible resizable class="bg-muted" :ui="{ footer: 'border-t border-default', root: 'min-w-0 transition-all duration-300 overflow-hidden' }">
+  <UDashboardSidebar
+    collapsible
+    resizable
+    class="bg-muted"
+    :ui="{
+      footer: 'border-t border-default',
+      root: 'min-w-0 transition-all duration-300 overflow-hidden',
+    }"
+  >
     <template #header>
       <div class="flex h-14 w-full items-center gap-2 overflow-hidden px-3 py-2 text-left text-sm">
         <NuxtImg src="/logo.webp" alt="Berkah Amanah" class="size-8" />

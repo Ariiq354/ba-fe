@@ -1,10 +1,7 @@
 import { FetchError } from "ofetch";
 import { useToast } from "#ui/composables/useToast";
 
-export function useToastSuccess(
-  title: string,
-  description?: string,
-) {
+export function useToastSuccess(title: string, description?: string) {
   const toast = useToast();
   toast.add({
     title,
@@ -27,7 +24,13 @@ export function useToastError(title: string, description?: string) {
 }
 
 export function extractErrorMessage(error: unknown, fallback = "Terjadi kesalahan."): string {
-  if (error instanceof FetchError && error.data && typeof error.data === "object" && "message" in error.data && error.data.message) {
+  if (
+    error instanceof FetchError &&
+    error.data &&
+    typeof error.data === "object" &&
+    "message" in error.data &&
+    error.data.message
+  ) {
     return String(error.data.message);
   }
   if (error instanceof Error && error.message) {

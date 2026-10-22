@@ -18,9 +18,13 @@ const limit = 10;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "jurnal", "manage"));
 
-watch(search, () => {
-  page.value = 1;
-}, { flush: "sync" });
+watch(
+  search,
+  () => {
+    page.value = 1;
+  },
+  { flush: "sync" },
+);
 
 const { data, status, error, refresh } = useApi<JurnalResponse>("/api/v1/jurnal", {
   key: JURNAL_LIST_KEY,
@@ -37,8 +41,7 @@ async function refreshList() {
 }
 
 function openForm() {
-  if (!canManage.value)
-    return;
+  if (!canManage.value) return;
   openModal(ModalJurnal, { refresh: refreshList });
 }
 
@@ -47,8 +50,7 @@ function viewJurnal(jurnal: JurnalSummary) {
 }
 
 function deleteJurnal(ids: number[]) {
-  if (!canManage.value || !ids.length)
-    return;
+  if (!canManage.value || !ids.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Jurnal",
     description: `Apakah Anda yakin ingin menghapus ${ids.length} jurnal beserta seluruh rincian akunnya?`,
@@ -65,9 +67,7 @@ function deleteJurnal(ids: number[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">
-          Jurnal Transaksi
-        </h1>
+        <h1 class="text-2xl font-semibold text-highlighted">Jurnal Transaksi</h1>
         <p class="mt-1 text-sm text-muted">
           Kelola pencatatan transaksi dan rincian debit–kredit setiap jurnal.
         </p>
@@ -79,7 +79,11 @@ function deleteJurnal(ids: number[]) {
     <UCard>
       <div class="space-y-4">
         <div class="flex flex-col gap-3 sm:flex-row">
-          <InputSearch v-model="search" placeholder="Cari kode transaksi..." aria-label="Cari jurnal" />
+          <InputSearch
+            v-model="search"
+            placeholder="Cari kode transaksi..."
+            aria-label="Cari jurnal"
+          />
         </div>
         <UAlert
           v-if="error"
@@ -88,7 +92,9 @@ function deleteJurnal(ids: number[]) {
           color="error"
           variant="subtle"
           icon="i-tabler-alert-circle"
-          :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList }]"
+          :actions="[
+            { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList },
+          ]"
         />
         <DataTable
           v-else
@@ -106,23 +112,34 @@ function deleteJurnal(ids: number[]) {
           @delete="deleteJurnal"
         >
           <template #kodeTransaksi-cell="{ row }">
-            <UButton color="neutral" variant="link" class="p-0 font-mono" @click="viewJurnal(row.original)">
+            <UButton
+              color="neutral"
+              variant="link"
+              class="p-0 font-mono"
+              @click="viewJurnal(row.original)"
+            >
               {{ row.original.kodeTransaksi }}
             </UButton>
           </template>
           <template #keterangan-cell="{ row }">
             <p class="max-w-xs truncate" :title="row.original.keterangan || undefined">
-              {{ row.original.keterangan || '—' }}
+              {{ row.original.keterangan || "—" }}
             </p>
           </template>
           <template #empty>
             <div class="py-8 text-center">
               <UIcon name="i-tabler-receipt-2" class="mb-2 size-8 text-dimmed" />
               <p class="font-medium text-highlighted">
-                {{ search ? 'Tidak ada jurnal yang sesuai' : 'Belum ada jurnal' }}
+                {{ search ? "Tidak ada jurnal yang sesuai" : "Belum ada jurnal" }}
               </p>
               <p class="mt-1 text-sm text-muted">
-                {{ search ? 'Coba kode transaksi lain.' : canManage ? 'Klik Tambah Jurnal untuk mencatat transaksi pertama.' : 'Belum ada jurnal yang tersedia.' }}
+                {{
+                  search
+                    ? "Coba kode transaksi lain."
+                    : canManage
+                      ? "Klik Tambah Jurnal untuk mencatat transaksi pertama."
+                      : "Belum ada jurnal yang tersedia."
+                }}
               </p>
             </div>
           </template>

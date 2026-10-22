@@ -9,26 +9,29 @@ interface PaginatedRefreshOptions {
   refresh: (options?: { dedupe: "defer" }) => Promise<void>;
 }
 
-export function usePaginatedRefresh({ page, total, error, limit, refresh }: PaginatedRefreshOptions) {
+export function usePaginatedRefresh({
+  page,
+  total,
+  error,
+  limit,
+  refresh,
+}: PaginatedRefreshOptions) {
   let active = true;
   onScopeDispose(() => {
     active = false;
   });
 
   return async () => {
-    if (!active)
-      return;
+    if (!active) return;
 
     await refresh();
-    if (!active || error.value)
-      return;
+    if (!active || error.value) return;
 
     const lastPage = Math.max(1, Math.ceil(total.value / limit));
     if (page.value > lastPage) {
       page.value = lastPage;
       await nextTick();
-      if (!active)
-        return;
+      if (!active) return;
       await refresh({ dedupe: "defer" });
     }
   };

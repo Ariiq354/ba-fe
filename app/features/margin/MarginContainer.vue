@@ -26,14 +26,12 @@ async function refreshList() {
 }
 
 function openForm(margin?: Margin) {
-  if (!canManage.value)
-    return;
+  if (!canManage.value) return;
   openModal(ModalMargin, { margin, refresh: refreshList });
 }
 
 function deleteMargin(ids: number[]) {
-  if (!canManage.value || !ids.length)
-    return;
+  if (!canManage.value || !ids.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Margin",
     description: `Apakah Anda yakin ingin menghapus ${ids.length} margin yang dipilih?`,
@@ -50,9 +48,7 @@ function deleteMargin(ids: number[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">
-          Master Margin
-        </h1>
+        <h1 class="text-2xl font-semibold text-highlighted">Master Margin</h1>
         <p class="mt-1 text-sm text-muted">
           Kelola margin, jaminan, dan biaya akad berdasarkan rentang nominal pembiayaan.
         </p>
@@ -69,7 +65,9 @@ function deleteMargin(ids: number[]) {
         color="error"
         variant="subtle"
         icon="i-tabler-alert-circle"
-        :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList }]"
+        :actions="[
+          { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList },
+        ]"
       />
       <DataTable
         v-else
@@ -89,11 +87,13 @@ function deleteMargin(ids: number[]) {
         <template #empty>
           <div class="py-8 text-center">
             <UIcon name="i-tabler-percentage" class="mb-2 size-8 text-dimmed" />
-            <p class="font-medium text-highlighted">
-              Belum ada margin
-            </p>
+            <p class="font-medium text-highlighted">Belum ada margin</p>
             <p class="mt-1 text-sm text-muted">
-              {{ canManage ? 'Klik Tambah Margin untuk membuat ketentuan margin pertama.' : 'Belum ada margin yang tersedia.' }}
+              {{
+                canManage
+                  ? "Klik Tambah Margin untuk membuat ketentuan margin pertama."
+                  : "Belum ada margin yang tersedia."
+              }}
             </p>
           </div>
         </template>

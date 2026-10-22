@@ -21,15 +21,13 @@ async function refreshList() {
 async function refreshAfterCreate() {
   if (page.value !== 1) {
     page.value = 1;
-  }
-  else {
+  } else {
     await refreshList();
   }
 }
 
 function openForm() {
-  if (!canManage.value)
-    return;
+  if (!canManage.value) return;
   openModal(ModalSaham, { refresh: refreshAfterCreate });
 }
 </script>
@@ -38,9 +36,7 @@ function openForm() {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">
-          Master Saham
-        </h1>
+        <h1 class="text-2xl font-semibold text-highlighted">Master Saham</h1>
         <p class="mt-1 text-sm text-muted">
           Kelola harga jual saham dan lihat riwayat penetapan harga, dari yang terbaru.
         </p>
@@ -57,7 +53,9 @@ function openForm() {
         color="error"
         variant="subtle"
         icon="i-tabler-alert-circle"
-        :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList }]"
+        :actions="[
+          { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList },
+        ]"
       />
       <DataTable
         v-else
@@ -72,11 +70,13 @@ function openForm() {
         <template #empty>
           <div class="py-8 text-center">
             <UIcon name="i-tabler-chart-candle" class="mb-2 size-8 text-dimmed" />
-            <p class="font-medium text-highlighted">
-              Belum ada harga saham
-            </p>
+            <p class="font-medium text-highlighted">Belum ada harga saham</p>
             <p class="mt-1 text-sm text-muted">
-              {{ canManage ? 'Klik Tambah Harga Saham untuk menetapkan harga pertama.' : 'Belum ada riwayat harga saham yang tersedia.' }}
+              {{
+                canManage
+                  ? "Klik Tambah Harga Saham untuk menetapkan harga pertama."
+                  : "Belum ada riwayat harga saham yang tersedia."
+              }}
             </p>
           </div>
         </template>

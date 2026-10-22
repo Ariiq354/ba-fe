@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
 import type { RegisterSchema } from "./model";
 import InputPassword from "~/components/input/InputPassword.vue";
@@ -27,20 +27,25 @@ async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
     });
 
     if (error) {
-      const message = error.code === "USERNAME_IS_ALREADY_TAKEN"
-        ? "Username sudah digunakan. Silakan gunakan username lain."
-        : error.message || "Terjadi kesalahan. Silakan coba lagi beberapa saat lagi.";
+      const message =
+        error.code === "USERNAME_IS_ALREADY_TAKEN"
+          ? "Username sudah digunakan. Silakan gunakan username lain."
+          : error.message || "Terjadi kesalahan. Silakan coba lagi beberapa saat lagi.";
       useToastError("Registrasi Gagal", message);
       return;
     }
 
-    useToastSuccess("Registrasi Berhasil", "Akun Anda telah berhasil dibuat. Silakan login untuk melanjutkan.");
+    useToastSuccess(
+      "Registrasi Berhasil",
+      "Akun Anda telah berhasil dibuat. Silakan login untuk melanjutkan.",
+    );
     await navigateTo("/");
-  }
-  catch (err: unknown) {
-    useToastError("Registrasi Gagal", extractErrorMessage(err, "Gagal mengunggah foto atau membuat akun. Silakan coba lagi."));
-  }
-  finally {
+  } catch (err: unknown) {
+    useToastError(
+      "Registrasi Gagal",
+      extractErrorMessage(err, "Gagal mengunggah foto atau membuat akun. Silakan coba lagi."),
+    );
+  } finally {
     isLoading.value = false;
   }
 }
@@ -50,25 +55,13 @@ async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
   <UCard :ui="{ body: 'p-0 sm:p-0 grid md:grid-cols-2 max-w-sm md:max-w-6xl' }">
     <div class="flex flex-col items-center justify-center p-4 md:p-8 space-y-8">
       <div class="text-center">
-        <NuxtImg
-          src="/logo.webp"
-          class="mx-auto h-24 w-24"
-        />
+        <NuxtImg src="/logo.webp" class="mx-auto h-24 w-24" />
 
-        <h1 class="mt-4 text-2xl font-bold">
-          Buat Akun Baru
-        </h1>
+        <h1 class="mt-4 text-2xl font-bold">Buat Akun Baru</h1>
 
-        <p class="text-sm text-muted">
-          Lengkapi data berikut untuk membuat akun baru.
-        </p>
+        <p class="text-sm text-muted">Lengkapi data berikut untuk membuat akun baru.</p>
       </div>
-      <UForm
-        :schema="registerSchema"
-        :state="state"
-        class="w-full space-y-6"
-        @submit="onSubmit"
-      >
+      <UForm :schema="registerSchema" :state="state" class="w-full space-y-6" @submit="onSubmit">
         <UFormField label="Foto Profil" name="image" required>
           <UFileUpload
             :model-value="state.image"
@@ -136,25 +129,15 @@ async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
         </div>
 
         <UFormField label="Pilih Kelompok" name="idKelompok" required>
-          <SelectKelompok
-            v-model="state.idKelompok"
-            :disabled="isLoading"
-          />
+          <SelectKelompok v-model="state.idKelompok" :disabled="isLoading" />
         </UFormField>
 
-        <UButton
-          class="flex w-full justify-center"
-          type="submit"
-          :loading="isLoading"
-        >
+        <UButton class="flex w-full justify-center" type="submit" :loading="isLoading">
           Daftar
         </UButton>
         <p class="text-center text-sm text-muted">
           Sudah punya akun?
-          <NuxtLink
-            to="/"
-            class="font-medium text-primary hover:underline"
-          >
+          <NuxtLink to="/" class="font-medium text-primary hover:underline">
             Masuk sekarang
           </NuxtLink>
         </p>
@@ -162,11 +145,7 @@ async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
     </div>
 
     <div class="bg-muted relative hidden md:block">
-      <NuxtImg
-        src="/vertical.webp"
-        alt="Image Vertical"
-        class="h-full w-full object-cover"
-      />
+      <NuxtImg src="/vertical.webp" alt="Image Vertical" class="h-full w-full object-cover" />
     </div>
   </UCard>
 </template>

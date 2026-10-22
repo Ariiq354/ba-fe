@@ -27,14 +27,18 @@ const password = defineModel<string>();
         :aria-label="show ? 'Hide password' : 'Show password'"
         :aria-pressed="show"
         aria-controls="password"
-        @click="() => { show = !show }"
+        @click="
+          () => {
+            show = !show;
+          }
+        "
       />
     </template>
   </UInput>
 </template>
 
 <style>
-  ::-ms-reveal {
+::-ms-reveal {
   display: none;
 }
 </style>

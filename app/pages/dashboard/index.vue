@@ -14,7 +14,5 @@ useHead({
 </script>
 
 <template>
-  <div>
-    Ini Dashboard
-  </div>
+  <div>Ini Dashboard</div>
 </template>

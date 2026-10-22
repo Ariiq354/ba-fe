@@ -12,7 +12,12 @@ const state = reactive(initJurnalFormdata());
 const isLoading = ref(false);
 let nextRowKey = 2;
 
-const { data: akun, status: akunStatus, error: akunError, refresh: refreshAkun } = useAsyncData("jurnal-akun-options", async () => {
+const {
+  data: akun,
+  status: akunStatus,
+  error: akunError,
+  refresh: refreshAkun,
+} = useAsyncData("jurnal-akun-options", async () => {
   const accounts: JurnalAkun[] = [];
   const limit = 100;
   let page = 1;
@@ -26,17 +31,20 @@ const { data: akun, status: akunStatus, error: akunError, refresh: refreshAkun }
     accounts.push(...response.data);
     total = response.total;
     page++;
-    if (!response.data.length)
-      break;
+    if (!response.data.length) break;
   } while (accounts.length < total);
-  return accounts.filter(account => account.isActive).map(account => ({
-    label: `${account.kodeAkun} · ${account.namaAkun}`,
-    value: account.id,
-  }));
+  return accounts
+    .filter((account) => account.isActive)
+    .map((account) => ({
+      label: `${account.kodeAkun} · ${account.namaAkun}`,
+      value: account.id,
+    }));
 });
 
 const totals = computed(() => getJurnalTotals(state.details));
-const isBalanced = computed(() => totals.value.debit > 0 && totals.value.debit === totals.value.kredit);
+const isBalanced = computed(
+  () => totals.value.debit > 0 && totals.value.debit === totals.value.kredit,
+);
 const accountsReady = computed(() => akunStatus.value === "success" && !!akun.value?.length);
 
 function addRow() {
@@ -44,8 +52,7 @@ function addRow() {
 }
 
 async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
-  if (isLoading.value || !accountsReady.value)
-    return;
+  if (isLoading.value || !accountsReady.value) return;
   isLoading.value = true;
   try {
     await $fetch("/api/v1/jurnal", {
@@ -54,9 +61,11 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
       credentials: "include",
       body: event.data,
     });
-  }
-  catch (error) {
-    useToastError("Gagal Menyimpan Jurnal", extractErrorMessage(error, "Jurnal gagal disimpan. Silakan coba lagi."));
+  } catch (error) {
+    useToastError(
+      "Gagal Menyimpan Jurnal",
+      extractErrorMessage(error, "Jurnal gagal disimpan. Silakan coba lagi."),
+    );
     isLoading.value = false;
     return;
   }
@@ -75,12 +84,23 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
     <template #body>
-      <UForm id="form-jurnal" :schema="jurnalSchema" :state="state" :disabled="isLoading" class="space-y-5" @submit="onSubmit">
+      <UForm
+        id="form-jurnal"
+        :schema="jurnalSchema"
+        :state="state"
+        :disabled="isLoading"
+        class="space-y-5"
+        @submit="onSubmit"
+      >
         <UFormField label="Tanggal Transaksi" name="tanggalTransaksi" required>
           <UInput v-model="state.tanggalTransaksi" type="date" class="w-full sm:w-64" />
         </UFormField>
         <UFormField label="Keterangan" name="keterangan">
-          <UTextarea v-model="state.keterangan" placeholder="Keterangan transaksi (opsional)" class="w-full" />
+          <UTextarea
+            v-model="state.keterangan"
+            placeholder="Keterangan transaksi (opsional)"
+            class="w-full"
+          />
         </UFormField>
 
         <UAlert
@@ -89,7 +109,14 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
           description="Daftar akun belum dapat dimuat. Silakan coba lagi."
           color="error"
           variant="subtle"
-          :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refreshAkun() }]"
+          :actions="[
+            {
+              label: 'Coba lagi',
+              color: 'error',
+              variant: 'outline',
+              onClick: () => refreshAkun(),
+            },
+          ]"
         />
         <UAlert
           v-else-if="akunStatus === 'success' && !akun?.length"
@@ -101,8 +128,17 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
 
         <UFormField label="Rincian Akun" name="details" required>
           <div class="space-y-3">
-            <div v-for="(detail, index) in state.details" :key="detail.key" class="grid gap-3 rounded-lg border border-default p-3 sm:grid-cols-12">
-              <UFormField :label="`Akun ${index + 1}`" :name="`details.${index}.akunId`" class="sm:col-span-5" required>
+            <div
+              v-for="(detail, index) in state.details"
+              :key="detail.key"
+              class="grid gap-3 rounded-lg border border-default p-3 sm:grid-cols-12"
+            >
+              <UFormField
+                :label="`Akun ${index + 1}`"
+                :name="`details.${index}.akunId`"
+                class="sm:col-span-5"
+                required
+              >
                 <USelectMenu
                   v-model="detail.akunId"
                   :items="akun ?? []"
@@ -113,11 +149,33 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
                   class="w-full"
                 />
               </UFormField>
-              <UFormField label="Debit (Rp)" :name="`details.${index}.debit`" class="sm:col-span-3" required>
-                <UInputNumber v-model="detail.debit" :min="0" :max="maxJurnalAmount" :step="1" class="w-full" />
+              <UFormField
+                label="Debit (Rp)"
+                :name="`details.${index}.debit`"
+                class="sm:col-span-3"
+                required
+              >
+                <UInputNumber
+                  v-model="detail.debit"
+                  :min="0"
+                  :max="maxJurnalAmount"
+                  :step="1"
+                  class="w-full"
+                />
               </UFormField>
-              <UFormField label="Kredit (Rp)" :name="`details.${index}.kredit`" class="sm:col-span-3" required>
-                <UInputNumber v-model="detail.kredit" :min="0" :max="maxJurnalAmount" :step="1" class="w-full" />
+              <UFormField
+                label="Kredit (Rp)"
+                :name="`details.${index}.kredit`"
+                class="sm:col-span-3"
+                required
+              >
+                <UInputNumber
+                  v-model="detail.kredit"
+                  :min="0"
+                  :max="maxJurnalAmount"
+                  :step="1"
+                  class="w-full"
+                />
               </UFormField>
               <div class="flex items-end justify-end sm:col-span-1">
                 <UButton
@@ -130,7 +188,13 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
                 />
               </div>
             </div>
-            <UButton icon="i-tabler-plus" color="neutral" variant="outline" :disabled="isLoading" @click="addRow">
+            <UButton
+              icon="i-tabler-plus"
+              color="neutral"
+              variant="outline"
+              :disabled="isLoading"
+              @click="addRow"
+            >
               Tambah Baris
             </UButton>
           </div>
@@ -139,24 +203,26 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
         <div class="space-y-3 rounded-lg bg-elevated p-4" aria-live="polite">
           <div class="grid gap-3 sm:grid-cols-2">
             <div>
-              <p class="text-sm text-muted">
-                Total Debit
-              </p>
+              <p class="text-sm text-muted">Total Debit</p>
               <p class="font-semibold">
                 {{ formatRupiah(totals.debit) }}
               </p>
             </div>
             <div>
-              <p class="text-sm text-muted">
-                Total Kredit
-              </p>
+              <p class="text-sm text-muted">Total Kredit</p>
               <p class="font-semibold">
                 {{ formatRupiah(totals.kredit) }}
               </p>
             </div>
           </div>
           <UBadge :color="isBalanced ? 'success' : 'warning'" variant="subtle">
-            {{ isBalanced ? 'Seimbang' : totals.debit === totals.kredit ? 'Total harus lebih dari nol' : `Selisih ${formatRupiah(Math.abs(totals.debit - totals.kredit))}` }}
+            {{
+              isBalanced
+                ? "Seimbang"
+                : totals.debit === totals.kredit
+                  ? "Total harus lebih dari nol"
+                  : `Selisih ${formatRupiah(Math.abs(totals.debit - totals.kredit))}`
+            }}
           </UBadge>
         </div>
       </UForm>
@@ -166,7 +232,13 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
         <UButton color="neutral" variant="ghost" :disabled="isLoading" @click="emit('close')">
           Batal
         </UButton>
-        <UButton type="submit" form="form-jurnal" icon="i-tabler-check" :loading="isLoading" :disabled="!accountsReady">
+        <UButton
+          type="submit"
+          form="form-jurnal"
+          icon="i-tabler-check"
+          :loading="isLoading"
+          :disabled="!accountsReady"
+        >
           Simpan
         </UButton>
       </div>

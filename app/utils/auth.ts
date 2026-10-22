@@ -1,9 +1,5 @@
 import type { statement } from "~/utils/permissions";
-import {
-  adminClient,
-  inferAdditionalFields,
-  usernameClient,
-} from "better-auth/client/plugins";
+import { adminClient, inferAdditionalFields, usernameClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/vue";
 import { API_URL } from "~/constants";
 import { ac, roles } from "~/utils/permissions";

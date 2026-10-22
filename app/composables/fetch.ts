@@ -1,15 +1,6 @@
 import { API_URL } from "~/constants";
 
-export const useApi = createUseFetch((options) => {
-  return {
-    ...options,
-    baseURL: API_URL,
-
-    headers: {
-      ...useRequestHeaders(["cookie"]),
-      ...options.headers,
-    },
-
-    credentials: "include",
-  };
+export const useApi = createUseFetch({
+  baseURL: API_URL,
+  credentials: "include",
 });

@@ -22,8 +22,7 @@ async function refreshAfterCreate() {
 }
 
 function openForm(jenis: JenisPengajuan) {
-  if (!canManage.value || !userId.value)
-    return;
+  if (!canManage.value || !userId.value) return;
   openModal(ModalPengajuanSimpanan, {
     jenis,
     userId: userId.value,
@@ -36,9 +35,7 @@ function openForm(jenis: JenisPengajuan) {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">
-        Simpanan Saya
-      </h1>
+      <h1 class="text-2xl font-semibold text-highlighted">Simpanan Saya</h1>
       <p class="mt-1 text-sm text-muted">
         Lihat saldo, kepemilikan saham, dan riwayat simpanan pribadi.
       </p>
@@ -46,11 +43,21 @@ function openForm(jenis: JenisPengajuan) {
     <template v-if="userId">
       <RingkasanSaldo ref="saldo" :user-id="userId" />
       <div v-if="canManage" class="flex flex-wrap gap-3">
-        <UButton v-for="jenis in (['tabungan', 'saham', 'penarikan'] as const)" :key="jenis" :icon="pengajuanLabels[jenis].icon" @click="openForm(jenis)">
+        <UButton
+          v-for="jenis in ['tabungan', 'saham', 'penarikan'] as const"
+          :key="jenis"
+          :icon="pengajuanLabels[jenis].icon"
+          @click="openForm(jenis)"
+        >
           {{ pengajuanLabels[jenis].title }}
         </UButton>
       </div>
-      <DaftarMutasiSimpanan ref="mutasi" scope="personal" :user-id="userId" @changed="refreshSaldo" />
+      <DaftarMutasiSimpanan
+        ref="mutasi"
+        scope="personal"
+        :user-id="userId"
+        @changed="refreshSaldo"
+      />
     </template>
     <USkeleton v-else class="h-40 w-full" />
   </div>
