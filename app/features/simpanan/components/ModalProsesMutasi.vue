@@ -18,36 +18,61 @@ const session = authClient.useSession();
 const isLoading = ref(false);
 const state = reactive({ alasanPenolakan: "" });
 const labels = {
-  approve: { title: "Setujui Pengajuan", button: "Setujui", success: "Pengajuan Berhasil Disetujui", color: "primary" },
-  reject: { title: "Tolak Pengajuan", button: "Tolak", success: "Pengajuan Berhasil Ditolak", color: "error" },
-  cancel: { title: "Batalkan Pengajuan", button: "Batalkan Pengajuan", success: "Pengajuan Berhasil Dibatalkan", color: "warning" },
+  approve: {
+    title: "Setujui Pengajuan",
+    button: "Setujui",
+    success: "Pengajuan Berhasil Disetujui",
+    color: "primary",
+  },
+  reject: {
+    title: "Tolak Pengajuan",
+    button: "Tolak",
+    success: "Pengajuan Berhasil Ditolak",
+    color: "error",
+  },
+  cancel: {
+    title: "Batalkan Pengajuan",
+    button: "Batalkan Pengajuan",
+    success: "Pengajuan Berhasil Dibatalkan",
+    color: "warning",
+  },
 } as const;
 const canProcess = computed(() => {
-  if (props.mutasi.statusApproved !== "pending")
-    return false;
+  if (props.mutasi.statusApproved !== "pending") return false;
   const role = session.value.data?.user.role;
-  if (props.action !== "cancel")
-    return can(role, "approvalSimpanan", "manage");
-  return (can(role, "simpananSaya", "manage") || can(role, "mutasiSimpanan", "manage"))
-    && canCancelMutasi(props.mutasi, Number(session.value.data?.user.id));
+  if (props.action !== "cancel") return can(role, "approvalSimpanan", "manage");
+  return (
+    (can(role, "simpananSaya", "manage") || can(role, "mutasiSimpanan", "manage")) &&
+    canCancelMutasi(props.mutasi, Number(session.value.data?.user.id))
+  );
 });
 
 async function onConfirm(alasanPenolakan?: string) {
-  if (isLoading.value || !canProcess.value)
-    return;
-  if (props.action === "reject" && !alasanPenolakan?.trim())
-    return;
+  if (isLoading.value || !canProcess.value) return;
+  if (props.action === "reject" && !alasanPenolakan?.trim()) return;
   isLoading.value = true;
   try {
-    await $fetch(props.action === "cancel" ? "/api/v1/simpanan/mutasi" : `/api/v1/simpanan/mutasi/${props.mutasi.id}/${props.action}`, {
-      baseURL: API_URL,
-      method: props.action === "cancel" ? "DELETE" : "PATCH",
-      credentials: "include",
-      body: props.action === "cancel" ? { ids: [props.mutasi.id] } : props.action === "reject" ? { alasanPenolakan } : undefined,
-    });
-  }
-  catch (error) {
-    useToastError("Gagal Memproses Pengajuan", extractErrorMessage(error, "Pengajuan gagal diproses. Silakan coba lagi."));
+    await $fetch(
+      props.action === "cancel"
+        ? "/api/v1/simpanan/mutasi"
+        : `/api/v1/simpanan/mutasi/${props.mutasi.id}/${props.action}`,
+      {
+        baseURL: API_URL,
+        method: props.action === "cancel" ? "DELETE" : "PATCH",
+        credentials: "include",
+        body:
+          props.action === "cancel"
+            ? { ids: [props.mutasi.id] }
+            : props.action === "reject"
+              ? { alasanPenolakan }
+              : undefined,
+      },
+    );
+  } catch (error) {
+    useToastError(
+      "Gagal Memproses Pengajuan",
+      extractErrorMessage(error, "Pengajuan gagal diproses. Silakan coba lagi."),
+    );
     isLoading.value = false;
     return;
   }
@@ -62,44 +87,58 @@ function onReject(event: FormSubmitEvent<RejectMutasiSchema>) {
 </script>
 
 <template>
-  <UModal :title="labels[action].title" :description="mutasi.kodeTransaksi" :dismissible="!isLoading" :close="isLoading ? false : { onClick: () => emit('close') }">
+  <UModal
+    :title="labels[action].title"
+    :description="mutasi.kodeTransaksi"
+    :dismissible="!isLoading"
+    :close="isLoading ? false : { onClick: () => emit('close') }"
+  >
     <template #body>
       <div class="space-y-4">
         <dl class="space-y-3 rounded-lg bg-elevated p-4">
           <div>
-            <dt class="text-sm text-muted">
-              Anggota
-            </dt><dd class="font-medium">
+            <dt class="text-sm text-muted">Anggota</dt>
+            <dd class="font-medium">
               {{ mutasi.memberName }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-muted">
-              Transaksi
-            </dt><dd class="capitalize">
-              {{ mutasi.jenisTransaksi }} {{ mutasi.jenisSimpanan }}
-            </dd>
+            <dt class="text-sm text-muted">Transaksi</dt>
+            <dd class="capitalize">{{ mutasi.jenisTransaksi }} {{ mutasi.jenisSimpanan }}</dd>
           </div>
           <div>
-            <dt class="text-sm text-muted">
-              Nominal
-            </dt><dd class="font-semibold">
+            <dt class="text-sm text-muted">Nominal</dt>
+            <dd class="font-semibold">
               {{ formatRupiah(mutasi.nilaiTransaksi) }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-muted">
-              Diinput Oleh
-            </dt><dd>{{ mutasi.creatorName }}</dd>
+            <dt class="text-sm text-muted">Diinput Oleh</dt>
+            <dd>{{ mutasi.creatorName }}</dd>
           </div>
         </dl>
-        <UForm v-if="action === 'reject'" id="form-reject-simpanan" :schema="rejectMutasiSchema" :state="state" :disabled="isLoading" @submit="onReject">
+        <UForm
+          v-if="action === 'reject'"
+          id="form-reject-simpanan"
+          :schema="rejectMutasiSchema"
+          :state="state"
+          :disabled="isLoading"
+          @submit="onReject"
+        >
           <UFormField label="Alasan Penolakan" name="alasanPenolakan" required>
-            <UTextarea v-model="state.alasanPenolakan" placeholder="Tuliskan alasan penolakan" class="w-full" />
+            <UTextarea
+              v-model="state.alasanPenolakan"
+              placeholder="Tuliskan alasan penolakan"
+              class="w-full"
+            />
           </UFormField>
         </UForm>
         <p v-else class="text-sm text-muted">
-          {{ action === 'approve' ? 'Persetujuan akan memperbarui saldo atau jumlah saham dan membuat jurnal otomatis.' : 'Pengajuan pending ini akan dibatalkan.' }}
+          {{
+            action === "approve"
+              ? "Persetujuan akan memperbarui saldo atau jumlah saham dan membuat jurnal otomatis."
+              : "Pengajuan pending ini akan dibatalkan."
+          }}
         </p>
       </div>
     </template>

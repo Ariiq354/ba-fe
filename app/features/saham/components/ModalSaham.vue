@@ -13,8 +13,7 @@ const state = reactive({ ...initSahamFormdata });
 const isLoading = ref(false);
 
 async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
-  if (isLoading.value)
-    return;
+  if (isLoading.value) return;
   isLoading.value = true;
 
   try {
@@ -24,9 +23,11 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
       credentials: "include",
       body: event.data,
     });
-  }
-  catch (error) {
-    useToastError("Gagal Menyimpan Harga Saham", extractErrorMessage(error, "Harga saham gagal disimpan. Silakan coba lagi."));
+  } catch (error) {
+    useToastError(
+      "Gagal Menyimpan Harga Saham",
+      extractErrorMessage(error, "Harga saham gagal disimpan. Silakan coba lagi."),
+    );
     isLoading.value = false;
     return;
   }
@@ -45,13 +46,24 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
     <template #body>
-      <UForm id="form-saham" :schema="sahamSchema" :state="state" :disabled="isLoading" class="space-y-4" @submit="onSubmit">
+      <UForm
+        id="form-saham"
+        :schema="sahamSchema"
+        :state="state"
+        :disabled="isLoading"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
         <UFormField label="Harga Jual per Saham (Rp)" name="hargaJual" required>
-          <UInputNumber v-model="state.hargaJual" :min="1" :step="1" placeholder="Masukkan harga jual" class="w-full" />
+          <UInputNumber
+            v-model="state.hargaJual"
+            :min="1"
+            :step="1"
+            placeholder="Masukkan harga jual"
+            class="w-full"
+          />
         </UFormField>
-        <p class="text-sm text-muted">
-          Harga nominal saham ditentukan otomatis oleh sistem.
-        </p>
+        <p class="text-sm text-muted">Harga nominal saham ditentukan otomatis oleh sistem.</p>
       </UForm>
     </template>
     <template #footer>

@@ -9,7 +9,13 @@ import { usePaginatedRefresh } from "~/composables/pagination";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailMutasi from "./components/ModalDetailMutasi.vue";
 import ModalProsesMutasi from "./components/ModalProsesMutasi.vue";
-import { getAnggotaOptions, jenisSimpananOptions, jenisTransaksiOptions, mutasiColumns, statusMutasiLabels } from "./model";
+import {
+  getAnggotaOptions,
+  jenisSimpananOptions,
+  jenisTransaksiOptions,
+  mutasiColumns,
+  statusMutasiLabels,
+} from "./model";
 
 const page = ref(1);
 const search = ref("");
@@ -21,19 +27,41 @@ const session = authClient.useSession();
 const canView = computed(() => can(session.value.data?.user.role, "approvalSimpanan", "view"));
 const canApprove = computed(() => can(session.value.data?.user.role, "approvalSimpanan", "manage"));
 
-const { data: members, status: membersStatus, error: membersError, refresh: refreshMembers } = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
+const {
+  data: members,
+  status: membersStatus,
+  error: membersError,
+  refresh: refreshMembers,
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
   enabled: canView,
   watch: [canView],
 });
-const memberOptions = computed(() => [{ label: "Semua anggota", value: "all" }, ...getAnggotaOptions(members.value?.data ?? [])]);
-const targetUserId = computed(() => selectedUserId.value === "all" ? undefined : selectedUserId.value);
+const memberOptions = computed(() => [
+  { label: "Semua anggota", value: "all" },
+  ...getAnggotaOptions(members.value?.data ?? []),
+]);
+const targetUserId = computed(() =>
+  selectedUserId.value === "all" ? undefined : selectedUserId.value,
+);
 
-watch([search, jenisSimpanan, jenisTransaksi, targetUserId], () => {
-  page.value = 1;
-}, { flush: "sync" });
+watch(
+  [search, jenisSimpanan, jenisTransaksi, targetUserId],
+  () => {
+    page.value = 1;
+  },
+  { flush: "sync" },
+);
 
 const { data, status, error, refresh } = useApi<MutasiResponse>("/api/v1/simpanan/mutasi", {
-  query: { page, limit, search, status: "pending", jenisSimpanan, jenisTransaksi, userId: targetUserId },
+  query: {
+    page,
+    limit,
+    search,
+    status: "pending",
+    jenisSimpanan,
+    jenisTransaksi,
+    userId: targetUserId,
+  },
   enabled: canView,
   watch: [canView],
 });
@@ -52,11 +80,15 @@ function processMutasi(mutasi: MutasiSimpanan, action: "approve" | "reject") {
 }
 
 function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
-  if (mutasi.statusApproved !== "pending" || !canApprove.value)
-    return [];
+  if (mutasi.statusApproved !== "pending" || !canApprove.value) return [];
   return [
     { label: "Setujui", icon: "i-tabler-check", onSelect: () => processMutasi(mutasi, "approve") },
-    { label: "Tolak", icon: "i-tabler-x", color: "error", onSelect: () => processMutasi(mutasi, "reject") },
+    {
+      label: "Tolak",
+      icon: "i-tabler-x",
+      color: "error",
+      onSelect: () => processMutasi(mutasi, "reject"),
+    },
   ];
 }
 </script>
@@ -64,9 +96,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">
-        Approval Simpanan
-      </h1>
+      <h1 class="text-2xl font-semibold text-highlighted">Approval Simpanan</h1>
       <p class="mt-1 text-sm text-muted">
         Tinjau pengajuan simpanan yang menunggu persetujuan, lalu setujui atau tolak.
       </p>
@@ -74,15 +104,52 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
     <UCard>
       <div class="space-y-4">
         <div class="flex flex-col gap-3 lg:flex-row">
-          <InputSearch v-model="search" placeholder="Cari kode transaksi..." aria-label="Cari approval simpanan" />
-          <USelectMenu v-model="selectedUserId" :items="memberOptions" value-key="value" :loading="membersStatus === 'pending'" :disabled="membersStatus !== 'success'" aria-label="Filter anggota" class="w-full lg:w-80" />
+          <InputSearch
+            v-model="search"
+            placeholder="Cari kode transaksi..."
+            aria-label="Cari approval simpanan"
+          />
+          <USelectMenu
+            v-model="selectedUserId"
+            :items="memberOptions"
+            value-key="value"
+            :loading="membersStatus === 'pending'"
+            :disabled="membersStatus !== 'success'"
+            aria-label="Filter anggota"
+            class="w-full lg:w-80"
+          />
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
-          <USelect v-model="jenisSimpanan" :items="jenisSimpananOptions" aria-label="Filter jenis simpanan" class="w-full" />
-          <USelect v-model="jenisTransaksi" :items="jenisTransaksiOptions" aria-label="Filter jenis transaksi" class="w-full" />
+          <USelect
+            v-model="jenisSimpanan"
+            :items="jenisSimpananOptions"
+            aria-label="Filter jenis simpanan"
+            class="w-full"
+          />
+          <USelect
+            v-model="jenisTransaksi"
+            :items="jenisTransaksiOptions"
+            aria-label="Filter jenis transaksi"
+            class="w-full"
+          />
         </div>
-        <UAlert v-if="membersError" title="Gagal Memuat Pilihan Anggota" color="error" variant="subtle" :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshMembers() }]" />
-        <UAlert v-if="error" title="Gagal Memuat Approval Simpanan" description="Pengajuan belum dapat dimuat. Silakan coba lagi." color="error" variant="subtle" :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList }]" />
+        <UAlert
+          v-if="membersError"
+          title="Gagal Memuat Pilihan Anggota"
+          color="error"
+          variant="subtle"
+          :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshMembers() }]"
+        />
+        <UAlert
+          v-if="error"
+          title="Gagal Memuat Approval Simpanan"
+          description="Pengajuan belum dapat dimuat. Silakan coba lagi."
+          color="error"
+          variant="subtle"
+          :actions="[
+            { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList },
+          ]"
+        />
         <DataTable
           v-else
           v-model:page="page"
@@ -97,12 +164,20 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
           @view="viewMutasi"
         >
           <template #kodeTransaksi-cell="{ row }">
-            <UButton color="neutral" variant="link" class="p-0 font-mono" @click="viewMutasi(row.original)">
+            <UButton
+              color="neutral"
+              variant="link"
+              class="p-0 font-mono"
+              @click="viewMutasi(row.original)"
+            >
               {{ row.original.kodeTransaksi }}
             </UButton>
           </template>
           <template #statusApproved-cell="{ row }">
-            <UBadge :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color" variant="subtle">
+            <UBadge
+              :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"
+              variant="subtle"
+            >
               {{ statusMutasiLabels[row.original.statusApproved as StatusMutasi].label }}
             </UBadge>
           </template>

@@ -32,22 +32,24 @@ async function onClick() {
   try {
     if (props.onConfirm) {
       await props.onConfirm();
-    }
-    else if (props.path) {
+    } else if (props.path) {
       await $fetch(`${props.path}`, {
         method: props.method,
         body: props.body,
         credentials: "include",
       });
-      useToastSuccess(props.method === "DELETE" ? "Berhasil Hapus Data" : "Berhasil Memproses Data");
+      useToastSuccess(
+        props.method === "DELETE" ? "Berhasil Hapus Data" : "Berhasil Memproses Data",
+      );
     }
     await props.refresh?.();
     emit("close", false);
-  }
-  catch (error) {
-    useToastError("Gagal Memproses", extractErrorMessage(error, "Terjadi kesalahan dalam memproses data."));
-  }
-  finally {
+  } catch (error) {
+    useToastError(
+      "Gagal Memproses",
+      extractErrorMessage(error, "Terjadi kesalahan dalam memproses data."),
+    );
+  } finally {
     loading.value = false;
   }
 }

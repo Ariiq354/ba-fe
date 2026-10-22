@@ -4,13 +4,13 @@ const routeResources = {
   "master-akun": "masterAkun",
   "master-margin": "masterMargin",
   "master-saham": "masterSaham",
-  "jurnal": "jurnal",
-  "users": "pengguna",
-  "simpanan": "simpananSaya",
+  jurnal: "jurnal",
+  users: "pengguna",
+  simpanan: "simpananSaya",
   "input-simpanan": "inputSimpanan",
   "mutasi-simpanan": "mutasiSimpanan",
   "approval-simpanan": "approvalSimpanan",
-  "pemindahbukuan": "pemindahbukuan",
+  pemindahbukuan: "pemindahbukuan",
   "approval-pemindahbukuan": "approvalPemindahbukuan",
 } as const;
 
@@ -31,8 +31,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     for (const [route, resource] of Object.entries(routeResources)) {
       const path = `/dashboard/${route}`;
       if (
-        (to.path === path || to.path.startsWith(`${path}/`))
-        && !can(session.user.role, resource, "view")
+        (to.path === path || to.path.startsWith(`${path}/`)) &&
+        !can(session.user.role, resource, "view")
       ) {
         return navigateTo({ path: "/dashboard" });
       }

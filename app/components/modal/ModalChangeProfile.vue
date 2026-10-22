@@ -57,24 +57,28 @@ const state = ref<Partial<Schema>>({});
 
 const { data: userProfile, status } = useApi<UserProfile>("/api/v1/pengguna/profile");
 
-watch(userProfile, (userData) => {
-  if (userData) {
-    state.value = {
-      name: userData.name ?? "",
-      avatarUrl: userData.image ?? undefined,
-      noHp: userData.noHp ?? "",
-      nik: userData.nik ?? "",
-      namaBank: userData.namaBank ?? "",
-      noRekening: userData.noRekening ?? "",
-      pemilikRekening: userData.pemilikRekening ?? "",
-      jalan: userData.jalan ?? "",
-      idProvinsi: userData.idProvinsi ?? undefined,
-      idKabupatenKota: userData.idKabupatenKota ?? undefined,
-      idKecamatan: userData.idKecamatan ?? undefined,
-      idDesaKelurahan: userData.idDesaKelurahan ?? undefined,
-    };
-  }
-}, { immediate: true });
+watch(
+  userProfile,
+  (userData) => {
+    if (userData) {
+      state.value = {
+        name: userData.name ?? "",
+        avatarUrl: userData.image ?? undefined,
+        noHp: userData.noHp ?? "",
+        nik: userData.nik ?? "",
+        namaBank: userData.namaBank ?? "",
+        noRekening: userData.noRekening ?? "",
+        pemilikRekening: userData.pemilikRekening ?? "",
+        jalan: userData.jalan ?? "",
+        idProvinsi: userData.idProvinsi ?? undefined,
+        idKabupatenKota: userData.idKabupatenKota ?? undefined,
+        idKecamatan: userData.idKecamatan ?? undefined,
+        idDesaKelurahan: userData.idDesaKelurahan ?? undefined,
+      };
+    }
+  },
+  { immediate: true },
+);
 
 const isLoading = ref(false);
 const session = authClient.useSession();
@@ -88,8 +92,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (event.data.avatar instanceof File) {
       uploadedImageKey = await useUploadFile(event.data.avatar, "avatar");
       imageAction = "update";
-    }
-    else if (!state.value.avatarUrl && userProfile.value?.image) {
+    } else if (!state.value.avatarUrl && userProfile.value?.image) {
       imageAction = "remove";
     }
 
@@ -117,22 +120,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     useToastSuccess("Berhasil", "Profil Anda berhasil diperbarui");
     emit("close");
-  }
-  catch (err: unknown) {
+  } catch (err: unknown) {
     useToastError("Gagal", extractErrorMessage(err, "Gagal memperbarui profil"));
-  }
-  finally {
+  } finally {
     isLoading.value = false;
   }
 }
 </script>
 
 <template>
-  <UModal
-    title="Ubah Profil"
-    description="Perbarui informasi profil Anda."
-    class="max-w-2xl"
-  >
+  <UModal title="Ubah Profil" description="Perbarui informasi profil Anda." class="max-w-2xl">
     <template #body>
       <div v-if="status === 'pending'" class="space-y-6">
         <USkeleton class="aspect-square w-40 rounded-lg" />
@@ -182,9 +179,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </UFormField>
         <!-- Informasi Pribadi -->
         <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">
-            Informasi Pribadi
-          </h3>
+          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">Informasi Pribadi</h3>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField label="Nama Lengkap" name="name" required class="sm:col-span-2">
               <UInput
@@ -195,19 +190,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             </UFormField>
 
             <UFormField label="No. Handphone" name="noHp">
-              <UInput
-                v-model="state.noHp"
-                :disabled="isLoading"
-                placeholder="08xxxxxxxxxx"
-              />
+              <UInput v-model="state.noHp" :disabled="isLoading" placeholder="08xxxxxxxxxx" />
             </UFormField>
 
             <UFormField label="NIK" name="nik">
-              <UInput
-                v-model="state.nik"
-                :disabled="isLoading"
-                placeholder="Masukkan NIK"
-              />
+              <UInput v-model="state.nik" :disabled="isLoading" placeholder="Masukkan NIK" />
             </UFormField>
           </div>
         </div>
@@ -246,9 +233,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
         <!-- Informasi Alamat & Wilayah -->
         <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">
-            Alamat & Wilayah
-          </h3>
+          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">Alamat & Wilayah</h3>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField label="Alamat / Jalan" name="jalan" class="sm:col-span-2">
               <UInput
@@ -259,10 +244,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             </UFormField>
 
             <UFormField label="Provinsi" name="idProvinsi">
-              <SelectProvinsi
-                v-model="state.idProvinsi"
-                :disabled="isLoading"
-              />
+              <SelectProvinsi v-model="state.idProvinsi" :disabled="isLoading" />
             </UFormField>
 
             <UFormField label="Kota / Kabupaten" name="idKabupatenKota">
@@ -293,12 +275,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       </UForm>
     </template>
     <template #footer>
-      <UButton
-        icon="i-tabler-x"
-        variant="ghost"
-        :disabled="isLoading"
-        @click="emit('close')"
-      >
+      <UButton icon="i-tabler-x" variant="ghost" :disabled="isLoading" @click="emit('close')">
         Batal
       </UButton>
       <UButton

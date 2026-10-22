@@ -17,9 +17,13 @@ const limit = 10;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "masterAkun", "manage"));
 
-watch([search, kategori], () => {
-  page.value = 1;
-}, { flush: "sync" });
+watch(
+  [search, kategori],
+  () => {
+    page.value = 1;
+  },
+  { flush: "sync" },
+);
 
 const { data, status, error, refresh } = useApi<AkunResponse>("/api/v1/master-akun", {
   query: { page, limit, search, kategori },
@@ -34,14 +38,12 @@ async function refreshList() {
 }
 
 function openForm(akun?: Akun) {
-  if (!canManage.value)
-    return;
+  if (!canManage.value) return;
   openModal(ModalAkun, { akun, refresh: refreshList });
 }
 
 function deleteAkun(ids: string[]) {
-  if (!canManage.value || !ids.length)
-    return;
+  if (!canManage.value || !ids.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Akun",
     description: `Apakah Anda yakin ingin menghapus ${ids.length} akun yang dipilih?`,
@@ -58,12 +60,8 @@ function deleteAkun(ids: string[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">
-          Master Akun
-        </h1>
-        <p class="mt-1 text-sm text-muted">
-          Kelola daftar akun untuk pencatatan keuangan.
-        </p>
+        <h1 class="text-2xl font-semibold text-highlighted">Master Akun</h1>
+        <p class="mt-1 text-sm text-muted">Kelola daftar akun untuk pencatatan keuangan.</p>
       </div>
       <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
         Tambah Akun
@@ -73,7 +71,11 @@ function deleteAkun(ids: string[]) {
     <UCard>
       <div class="space-y-4">
         <div class="flex flex-col gap-3 sm:flex-row">
-          <InputSearch v-model="search" placeholder="Cari kode atau nama akun..." aria-label="Cari akun" />
+          <InputSearch
+            v-model="search"
+            placeholder="Cari kode atau nama akun..."
+            aria-label="Cari akun"
+          />
           <USelect
             v-model="kategori"
             :items="kategoriFilterOptions"
@@ -89,7 +91,9 @@ function deleteAkun(ids: string[]) {
           color="error"
           variant="subtle"
           icon="i-tabler-alert-circle"
-          :actions="[{ label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList }]"
+          :actions="[
+            { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList },
+          ]"
         />
 
         <DataTable
@@ -120,17 +124,23 @@ function deleteAkun(ids: string[]) {
           </template>
           <template #isActive-cell="{ row }">
             <UBadge :color="row.original.isActive ? 'success' : 'neutral'" variant="subtle">
-              {{ row.original.isActive ? 'Aktif' : 'Nonaktif' }}
+              {{ row.original.isActive ? "Aktif" : "Nonaktif" }}
             </UBadge>
           </template>
           <template #empty>
             <div class="py-8 text-center">
               <UIcon name="i-tabler-book-2" class="mb-2 size-8 text-dimmed" />
               <p class="font-medium text-highlighted">
-                {{ search || kategori !== 'all' ? 'Tidak ada akun yang sesuai' : 'Belum ada akun' }}
+                {{ search || kategori !== "all" ? "Tidak ada akun yang sesuai" : "Belum ada akun" }}
               </p>
               <p class="mt-1 text-sm text-muted">
-                {{ search || kategori !== 'all' ? 'Coba kata kunci atau kategori lain.' : canManage ? 'Klik Tambah Akun untuk membuat akun pertama.' : 'Belum ada akun yang tersedia.' }}
+                {{
+                  search || kategori !== "all"
+                    ? "Coba kata kunci atau kategori lain."
+                    : canManage
+                      ? "Klik Tambah Akun untuk membuat akun pertama."
+                      : "Belum ada akun yang tersedia."
+                }}
               </p>
             </div>
           </template>

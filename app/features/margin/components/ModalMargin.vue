@@ -17,13 +17,11 @@ let previousMaxNominal = state.maxNominal ?? undefined;
 const isUnlimited = computed({
   get: () => state.maxNominal === null,
   set(value: boolean) {
-    if (value === (state.maxNominal === null))
-      return;
+    if (value === (state.maxNominal === null)) return;
     if (value) {
       previousMaxNominal = state.maxNominal ?? undefined;
       state.maxNominal = null;
-    }
-    else {
+    } else {
       state.maxNominal = previousMaxNominal;
     }
     form.value?.clear("maxNominal");
@@ -31,20 +29,24 @@ const isUnlimited = computed({
 });
 
 async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
-  if (isLoading.value)
-    return;
+  if (isLoading.value) return;
   isLoading.value = true;
 
   try {
-    await $fetch(props.margin ? `/api/v1/master-margin/${props.margin.id}` : "/api/v1/master-margin", {
-      baseURL: API_URL,
-      method: props.margin ? "PATCH" : "POST",
-      credentials: "include",
-      body: event.data,
-    });
-  }
-  catch (error) {
-    useToastError("Gagal Menyimpan Margin", extractErrorMessage(error, "Margin gagal disimpan. Silakan coba lagi."));
+    await $fetch(
+      props.margin ? `/api/v1/master-margin/${props.margin.id}` : "/api/v1/master-margin",
+      {
+        baseURL: API_URL,
+        method: props.margin ? "PATCH" : "POST",
+        credentials: "include",
+        body: event.data,
+      },
+    );
+  } catch (error) {
+    useToastError(
+      "Gagal Menyimpan Margin",
+      extractErrorMessage(error, "Margin gagal disimpan. Silakan coba lagi."),
+    );
     isLoading.value = false;
     return;
   }
@@ -63,20 +65,47 @@ async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
     <template #body>
-      <UForm id="form-margin" ref="form" :schema="marginSchema" :state="state" :disabled="isLoading" class="space-y-4" @submit="onSubmit">
+      <UForm
+        id="form-margin"
+        ref="form"
+        :schema="marginSchema"
+        :state="state"
+        :disabled="isLoading"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
         <div class="grid gap-4 sm:grid-cols-2">
           <UFormField label="Nominal Minimum (Rp)" name="minNominal" required>
-            <UInputNumber v-model="state.minNominal" :min="0" :step="1" placeholder="0" class="w-full" />
+            <UInputNumber
+              v-model="state.minNominal"
+              :min="0"
+              :step="1"
+              placeholder="0"
+              class="w-full"
+            />
           </UFormField>
           <div class="space-y-2">
             <UFormField label="Nominal Maksimum (Rp)" name="maxNominal" :required="!isUnlimited">
-              <UInputNumber v-model.optional="state.maxNominal" :min="0" :step="1" :disabled="isUnlimited" :placeholder="isUnlimited ? 'Seterusnya' : '0'" class="w-full" />
+              <UInputNumber
+                v-model.optional="state.maxNominal"
+                :min="0"
+                :step="1"
+                :disabled="isUnlimited"
+                :placeholder="isUnlimited ? 'Seterusnya' : '0'"
+                class="w-full"
+              />
             </UFormField>
             <UCheckbox v-model="isUnlimited" label="Tanpa batas maksimum (seterusnya)" />
           </div>
         </div>
         <UFormField label="Margin per Tahun (%)" name="persenMarginTahun" required>
-          <UInputNumber v-model="state.persenMarginTahun" :min="0" :step="1" placeholder="0" class="w-full" />
+          <UInputNumber
+            v-model="state.persenMarginTahun"
+            :min="0"
+            :step="1"
+            placeholder="0"
+            class="w-full"
+          />
         </UFormField>
         <UFormField label="Jaminan" name="jaminan" required>
           <USelect v-model="state.jaminan" :items="jaminanOptions" class="w-full" />

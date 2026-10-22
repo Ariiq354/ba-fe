@@ -10,21 +10,9 @@ export default defineNuxtConfig({
     preset: "static",
   },
 
-  modules: [
-    "@nuxt/eslint",
-    "nuxt-security",
-    "@nuxt/ui",
-    "@nuxt/image",
-    "@vueuse/nuxt",
-  ],
+  modules: ["nuxt-security", "@nuxt/ui", "@nuxt/image", "@vueuse/nuxt"],
 
   css: ["~/assets/css/main.css"],
-
-  eslint: {
-    config: {
-      standalone: false,
-    },
-  },
 
   image: {
     provider: "none",
@@ -47,12 +35,7 @@ export default defineNuxtConfig({
     headers: {
       crossOriginResourcePolicy: "same-site",
       contentSecurityPolicy: {
-        "img-src": [
-          "'self'",
-          "data:",
-          "blob:",
-          "https://assets.ubberkahamanah.my.id",
-        ],
+        "img-src": ["'self'", "data:", "blob:", "https://assets.ubberkahamanah.my.id"],
       },
     },
   },

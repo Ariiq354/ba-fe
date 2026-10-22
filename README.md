@@ -6,7 +6,7 @@ Cloudflare Workers Static Assets. API dan gambar mengacu pada URL di
 
 ## Development
 
-Gunakan Node.js 22 dan Bun 1.4.2.
+Gunakan Node.js 22.22.3+ (atau versi 24/26 yang didukung Nuxt) dan Bun 1.4.3.
 
 ```bash
 bun install --frozen-lockfile
@@ -14,6 +14,25 @@ bun run dev
 ```
 
 Development server tersedia di `http://localhost:3000`.
+
+## Tooling dan pemeriksaan kode
+
+Proyek memakai Vite+ 1.3.0 dengan Oxlint dan Oxfmt default, dikonfigurasi di
+`vite.config.ts`. Dependency Vite Nuxt diarahkan ke Vite+ core melalui override;
+development dan build tetap memakai perintah Nuxt dan `nuxt.config.ts`.
+
+```bash
+bun run lint        # Oxlint
+bun run lint:fix    # Oxlint dengan autofix
+bun run fmt         # Format dengan Oxfmt
+bun run fmt:check   # Periksa format tanpa mengubah file
+bun run typecheck   # Pemeriksaan tipe Nuxt/Vue
+bun run check       # vp check, lalu pemeriksaan tipe Nuxt/Vue
+```
+
+Pemeriksaan tipe Vue tetap menggunakan `nuxt typecheck`/`vue-tsc`, bukan hanya
+checker TypeScript Vite+. ESLint dan preset Antfu tidak digunakan lagi.
+Untuk integrasi editor, pasang ekstensi **Oxc** di VS Code atau **oxc-zed** di Zed.
 
 ## Build dan preview statis
 
@@ -52,7 +71,7 @@ Jika nama Worker berbeda, sesuaikan `name` di `wrangler.jsonc`. Preview builds
 bisa diaktifkan untuk branch lain; `deploy:preview` mengunggah versi preview
 tanpa mempromosikannya ke produksi.
 
-Pada pengaturan build, set `NODE_VERSION=22` dan `BUN_VERSION=1.4.2`.
+Pada pengaturan build, set `NODE_VERSION=22.22.3` dan `BUN_VERSION=1.4.3`.
 Cloudflare menginstal dependencies sebelum menjalankan build command.
 
 ## Deploy dari lokal

@@ -14,20 +14,26 @@ const state = reactive<AkunSchema>({ ...initAkunFormdata, ...props.akun });
 const isLoading = ref(false);
 
 async function onSubmit(event: FormSubmitEvent<AkunSchema>) {
-  if (isLoading.value)
-    return;
+  if (isLoading.value) return;
   isLoading.value = true;
 
   try {
-    await $fetch(props.akun ? `/api/v1/master-akun/${encodeURIComponent(props.akun.id)}` : "/api/v1/master-akun", {
-      baseURL: API_URL,
-      method: props.akun ? "PATCH" : "POST",
-      credentials: "include",
-      body: event.data,
-    });
-  }
-  catch (error) {
-    useToastError("Gagal Menyimpan Akun", extractErrorMessage(error, "Akun gagal disimpan. Silakan coba lagi."));
+    await $fetch(
+      props.akun
+        ? `/api/v1/master-akun/${encodeURIComponent(props.akun.id)}`
+        : "/api/v1/master-akun",
+      {
+        baseURL: API_URL,
+        method: props.akun ? "PATCH" : "POST",
+        credentials: "include",
+        body: event.data,
+      },
+    );
+  } catch (error) {
+    useToastError(
+      "Gagal Menyimpan Akun",
+      extractErrorMessage(error, "Akun gagal disimpan. Silakan coba lagi."),
+    );
     isLoading.value = false;
     return;
   }
