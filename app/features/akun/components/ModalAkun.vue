@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
 import type { Akun, AkunSchema } from "../model";
-import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
+import { useToastError, useToastSuccess } from "~/composables/toast";
+import { extractErrorMessage } from "~/utils/error";
 import { API_URL } from "~/constants";
 import { akunSchema, initAkunFormdata, kategoriOptions, normalBalanceOptions } from "../model";
 

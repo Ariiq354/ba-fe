@@ -8,7 +8,8 @@ import type {
   SaldoSimpanan,
 } from "~/features/simpanan/model";
 import { useApi } from "~/composables/fetch";
-import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
+import { useToastError, useToastSuccess } from "~/composables/toast";
+import { extractErrorMessage } from "~/utils/error";
 import { API_URL } from "~/constants";
 import { getSaldoSimpananKey } from "~/features/simpanan/data";
 import { getAnggotaOptions } from "~/features/simpanan/model";
