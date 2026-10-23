@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
+import { useToastError, useToastSuccess } from "~/composables/toast";
+import { extractErrorMessage } from "~/utils/error";
 
 const props = withDefaults(
   defineProps<{

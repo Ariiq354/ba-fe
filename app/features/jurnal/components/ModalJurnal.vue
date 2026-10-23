@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
 import type { JurnalAkun, JurnalAkunResponse, JurnalSchema } from "../model";
-import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
+import { useToastError, useToastSuccess } from "~/composables/toast";
+import { extractErrorMessage } from "~/utils/error";
 import { API_URL } from "~/constants";
 import { formatRupiah } from "~/utils/format";
 import { getJurnalTotals, initJurnalFormdata, jurnalSchema, maxJurnalAmount } from "../model";

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Pengguna, VerifikasiPenggunaResponse } from "../model";
-import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
+import { useToastError, useToastSuccess } from "~/composables/toast";
+import { extractErrorMessage } from "~/utils/error";
 import { API_URL, IMAGE_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import {
