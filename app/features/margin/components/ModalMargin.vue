@@ -71,59 +71,71 @@ async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
         :schema="marginSchema"
         :state="state"
         :disabled="isLoading"
-        class="space-y-4"
+        class="space-y-5"
         @submit="onSubmit"
       >
         <div class="grid gap-4 sm:grid-cols-2">
-          <UFormField label="Nominal Minimum (Rp)" name="minNominal" required>
+          <UFormField label="Nominal minimum (Rp)" name="minNominal" required>
             <UInputNumber
               v-model="state.minNominal"
               :min="0"
               :step="1"
+              locale="id-ID"
               placeholder="0"
               class="w-full"
             />
           </UFormField>
           <div class="space-y-2">
-            <UFormField label="Nominal Maksimum (Rp)" name="maxNominal" :required="!isUnlimited">
+            <UFormField label="Nominal maksimum (Rp)" name="maxNominal" :required="!isUnlimited">
               <UInputNumber
                 v-model.optional="state.maxNominal"
                 :min="0"
                 :step="1"
-                :disabled="isUnlimited"
+                :disabled="isLoading || isUnlimited"
+                locale="id-ID"
                 :placeholder="isUnlimited ? 'Seterusnya' : '0'"
                 class="w-full"
               />
             </UFormField>
-            <UCheckbox v-model="isUnlimited" label="Tanpa batas maksimum (seterusnya)" />
+            <UCheckbox v-model="isUnlimited" label="Tanpa batas maksimum" />
           </div>
         </div>
-        <UFormField label="Margin per Tahun (%)" name="persenMarginTahun" required>
-          <UInputNumber
-            v-model="state.persenMarginTahun"
-            :min="0"
-            :step="1"
-            placeholder="0"
-            class="w-full"
-          />
-        </UFormField>
+
+        <USeparator />
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <UFormField label="Margin per tahun (%)" name="persenMarginTahun" required>
+            <UInputNumber
+              v-model="state.persenMarginTahun"
+              :min="0"
+              :step="1"
+              locale="id-ID"
+              placeholder="0"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField label="Biaya akad (Rp)" name="biayaAkad" required>
+            <UInputNumber
+              v-model="state.biayaAkad"
+              :min="0"
+              :step="1"
+              locale="id-ID"
+              placeholder="0"
+              class="w-full"
+            />
+          </UFormField>
+        </div>
+
         <UFormField label="Jaminan" name="jaminan" required>
-          <USelect v-model="state.jaminan" :items="jaminanOptions" class="w-full" />
-        </UFormField>
-        <UFormField label="Biaya Akad (Rp)" name="biayaAkad" required>
-          <UInputNumber v-model="state.biayaAkad" :min="0" :step="1" class="w-full" />
+          <URadioGroup v-model="state.jaminan" :items="jaminanOptions" orientation="horizontal" />
         </UFormField>
       </UForm>
     </template>
     <template #footer>
-      <div class="flex w-full justify-end gap-2">
-        <UButton color="neutral" variant="ghost" :disabled="isLoading" @click="emit('close')">
-          Batal
-        </UButton>
-        <UButton type="submit" form="form-margin" icon="i-tabler-check" :loading="isLoading">
-          Simpan
-        </UButton>
-      </div>
+      <UButton color="neutral" variant="ghost" :disabled="isLoading" @click="emit('close')">
+        Batal
+      </UButton>
+      <UButton type="submit" form="form-margin" :loading="isLoading">Simpan</UButton>
     </template>
   </UModal>
 </template>
