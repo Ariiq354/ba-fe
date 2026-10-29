@@ -27,11 +27,14 @@ export function extractErrorMessage(error: unknown, fallback = "Terjadi kesalaha
   if (
     error instanceof FetchError &&
     error.data &&
-    typeof error.data === "object" &&
-    "message" in error.data &&
-    error.data.message
+    typeof error.data === "object"
   ) {
-    return String(error.data.message);
+    if (typeof error.data.detail === "string" && error.data.detail.trim()) {
+      return error.data.detail;
+    }
+    if ("message" in error.data && error.data.message) {
+      return String(error.data.message);
+    }
   }
   if (error instanceof Error && error.message) {
     return error.message;
