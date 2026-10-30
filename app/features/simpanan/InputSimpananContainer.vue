@@ -3,7 +3,9 @@ import type { AnggotaOptionsResponse, JenisPengajuan } from "./model";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { authClient, can } from "~/utils/auth";
-import ModalPengajuanSimpanan from "./components/ModalPengajuanSimpanan.vue";
+import ModalPembelianSaham from "./components/ModalPembelianSaham.vue";
+import ModalPenarikanTabungan from "./components/ModalPenarikanTabungan.vue";
+import ModalSetoranTabungan from "./components/ModalSetoranTabungan.vue";
 import RingkasanSaldo from "./components/RingkasanSaldo.vue";
 import { getAnggotaOptions, pengajuanLabels } from "./model";
 
@@ -21,10 +23,15 @@ async function refreshSaldo() {
   await saldo.value?.refresh();
 }
 
+const pengajuanModals = {
+  tabungan: ModalSetoranTabungan,
+  saham: ModalPembelianSaham,
+  penarikan: ModalPenarikanTabungan,
+};
+
 function openForm(jenis: JenisPengajuan) {
   if (!canManage.value || !selectedMember.value?.noAnggota?.trim()) return;
-  openModal(ModalPengajuanSimpanan, {
-    jenis,
+  openModal(pengajuanModals[jenis], {
     userId: selectedMember.value.id,
     memberName: selectedMember.value.name,
     refresh: refreshSaldo,

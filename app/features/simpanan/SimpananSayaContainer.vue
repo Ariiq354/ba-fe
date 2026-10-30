@@ -3,7 +3,9 @@ import type { JenisPengajuan } from "./model";
 import { openModal } from "~/composables/modal";
 import { authClient, can } from "~/utils/auth";
 import DaftarMutasiSimpanan from "./components/DaftarMutasiSimpanan.vue";
-import ModalPengajuanSimpanan from "./components/ModalPengajuanSimpanan.vue";
+import ModalPembelianSaham from "./components/ModalPembelianSaham.vue";
+import ModalPenarikanTabungan from "./components/ModalPenarikanTabungan.vue";
+import ModalSetoranTabungan from "./components/ModalSetoranTabungan.vue";
 import RingkasanSaldo from "./components/RingkasanSaldo.vue";
 import { pengajuanLabels } from "./model";
 
@@ -21,10 +23,15 @@ async function refreshAfterCreate() {
   await Promise.all([refreshSaldo(), mutasi.value?.refreshList()]);
 }
 
+const pengajuanModals = {
+  tabungan: ModalSetoranTabungan,
+  saham: ModalPembelianSaham,
+  penarikan: ModalPenarikanTabungan,
+};
+
 function openForm(jenis: JenisPengajuan) {
   if (!canManage.value || !userId.value) return;
-  openModal(ModalPengajuanSimpanan, {
-    jenis,
+  openModal(pengajuanModals[jenis], {
     userId: userId.value,
     memberName: session.value.data?.user.name ?? "Saya",
     refresh: refreshAfterCreate,

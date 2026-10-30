@@ -45,8 +45,8 @@ function viewJurnal() {
             <dd class="capitalize">{{ mutasi.jenisTransaksi }} {{ mutasi.jenisSimpanan }}</dd>
           </div>
           <div>
-            <dt class="text-sm text-muted">Kas / Bank</dt>
-            <dd>{{ mutasi.accountName }}</dd>
+            <dt class="text-sm text-muted">Metode</dt>
+            <dd>{{ mutasi.metodePembayaran }}</dd>
           </div>
           <div>
             <dt class="text-sm text-muted">Nominal</dt>

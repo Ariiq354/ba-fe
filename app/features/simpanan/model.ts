@@ -11,36 +11,45 @@ function positiveIntegerSchema(message: string) {
     .max(maxSimpananAmount, "Nilai maksimal 2.147.483.647");
 }
 const positiveInteger = positiveIntegerSchema("Pilih anggota");
-const paymentAccountSchema = z
-  .number()
-  .optional()
-  .pipe(positiveIntegerSchema("Pilih kas atau bank"));
+export const paymentMethods = ["Transfer", "Tunai"] as const;
+export const sharePaymentMethods = [...paymentMethods, "Tabungan"] as const;
+export const paymentMethodOptions = [
+  { label: "Transfer", value: "Transfer" as const },
+  { label: "Tunai", value: "Tunai" as const },
+];
+export const sharePaymentMethodOptions = [
+  ...paymentMethodOptions,
+  { label: "Tabungan", value: "Tabungan" as const },
+];
+const paymentMethodSchema = z.enum(paymentMethods, "Pilih metode pembayaran");
 const amountSchema = z.number().optional().pipe(positiveIntegerSchema("Nominal wajib diisi"));
 const commonFields = {
   userId: positiveInteger,
-  akunId: paymentAccountSchema,
   keterangan: z.string().trim(),
 };
 
 export const setoranTabunganSchema = z.object({
   ...commonFields,
-  jenisSimpanan: z.literal("tabungan"),
+  metodePembayaran: paymentMethodSchema,
+  nilaiTransaksi: amountSchema,
+});
+export const penarikanSchema = z.object({
+  ...commonFields,
+  metodePembayaran: paymentMethodSchema,
   nilaiTransaksi: amountSchema,
 });
 export const setoranSahamSchema = z.object({
   ...commonFields,
-  jenisSimpanan: z.literal("saham"),
+  metodePembayaran: z.enum(sharePaymentMethods, "Pilih metode pembayaran"),
   jumlahSaham: amountSchema,
 });
-export const penarikanSchema = z.object({ ...commonFields, nilaiTransaksi: amountSchema });
 export const rejectMutasiSchema = z.object({
   alasanPenolakan: z.string().trim().min(1, "Alasan penolakan wajib diisi"),
 });
 
-export type PengajuanSimpanan =
-  | z.output<typeof setoranTabunganSchema>
-  | z.output<typeof setoranSahamSchema>
-  | z.output<typeof penarikanSchema>;
+export type SetoranTabungan = z.output<typeof setoranTabunganSchema>;
+export type PembelianSaham = z.output<typeof setoranSahamSchema>;
+export type PenarikanTabungan = z.output<typeof penarikanSchema>;
 export type RejectMutasiSchema = z.output<typeof rejectMutasiSchema>;
 export type JenisPengajuan = "tabungan" | "saham" | "penarikan";
 export type StatusMutasi = "pending" | "approved" | "rejected";
@@ -66,48 +75,16 @@ export interface AnggotaSimpanan {
 export interface AnggotaOptionsResponse {
   data: AnggotaSimpanan[];
 }
-export interface PaymentAccountsResponse {
-  data: { id: number; kodeAkun: string; namaAkun: string }[];
-}
 export interface HargaSaham {
   hargaJual: number;
   hargaNominal: number;
-}
-
-export function getPengajuanSchema(
-  jenis: JenisPengajuan,
-  price?: HargaSaham | null,
-  balance?: SaldoSimpanan | null,
-) {
-  if (jenis === "saham") {
-    return setoranSahamSchema.refine(
-      (data) =>
-        !!price &&
-        data.jumlahSaham * price.hargaJual <= maxSimpananAmount &&
-        data.jumlahSaham * price.hargaNominal <= maxSimpananAmount,
-      {
-        path: ["jumlahSaham"],
-        message: "Total transaksi saham melebihi batas yang diizinkan atau harga belum tersedia",
-      },
-    );
-  }
-  if (jenis === "penarikan") {
-    return penarikanSchema.refine(
-      (data) => !!balance && data.nilaiTransaksi <= balance.saldoEfektif,
-      {
-        path: ["nilaiTransaksi"],
-        message: "Nominal melebihi saldo efektif atau saldo belum tersedia",
-      },
-    );
-  }
-  return setoranTabunganSchema;
 }
 
 export interface MutasiSimpanan {
   id: number;
   kodeTransaksi: string;
   userId: number;
-  akunId: number;
+  metodePembayaran: (typeof paymentMethods)[number];
   jenisSimpanan: "tabungan" | "saham";
   jenisTransaksi: "setoran" | "penarikan";
   nilaiTransaksi: number;
@@ -128,7 +105,6 @@ export interface MutasiSimpanan {
   createdAt: string;
   updatedAt: string;
   memberName: string;
-  accountName: string;
   creatorName: string;
   approverName: string | null;
 }
@@ -229,7 +205,7 @@ export const mutasiColumns: TableColumn<MutasiSimpanan>[] = [
     header: "Nominal",
     cell: ({ row }) => formatRupiah(row.original.nilaiTransaksi),
   },
-  { accessorKey: "accountName", header: "Kas / Bank" },
+  { accessorKey: "metodePembayaran", header: "Metode" },
   { accessorKey: "statusApproved", header: "Status" },
   { accessorKey: "creatorName", header: "Diinput Oleh" },
   {
