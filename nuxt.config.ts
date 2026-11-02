@@ -31,7 +31,6 @@ export default defineNuxtConfig({
   },
 
   security: {
-    sri: false,
     headers: {
       crossOriginResourcePolicy: "same-site",
       contentSecurityPolicy: {
