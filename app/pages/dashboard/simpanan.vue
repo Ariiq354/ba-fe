@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import SimpananSayaContainer from "~/features/simpanan/SimpananSayaContainer.vue";
+import SimpananContainer from "~/features/simpanan/SimpananContainer.vue";
 
 definePageMeta({
-  layout: { name: "default", props: { title: "Simpanan Saya" } },
+  layout: { name: "default", props: { title: "Simpanan" } },
 });
-useHead({ title: "Simpanan Saya · Berkah Amanah" });
+useHead({ title: "Simpanan · Berkah Amanah" });
 </script>
 
 <template>
-  <SimpananSayaContainer />
+  <SimpananContainer />
 </template>

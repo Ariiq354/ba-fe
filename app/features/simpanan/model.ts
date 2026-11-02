@@ -53,7 +53,7 @@ export type PenarikanTabungan = z.output<typeof penarikanSchema>;
 export type RejectMutasiSchema = z.output<typeof rejectMutasiSchema>;
 export type JenisPengajuan = "tabungan" | "saham" | "penarikan";
 export type StatusMutasi = "pending" | "approved" | "rejected";
-export type MutasiScope = "personal" | "members";
+export type MutasiScope = "member" | "members";
 
 export interface SaldoSimpanan {
   saldoTabungan: number;

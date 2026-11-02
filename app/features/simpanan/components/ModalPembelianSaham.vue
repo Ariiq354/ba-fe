@@ -5,7 +5,7 @@ import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import {
-  PEMINDAHBUKUAN_APPROVAL_LIST_KEY,
+  PEMINDAHBUKUAN_MUTASI_LIST_KEY,
   PEMINDAHBUKUAN_LIST_KEY,
   refreshPemindahbukuanData,
 } from "~/features/pemindahbukuan/data";
@@ -136,7 +136,7 @@ async function onSubmit(event: FormSubmitEvent<PembelianSaham>) {
   if (paidFromTabungan) {
     await Promise.all([
       refreshPemindahbukuanData([props.userId], props.refresh),
-      refreshNuxtData([PEMINDAHBUKUAN_LIST_KEY, PEMINDAHBUKUAN_APPROVAL_LIST_KEY]),
+      refreshNuxtData([PEMINDAHBUKUAN_LIST_KEY, PEMINDAHBUKUAN_MUTASI_LIST_KEY]),
     ]);
   } else {
     await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
@@ -176,9 +176,7 @@ async function onSubmit(event: FormSubmitEvent<PembelianSaham>) {
             :step="1"
             locale="id-ID"
             placeholder="0"
-            size="xl"
             disable-wheel-change
-            :ui="{ base: 'font-medium tabular-nums' }"
             class="w-full"
           />
           <template #help>

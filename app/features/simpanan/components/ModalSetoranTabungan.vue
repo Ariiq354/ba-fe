@@ -80,9 +80,7 @@ async function onSubmit(event: FormSubmitEvent<SetoranTabungan>) {
             :format-options="{ style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }"
             locale="id-ID"
             placeholder="Rp 0"
-            size="xl"
             disable-wheel-change
-            :ui="{ base: 'text-left font-medium tabular-nums' }"
             class="w-full"
           />
         </UFormField>

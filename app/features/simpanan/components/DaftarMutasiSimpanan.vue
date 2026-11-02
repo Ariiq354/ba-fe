@@ -39,9 +39,13 @@ const actorId = computed(() => Number(session.value.data?.user.id));
 const canManage = computed(() =>
   can(
     session.value.data?.user.role,
-    props.scope === "personal" ? "simpananSaya" : "mutasiSimpanan",
+    props.scope === "member" && props.userId === actorId.value ? "simpananSaya" : "mutasiSimpanan",
     "manage",
   ),
+);
+const canApprove = computed(
+  () =>
+    props.scope === "members" && can(session.value.data?.user.role, "approvalSimpanan", "manage"),
 );
 
 const {
@@ -50,7 +54,7 @@ const {
   error: membersError,
   refresh: refreshMembers,
 } = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  immediate: props.scope !== "personal",
+  immediate: props.scope === "members",
   watch: false,
 });
 const memberOptions = computed(() => [
@@ -58,7 +62,7 @@ const memberOptions = computed(() => [
   ...getAnggotaOptions(members.value?.data ?? []),
 ]);
 const targetUserId = computed(() =>
-  props.scope === "personal"
+  props.scope === "member"
     ? props.userId
     : selectedUserId.value === "all"
       ? undefined
@@ -86,7 +90,7 @@ const { data, status, error, refresh } = useApi<MutasiResponse>("/api/v1/simpana
 });
 const total = computed(() => data.value?.total ?? 0);
 const columns = computed(() =>
-  props.scope === "personal"
+  props.scope === "member"
     ? mutasiColumns.filter(
         (column) => !("accessorKey" in column && column.accessorKey === "memberName"),
       )
@@ -105,22 +109,43 @@ function viewMutasi(mutasi: MutasiSimpanan) {
   openModal(ModalDetailMutasi, { mutasi });
 }
 
-function cancelMutasi(mutasi: MutasiSimpanan) {
+function processMutasi(mutasi: MutasiSimpanan, action: "approve" | "reject" | "cancel") {
   if (status.value === "pending" || mutasi.statusApproved !== "pending") return;
-  if (!canManage.value || !canCancelMutasi(mutasi, actorId.value)) return;
-  openModal(ModalProsesMutasi, { mutasi, action: "cancel", refresh: refreshAfterChange });
+  if (action === "cancel") {
+    if (!canManage.value || !canCancelMutasi(mutasi, actorId.value)) return;
+  } else if (!canApprove.value) {
+    return;
+  }
+  openModal(ModalProsesMutasi, { mutasi, action, refresh: refreshAfterChange });
 }
 
 function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
-  if (!canManage.value || !canCancelMutasi(mutasi, actorId.value)) return [];
-  return [
-    {
+  if (mutasi.statusApproved !== "pending") return [];
+  const items: DropdownMenuItem[] = [];
+  if (canApprove.value) {
+    items.push(
+      {
+        label: "Setujui",
+        icon: "i-tabler-check",
+        onSelect: () => processMutasi(mutasi, "approve"),
+      },
+      {
+        label: "Tolak",
+        icon: "i-tabler-x",
+        color: "error",
+        onSelect: () => processMutasi(mutasi, "reject"),
+      },
+    );
+  }
+  if (canManage.value && canCancelMutasi(mutasi, actorId.value)) {
+    items.push({
       label: "Batalkan Pengajuan",
       icon: "i-tabler-ban",
       color: "warning",
-      onSelect: () => cancelMutasi(mutasi),
-    },
-  ];
+      onSelect: () => processMutasi(mutasi, "cancel"),
+    });
+  }
+  return items;
 }
 </script>
 
@@ -134,7 +159,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
           aria-label="Cari mutasi simpanan"
         />
         <USelectMenu
-          v-if="scope !== 'personal'"
+          v-if="scope === 'members'"
           v-model="selectedUserId"
           :items="memberOptions"
           value-key="value"
@@ -165,7 +190,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
         />
       </div>
       <UAlert
-        v-if="scope !== 'personal' && membersError"
+        v-if="scope === 'members' && membersError"
         title="Gagal Memuat Pilihan Anggota"
         color="error"
         variant="subtle"

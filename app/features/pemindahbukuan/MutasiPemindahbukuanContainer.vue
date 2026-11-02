@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 import type { Pemindahbukuan, PemindahbukuanResponse, TipePemindahbukuan } from "./model";
-import type { AnggotaOptionsResponse } from "~/features/simpanan/model";
+import type { AnggotaOptionsResponse, StatusMutasi } from "~/features/simpanan/model";
 import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
-import { getAnggotaOptions } from "~/features/simpanan/model";
+import { getAnggotaOptions, statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
 import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
 import TabelPemindahbukuan from "./components/TabelPemindahbukuan.vue";
-import { PEMINDAHBUKUAN_APPROVAL_LIST_KEY } from "./data";
+import { PEMINDAHBUKUAN_MUTASI_LIST_KEY } from "./data";
 import { tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
@@ -23,6 +23,7 @@ const canApprove = computed(() =>
 );
 const page = ref(1);
 const search = ref("");
+const statusFilter = ref<"all" | StatusMutasi>("all");
 const tipe = ref<"all" | TipePemindahbukuan>("all");
 const selectedUserId = ref<number | "all">("all");
 const targetUserId = computed(() =>
@@ -31,7 +32,7 @@ const targetUserId = computed(() =>
 const limit = 10;
 
 watch(
-  [search, tipe, targetUserId],
+  [search, statusFilter, tipe, targetUserId],
   () => {
     page.value = 1;
   },
@@ -53,8 +54,15 @@ const memberOptions = computed(() => [
 ]);
 const tipeOptions = [{ label: "Semua jenis", value: "all" }, ...tipePemindahbukuanOptions];
 const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1/pemindahbukuan", {
-  key: PEMINDAHBUKUAN_APPROVAL_LIST_KEY,
-  query: { page, limit, search, status: "pending", tipePemindahbukuan: tipe, userId: targetUserId },
+  key: PEMINDAHBUKUAN_MUTASI_LIST_KEY,
+  query: {
+    page,
+    limit,
+    search,
+    status: statusFilter,
+    tipePemindahbukuan: tipe,
+    userId: targetUserId,
+  },
   enabled: canView,
   watch: [canView],
 });
@@ -93,9 +101,10 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Approval Pemindahbukuan</h1>
+      <h1 class="text-2xl font-semibold text-highlighted">Mutasi Pemindahbukuan</h1>
       <p class="mt-1 text-sm text-muted">
-        Tinjau pengajuan pemindahbukuan yang menunggu persetujuan, lalu setujui atau tolak.
+        Lihat semua mutasi pemindahbukuan dan tinjau pengajuan yang menunggu persetujuan untuk
+        disetujui atau ditolak.
       </p>
     </div>
     <UCard>
@@ -104,7 +113,7 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
           <InputSearch
             v-model="search"
             placeholder="Cari kode transaksi..."
-            aria-label="Cari approval pemindahbukuan"
+            aria-label="Cari mutasi pemindahbukuan"
           />
           <USelectMenu
             v-model="selectedUserId"
@@ -116,12 +125,20 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
             class="w-full lg:w-80"
           />
         </div>
-        <USelect
-          v-model="tipe"
-          :items="tipeOptions"
-          aria-label="Filter jenis pemindahbukuan"
-          class="w-full"
-        />
+        <div class="grid gap-3 sm:grid-cols-2">
+          <USelect
+            v-model="statusFilter"
+            :items="statusMutasiOptions"
+            aria-label="Filter status pemindahbukuan"
+            class="w-full"
+          />
+          <USelect
+            v-model="tipe"
+            :items="tipeOptions"
+            aria-label="Filter jenis pemindahbukuan"
+            class="w-full"
+          />
+        </div>
         <UAlert
           v-if="membersError"
           title="Gagal Memuat Pilihan Anggota"
@@ -131,8 +148,8 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
         />
         <UAlert
           v-if="error"
-          title="Gagal Memuat Approval Pemindahbukuan"
-          description="Pengajuan belum dapat dimuat. Silakan coba lagi."
+          title="Gagal Memuat Mutasi Pemindahbukuan"
+          description="Data transaksi belum dapat dimuat. Silakan coba lagi."
           color="error"
           variant="subtle"
           :actions="[{ label: 'Coba lagi', color: 'error', onClick: refreshList }]"
@@ -144,8 +161,8 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
           :loading="status === 'pending'"
           :total="total"
           :dropdown-items="getDropdownItems"
-          empty-title="Tidak ada pemindahbukuan yang menunggu persetujuan"
-          empty-description="Coba filter lain untuk melihat pengajuan."
+          empty-title="Tidak ada mutasi pemindahbukuan"
+          empty-description="Coba kata kunci atau filter lain untuk melihat transaksi."
           @view="viewTransfer"
         />
       </div>

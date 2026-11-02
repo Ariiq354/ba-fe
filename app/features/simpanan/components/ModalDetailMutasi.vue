@@ -1,20 +1,10 @@
 <script setup lang="ts">
 import type { MutasiSimpanan } from "../model";
-import { openModal } from "~/composables/modal";
-import ModalDetailJurnal from "~/features/jurnal/components/ModalDetailJurnal.vue";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import { formatSimpananDate, formatSimpananTimestamp, statusMutasiLabels } from "../model";
 
-const props = defineProps<{ mutasi: MutasiSimpanan }>();
+defineProps<{ mutasi: MutasiSimpanan }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
-const canViewJurnal = computed(() => can(session.value.data?.user.role, "jurnal", "view"));
-
-function viewJurnal() {
-  if (!canViewJurnal.value || !props.mutasi.jurnalId) return;
-  openModal(ModalDetailJurnal, { id: props.mutasi.jurnalId });
-}
 </script>
 
 <template>
@@ -126,15 +116,6 @@ function viewJurnal() {
     </template>
     <template #footer>
       <div class="flex w-full justify-end gap-2">
-        <UButton
-          v-if="canViewJurnal && mutasi.jurnalId"
-          icon="i-tabler-receipt-2"
-          color="neutral"
-          variant="outline"
-          @click="viewJurnal"
-        >
-          Lihat Jurnal
-        </UButton>
         <UButton color="neutral" variant="ghost" @click="emit('close')"> Tutup </UButton>
       </div>
     </template>

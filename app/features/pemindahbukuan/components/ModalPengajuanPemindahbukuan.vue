@@ -18,7 +18,6 @@ import { refreshPemindahbukuanData } from "../data";
 import {
   getPemindahbukuanLimit,
   getPemindahbukuanSchema,
-  hargaNominalSaham,
   tipePemindahbukuanOptions,
 } from "../model";
 import PemilihTujuanPemindahbukuan from "./PemilihTujuanPemindahbukuan.vue";
@@ -32,7 +31,7 @@ const canDelegate = computed(() => can(session.value.data?.user.role, "inputSimp
 const isLoading = ref(false);
 const state = reactive({
   tipePemindahbukuan: "tabungan_ke_tabungan" as TipePemindahbukuan,
-  idUserSumber: undefined as number | undefined,
+  idUserSumber: actorId.value as number | undefined,
   idUserTujuan: undefined as number | undefined,
   nominal: undefined as number | undefined,
   jumlahSaham: undefined as number | undefined,
@@ -49,20 +48,41 @@ const {
   enabled: canManage,
   watch: [canManage],
 });
-const sourceOptions = computed(() => getAnggotaOptions(sources.value?.data ?? []));
+const sourceOptions = computed(() => {
+  const options = getAnggotaOptions(sources.value?.data ?? []).map((option) =>
+    option.value === actorId.value ? { ...option, label: `${option.label} (Saya)` } : option,
+  );
+  if (options.some((option) => option.value === actorId.value)) return options;
+  return [
+    {
+      label: `${session.value.data?.user.name ?? "Saya"} (Saya)`,
+      value: actorId.value,
+      disabled: true,
+    },
+    ...options,
+  ];
+});
+const selectedSourceId = computed({
+  get: () => state.idUserSumber,
+  set: (id: number | undefined) => {
+    if (
+      canDelegate.value &&
+      !isLoading.value &&
+      sourceOptions.value.some((option) => option.value === id && !option.disabled)
+    ) {
+      state.idUserSumber = id;
+    }
+  },
+});
 const sourceMember = computed(() =>
   sources.value?.data.find((member) => member.id === state.idUserSumber),
 );
 watch(
-  [sources, actorId],
+  [actorId, canDelegate],
   () => {
-    if (
-      state.idUserSumber === undefined &&
-      sources.value?.data.some((member) => member.id === actorId.value && member.noAnggota?.trim())
-    )
-      state.idUserSumber = actorId.value;
+    state.idUserSumber = actorId.value;
   },
-  { immediate: true },
+  { flush: "sync" },
 );
 
 const selectedDestination = ref<AnggotaSimpanan>();
@@ -118,17 +138,6 @@ const {
 const schema = computed(() => getPemindahbukuanSchema(balance.value, price.value));
 const maxAmount = computed(() =>
   getPemindahbukuanLimit(state.tipePemindahbukuan, balance.value, price.value),
-);
-const estimatedAmount = computed(() =>
-  state.tipePemindahbukuan === "tabungan_ke_tabungan"
-    ? (state.nominal ?? 0)
-    : (state.jumlahSaham ?? 0) *
-      (conversion.value ? (price.value?.hargaJual ?? 0) : hargaNominalSaham),
-);
-const availableAfter = computed(() =>
-  shareTransfer.value
-    ? Math.max(0, (balance.value?.jumlahSahamEfektif ?? 0) - (state.jumlahSaham ?? 0))
-    : Math.max(0, (balance.value?.saldoEfektif ?? 0) - estimatedAmount.value),
 );
 const ready = computed(
   () =>
@@ -208,17 +217,18 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
                 @click="() => refreshBalance()"
               />
             </div>
-            <UFormField label="Anggota Sumber" name="idUserSumber" required>
+            <UFormField v-if="canDelegate" label="Anggota Sumber" name="idUserSumber" required>
               <USelectMenu
-                v-model="state.idUserSumber"
+                v-model="selectedSourceId"
                 :items="sourceOptions"
                 value-key="value"
                 placeholder="Pilih anggota sumber"
                 :loading="sourceStatus === 'pending'"
-                :disabled="!canDelegate || sourceStatus !== 'success' || isLoading"
+                :disabled="sourceStatus !== 'success' || isLoading"
                 class="w-full"
               />
             </UFormField>
+            <p v-else class="font-medium">{{ session.data?.user.name ?? "Saya" }} (Saya)</p>
             <UAlert
               v-if="sourceError"
               title="Gagal Memuat Anggota Sumber"
@@ -256,13 +266,6 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
                     : "—"
                 }}
               </p>
-              <p v-if="balance" class="text-xs text-muted">
-                {{
-                  shareTransfer
-                    ? `${balance.totalSahamPending.toLocaleString("id-ID")} lembar dicadangkan`
-                    : `${formatRupiah(balance.totalPenarikanPending + balance.totalPemindahbukuanPending)} dicadangkan`
-                }}
-              </p>
             </template>
           </div>
           <PemilihTujuanPemindahbukuan
@@ -275,7 +278,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
         </div>
         <UFormField
           v-if="state.tipePemindahbukuan === 'tabungan_ke_tabungan'"
-          label="Nominal (Rp)"
+          label="Nominal"
           name="nominal"
           required
         >
@@ -284,6 +287,12 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
             :min="1"
             :max="Math.max(1, maxAmount)"
             :step="1"
+            :increment="false"
+            :decrement="false"
+            :format-options="{ style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }"
+            locale="id-ID"
+            placeholder="Rp 0"
+            disable-wheel-change
             class="w-full"
           />
         </UFormField>
@@ -327,41 +336,6 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
             class="w-full"
           />
         </UFormField>
-        <div
-          v-if="sourceMember && destinationMember && balanceStatus === 'success'"
-          class="space-y-2 rounded-lg bg-elevated p-4"
-          aria-live="polite"
-        >
-          <p class="font-medium">{{ sourceMember.name }} → {{ destinationMember.name }}</p>
-          <p v-if="state.tipePemindahbukuan !== 'tabungan_ke_tabungan'">
-            {{ (state.jumlahSaham ?? 0).toLocaleString("id-ID") }} lembar saham
-            {{ conversion ? "diperoleh" : "dipindahkan" }}
-          </p>
-          <p>
-            {{
-              shareTransfer
-                ? "Nilai referensi saham"
-                : conversion
-                  ? "Estimasi tabungan digunakan"
-                  : "Tabungan dipindahkan"
-            }}:
-            <strong>{{
-              conversion && priceStatus !== "success" ? "—" : formatRupiah(estimatedAmount)
-            }}</strong>
-          </p>
-          <p v-if="!conversion || priceStatus === 'success'" class="text-sm text-muted">
-            {{ shareTransfer ? "Saham tersedia" : "Saldo tersedia" }} sumber setelah diajukan:
-            {{
-              shareTransfer
-                ? `${availableAfter.toLocaleString("id-ID")} lembar`
-                : formatRupiah(availableAfter)
-            }}.
-          </p>
-        </div>
-        <p class="text-sm text-muted">
-          Pengajuan menunggu persetujuan admin. Saldo atau saham sumber dicadangkan selama pending
-          dan dilepas jika pengajuan ditolak atau dibatalkan.
-        </p>
       </UForm>
     </template>
     <template #footer>

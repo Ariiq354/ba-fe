@@ -31,7 +31,7 @@ watch(canViewApproval, (allowed) => {
   if (!allowed) clearPendingApproval();
 });
 
-const canViewPemindahbukuanApproval = computed(() =>
+const canViewPemindahbukuanMutasi = computed(() =>
   can(session.value.data?.user.role, "approvalPemindahbukuan", "view"),
 );
 const { data: pendingPemindahbukuan, clear: clearPendingPemindahbukuan } =
@@ -39,14 +39,14 @@ const { data: pendingPemindahbukuan, clear: clearPendingPemindahbukuan } =
     key: PEMINDAHBUKUAN_PENDING_KEY,
     query: { status: "pending", page: 1, limit: 1 },
     pick: ["total"],
-    enabled: canViewPemindahbukuanApproval,
-    watch: [canViewPemindahbukuanApproval],
+    enabled: canViewPemindahbukuanMutasi,
+    watch: [canViewPemindahbukuanMutasi],
   });
 const pendingPemindahbukuanBadge = computed<NavigationMenuItem["badge"]>(() => {
   const total = pendingPemindahbukuan.value?.total ?? 0;
   return total > 0 ? { label: String(total), color: "warning", variant: "subtle" } : undefined;
 });
-watch(canViewPemindahbukuanApproval, (allowed) => {
+watch(canViewPemindahbukuanMutasi, (allowed) => {
   if (!allowed) clearPendingPemindahbukuan();
 });
 
@@ -57,7 +57,7 @@ function refreshPendingApprovals() {
   if (documentVisibility.value !== "visible") return;
   const keys = [
     ...(canViewApproval.value ? [APPROVAL_SIMPANAN_PENDING_KEY] : []),
-    ...(canViewPemindahbukuanApproval.value ? [PEMINDAHBUKUAN_PENDING_KEY] : []),
+    ...(canViewPemindahbukuanMutasi.value ? [PEMINDAHBUKUAN_PENDING_KEY] : []),
   ];
   if (keys.length) void refreshNuxtData(keys);
 }
@@ -85,30 +85,12 @@ const masterItems = computed<NavigationMenuItem[]>(() => {
 const transactionItems = computed<NavigationMenuItem[]>(() => {
   const role = session.value.data?.user.role;
   return [
-    ...(can(role, "inputSimpanan", "view")
-      ? [
-          {
-            label: "Input Simpanan Anggota",
-            to: "/dashboard/input-simpanan",
-            icon: "i-tabler-wallet",
-          },
-        ]
-      : []),
     ...(can(role, "mutasiSimpanan", "view")
       ? [
           {
             label: "Mutasi Simpanan",
             to: "/dashboard/mutasi-simpanan",
             icon: "i-tabler-arrows-exchange",
-          },
-        ]
-      : []),
-    ...(canViewApproval.value
-      ? [
-          {
-            label: "Approval Simpanan",
-            to: "/dashboard/approval-simpanan",
-            icon: "i-tabler-checks",
             badge: pendingApprovalBadge.value,
           },
         ]
@@ -116,12 +98,12 @@ const transactionItems = computed<NavigationMenuItem[]>(() => {
     ...(can(role, "pemindahbukuan", "view")
       ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer" }]
       : []),
-    ...(canViewPemindahbukuanApproval.value
+    ...(canViewPemindahbukuanMutasi.value
       ? [
           {
-            label: "Approval Pemindahbukuan",
-            to: "/dashboard/approval-pemindahbukuan",
-            icon: "i-tabler-checks",
+            label: "Mutasi Pemindahbukuan",
+            to: "/dashboard/mutasi-pemindahbukuan",
+            icon: "i-tabler-arrows-exchange",
             badge: pendingPemindahbukuanBadge.value,
           },
         ]
@@ -137,7 +119,7 @@ const items = computed<NavigationMenuItem[][]>(() => [
     { label: "Dashboard", type: "label" },
     { label: "Beranda", to: "/dashboard", icon: "i-tabler-layout-dashboard" },
     ...(can(session.value.data?.user.role, "simpananSaya", "view")
-      ? [{ label: "Simpanan Saya", to: "/dashboard/simpanan", icon: "i-tabler-wallet" }]
+      ? [{ label: "Simpanan", to: "/dashboard/simpanan", icon: "i-tabler-wallet" }]
       : []),
     // { label: "Pembiayaan Saya", to: "/dashboard/pembiayaan", icon: "i-tabler-file-text" },
     // { label: "Bagi Hasil Usaha", to: "/dashboard/shu", icon: "i-tabler-coins" },
