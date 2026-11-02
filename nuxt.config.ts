@@ -6,22 +6,13 @@ export default defineNuxtConfig({
   ssr: false,
   spaLoadingTemplate: true,
 
-  modules: [
-    "@nuxt/eslint",
-    "nuxt-security",
-    "@nuxt/ui",
-    "@nuxt/image",
-    "nuxt-charts",
-    "@vueuse/nuxt",
-  ],
+  nitro: {
+    preset: "static",
+  },
+
+  modules: ["nuxt-security", "@nuxt/ui", "@nuxt/image", "@vueuse/nuxt"],
 
   css: ["~/assets/css/main.css"],
-
-  eslint: {
-    config: {
-      standalone: false,
-    },
-  },
 
   image: {
     provider: "none",
@@ -44,12 +35,7 @@ export default defineNuxtConfig({
     headers: {
       crossOriginResourcePolicy: "same-site",
       contentSecurityPolicy: {
-        "img-src": [
-          "'self'",
-          "data:",
-          "blob:",
-          "https://pub-d903c762cae0445d8dce45d854b69f88.r2.dev",
-        ],
+        "img-src": ["'self'", "data:", "blob:", "https://assets.ubberkahamanah.my.id"],
       },
     },
   },
