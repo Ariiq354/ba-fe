@@ -2,9 +2,9 @@
 import MutasiPemindahbukuanContainer from "~/features/pemindahbukuan/MutasiPemindahbukuanContainer.vue";
 
 definePageMeta({
-  layout: { name: "default", props: { title: "Mutasi Pemindahbukuan" } },
+  layout: { name: "default", props: { title: "Daftar Pemindahbukuan" } },
 });
-useHead({ title: "Mutasi Pemindahbukuan · Berkah Amanah" });
+useHead({ title: "Daftar Pemindahbukuan · Berkah Amanah" });
 </script>
 
 <template>

@@ -101,7 +101,7 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold text-highlighted">Mutasi Pemindahbukuan</h1>
+      <h1 class="text-2xl font-semibold text-highlighted">Daftar Pemindahbukuan</h1>
       <p class="mt-1 text-sm text-muted">
         Lihat semua mutasi pemindahbukuan dan tinjau pengajuan yang menunggu persetujuan untuk
         disetujui atau ditolak.

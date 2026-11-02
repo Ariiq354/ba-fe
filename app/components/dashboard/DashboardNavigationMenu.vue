@@ -77,66 +77,103 @@ const masterItems = computed<NavigationMenuItem[]>(() => {
       ? [{ label: "Master Margin", to: "/dashboard/master-margin", icon: "i-tabler-percentage" }]
       : []),
     ...(can(role, "masterSaham", "view")
-      ? [{ label: "Master Saham", to: "/dashboard/master-saham", icon: "i-tabler-chart-candle" }]
+      ? [{ label: "Master Saham", to: "/dashboard/master-saham", icon: "i-tabler-coins" }]
       : []),
   ];
 });
 
-const transactionItems = computed<NavigationMenuItem[]>(() => {
+const serviceItems = computed<NavigationMenuItem[]>(() => {
+  const role = session.value.data?.user.role;
+  return [
+    ...(can(role, "simpananSaya", "view")
+      ? [{ label: "Simpanan", to: "/dashboard/simpanan", icon: "i-tabler-wallet" }]
+      : []),
+    ...(can(role, "pemindahbukuan", "view")
+      ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer" }]
+      : []),
+    {
+      label: "Pembiayaan",
+      to: "/dashboard/pembiayaan",
+      icon: "i-tabler-file-invoice",
+    },
+    {
+      label: "Angsuran",
+      to: "/dashboard/angsuran",
+      icon: "i-tabler-calendar-dollar",
+    },
+  ];
+});
+
+const managementItems = computed<NavigationMenuItem[]>(() => {
   const role = session.value.data?.user.role;
   return [
     ...(can(role, "mutasiSimpanan", "view")
       ? [
           {
-            label: "Mutasi Simpanan",
-            to: "/dashboard/mutasi-simpanan",
-            icon: "i-tabler-arrows-exchange",
+            label: "Daftar Simpanan",
+            to: "/dashboard/daftar-simpanan",
+            icon: "i-tabler-list-details",
             badge: pendingApprovalBadge.value,
           },
         ]
       : []),
-    ...(can(role, "pemindahbukuan", "view")
-      ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer" }]
-      : []),
     ...(canViewPemindahbukuanMutasi.value
       ? [
           {
-            label: "Mutasi Pemindahbukuan",
-            to: "/dashboard/mutasi-pemindahbukuan",
-            icon: "i-tabler-arrows-exchange",
+            label: "Daftar Pemindahbukuan",
+            to: "/dashboard/daftar-pemindahbukuan",
+            icon: "i-tabler-clipboard-check",
             badge: pendingPemindahbukuanBadge.value,
           },
         ]
       : []),
+    {
+      label: "Daftar Pembiayaan",
+      to: "/dashboard/daftar-pembiayaan",
+      icon: "i-tabler-files",
+    },
+    {
+      label: "Daftar Angsuran",
+      to: "/dashboard/daftar-angsuran",
+      icon: "i-tabler-calendar-check",
+    },
+  ];
+});
+
+const accountingItems = computed<NavigationMenuItem[]>(() => {
+  const role = session.value.data?.user.role;
+  return [
     ...(can(role, "jurnal", "view")
-      ? [{ label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-receipt-2" }]
+      ? [{ label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-notebook" }]
       : []),
+    { label: "Neraca", to: "/dashboard/neraca", icon: "i-tabler-scale" },
+    { label: "Laba Rugi", to: "/dashboard/laba-rugi", icon: "i-tabler-chart-bar" },
+  ];
+});
+
+const administrationItems = computed<NavigationMenuItem[]>(() => {
+  const role = session.value.data?.user.role;
+  return [
+    ...(can(role, "pengguna", "view")
+      ? [{ label: "Daftar Pengguna", to: "/dashboard/users", icon: "i-tabler-users" }]
+      : []),
+    ...masterItems.value,
   ];
 });
 
 const items = computed<NavigationMenuItem[][]>(() => [
-  [
-    { label: "Dashboard", type: "label" },
-    { label: "Beranda", to: "/dashboard", icon: "i-tabler-layout-dashboard" },
-    ...(can(session.value.data?.user.role, "simpananSaya", "view")
-      ? [{ label: "Simpanan", to: "/dashboard/simpanan", icon: "i-tabler-wallet" }]
-      : []),
-    // { label: "Pembiayaan Saya", to: "/dashboard/pembiayaan", icon: "i-tabler-file-text" },
-    // { label: "Bagi Hasil Usaha", to: "/dashboard/shu", icon: "i-tabler-coins" },
-  ],
-  ...(masterItems.value.length
-    ? [[{ label: "Master Data", type: "label" as const }, ...masterItems.value]]
+  [{ label: "Beranda", to: "/dashboard", icon: "i-tabler-layout-dashboard" }],
+  ...(serviceItems.value.length
+    ? [[{ label: "Layanan", type: "label" as const }, ...serviceItems.value]]
     : []),
-  ...(transactionItems.value.length
-    ? [[{ label: "Transaksi", type: "label" as const }, ...transactionItems.value]]
+  ...(managementItems.value.length
+    ? [[{ label: "Pengelolaan", type: "label" as const }, ...managementItems.value]]
     : []),
-  ...(can(session.value.data?.user.role, "pengguna", "view")
-    ? [
-        [
-          { label: "Keanggotaan", type: "label" as const },
-          { label: "Daftar Pengguna", to: "/dashboard/users", icon: "i-tabler-users" },
-        ],
-      ]
+  ...(accountingItems.value.length
+    ? [[{ label: "Akuntansi", type: "label" as const }, ...accountingItems.value]]
+    : []),
+  ...(administrationItems.value.length
+    ? [[{ label: "Administrasi", type: "label" as const }, ...administrationItems.value]]
     : []),
 ]);
 </script>
