@@ -94,7 +94,6 @@ export interface MutasiSimpanan {
   agioSaham: number;
   saldoSetelahTransaksi: number | null;
   jumlahSahamSetelahTransaksi: number | null;
-  jurnalId: number | null;
   tanggalTransaksi: string;
   statusApproved: StatusMutasi;
   alasanPenolakan: string | null;

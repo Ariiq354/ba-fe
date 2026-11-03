@@ -54,7 +54,6 @@ export interface Pembiayaan {
   jangkaWaktuBulan: number;
   tujuan: string;
   tanggalPembiayaan: string;
-  jurnalId: number | null;
   statusApproved: StatusMutasi;
   alasanPenolakan: string | null;
   createdBy: number;

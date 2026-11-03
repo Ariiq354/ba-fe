@@ -120,7 +120,6 @@ export interface Pemindahbukuan {
   hargaPerSaham: number;
   hargaNominalPerSaham: number;
   agioSaham: number;
-  jurnalId: number | null;
   tipePemindahbukuan: TipePemindahbukuan;
   tanggalTransaksi: string;
   statusApproved: StatusMutasi;
