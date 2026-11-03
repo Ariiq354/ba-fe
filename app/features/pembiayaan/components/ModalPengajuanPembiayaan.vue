@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { PengajuanPembiayaan } from "../model";
+import type { PengajuanPembiayaan, SimulasiMarginResponse } from "../model";
 import type { AnggotaOptionsResponse } from "~/features/simpanan/model";
+import { useDebounceFn } from "#imports";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
@@ -21,6 +22,11 @@ const canOverride = computed(() =>
 );
 const isLoading = ref(false);
 const overrideMargin = ref(false);
+const customMarginActive = computed(() => canOverride.value && overrideMargin.value);
+const simulasiMargin = ref<SimulasiMarginResponse>();
+const simulasiLoading = ref(false);
+const simulasiError = ref("");
+const simulasiRefresh = ref(0);
 const state = reactive({
   userId: actorId.value,
   jumlahPokok: undefined as number | undefined,
@@ -53,7 +59,78 @@ watch(
 watch(
   [overrideMargin, canOverride],
   () => {
-    if (!overrideMargin.value || !canOverride.value) state.persenMarginTahun = undefined;
+    state.persenMarginTahun = customMarginActive.value
+      ? (state.persenMarginTahun ?? simulasiMargin.value?.persenMarginTahun)
+      : undefined;
+  },
+  { flush: "sync" },
+);
+const persenMargin = computed({
+  get: () =>
+    customMarginActive.value ? state.persenMarginTahun : simulasiMargin.value?.persenMarginTahun,
+  set: (value: number | undefined) => {
+    if (customMarginActive.value) state.persenMarginTahun = value;
+  },
+});
+const simulasiSchema = pembiayaanSchema
+  .pick({ jumlahPokok: true, jangkaWaktuBulan: true, persenMarginTahun: true })
+  .partial({ jangkaWaktuBulan: true });
+const fetchSimulasiMargin = useDebounceFn(
+  async (body: ReturnType<typeof simulasiSchema.parse>, signal: AbortSignal) => {
+    try {
+      const result = await $fetch<SimulasiMarginResponse>("/api/v1/pembiayaan/simulasi-margin", {
+        baseURL: API_URL,
+        method: "POST",
+        credentials: "include",
+        body,
+        signal,
+        retry: 0,
+      });
+      if (!signal.aborted) simulasiMargin.value = result;
+    } catch (error) {
+      if (!signal.aborted) {
+        simulasiError.value = extractErrorMessage(
+          error,
+          "Simulasi margin belum dapat dimuat. Silakan coba lagi.",
+        );
+      }
+    } finally {
+      if (!signal.aborted) simulasiLoading.value = false;
+    }
+  },
+  1000,
+);
+
+watch(
+  [
+    () => state.jumlahPokok,
+    () => state.jangkaWaktuBulan,
+    () => state.persenMarginTahun,
+    customMarginActive,
+    canManage,
+    simulasiRefresh,
+  ],
+  (_value, _oldValue, onCleanup) => {
+    simulasiMargin.value = undefined;
+    simulasiError.value = "";
+    simulasiLoading.value = false;
+    if (!canManage.value || (customMarginActive.value && state.persenMarginTahun === undefined)) {
+      return;
+    }
+    const parsed = simulasiSchema.safeParse({
+      jumlahPokok: state.jumlahPokok,
+      jangkaWaktuBulan: state.jangkaWaktuBulan,
+      persenMarginTahun: customMarginActive.value ? state.persenMarginTahun : undefined,
+    });
+    if (!parsed.success) return;
+
+    const controller = new AbortController();
+    simulasiLoading.value = true;
+    void fetchSimulasiMargin(parsed.data, controller.signal);
+    onCleanup(() => {
+      fetchSimulasiMargin.cancel();
+      controller.abort();
+    });
   },
   { flush: "sync" },
 );
@@ -169,6 +246,74 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
             />
           </UFormField>
         </div>
+        <USwitch
+          v-if="canOverride"
+          v-model="overrideMargin"
+          label="Gunakan margin khusus (admin)"
+          :disabled="isLoading"
+        />
+        <div class="grid gap-4 sm:grid-cols-2">
+          <UFormField
+            label="Margin per Tahun (%)"
+            name="persenMarginTahun"
+            :required="customMarginActive"
+          >
+            <div class="relative">
+              <UInputNumber
+                v-model="persenMargin"
+                :disabled="!customMarginActive || isLoading"
+                :aria-busy="simulasiLoading"
+                :min="0"
+                :max="99_999"
+                :step="1"
+                :increment="false"
+                :decrement="false"
+                :format-options="{ maximumFractionDigits: 0 }"
+                :ui="{ base: simulasiLoading ? 'pe-9' : undefined }"
+                locale="id-ID"
+                placeholder="—"
+                disable-wheel-change
+                class="w-full"
+              />
+              <UIcon
+                v-if="simulasiLoading"
+                name="i-tabler-loader-2"
+                class="pointer-events-none absolute inset-e-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted"
+                aria-hidden="true"
+              />
+            </div>
+          </UFormField>
+          <UFormField label="Jumlah Margin (Rp)">
+            <div class="relative">
+              <UInputNumber
+                :model-value="simulasiMargin?.jumlahMargin"
+                :aria-busy="simulasiLoading"
+                :increment="false"
+                :decrement="false"
+                :format-options="{ style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }"
+                :ui="{ base: simulasiLoading ? 'pe-9' : undefined }"
+                locale="id-ID"
+                placeholder="—"
+                disabled
+                class="w-full"
+              />
+              <UIcon
+                v-if="simulasiLoading"
+                name="i-tabler-loader-2"
+                class="pointer-events-none absolute inset-e-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted"
+                aria-hidden="true"
+              />
+            </div>
+          </UFormField>
+        </div>
+        <UAlert
+          v-if="simulasiError"
+          title="Gagal Menghitung Margin"
+          :description="simulasiError"
+          color="error"
+          variant="subtle"
+          :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => simulasiRefresh++ }]"
+        />
         <UFormField label="Metode Pencairan" name="metodePembayaran" required>
           <USelect v-model="state.metodePembayaran" :items="paymentMethodOptions" class="w-full" />
         </UFormField>
@@ -179,30 +324,6 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
             class="w-full"
           />
         </UFormField>
-        <template v-if="canOverride">
-          <USwitch
-            v-model="overrideMargin"
-            label="Gunakan margin khusus (admin)"
-            :disabled="isLoading"
-          />
-          <UFormField
-            v-if="overrideMargin"
-            label="Margin per Tahun (%)"
-            name="persenMarginTahun"
-            required
-          >
-            <UInputNumber
-              v-model="state.persenMarginTahun"
-              :min="0"
-              :max="99_999"
-              :step="1"
-              :format-options="{ maximumFractionDigits: 0 }"
-              locale="id-ID"
-              disable-wheel-change
-              class="w-full"
-            />
-          </UFormField>
-        </template>
       </UForm>
     </template>
     <template #footer>

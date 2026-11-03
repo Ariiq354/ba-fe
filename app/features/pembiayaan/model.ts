@@ -31,6 +31,11 @@ export const pembiayaanSchema = z.object({
     .optional(),
 });
 export type PengajuanPembiayaan = z.output<typeof pembiayaanSchema>;
+export interface SimulasiMarginResponse {
+  persenMarginTahun?: number;
+  jumlahMargin?: number;
+}
+
 export const rejectPembiayaanSchema = z.object({
   alasanPenolakan: z.string().trim().min(1, "Alasan penolakan wajib diisi"),
 });
