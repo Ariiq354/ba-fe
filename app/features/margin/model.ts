@@ -57,11 +57,13 @@ export const marginColumns: TableColumn<Margin>[] = [
   {
     accessorKey: "minNominal",
     header: "Nominal Minimum",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.minNominal),
   },
   {
     accessorKey: "maxNominal",
     header: "Nominal Maksimum",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) =>
       row.original.maxNominal === null ? "Seterusnya" : formatRupiah(row.original.maxNominal),
   },
@@ -78,6 +80,7 @@ export const marginColumns: TableColumn<Margin>[] = [
   {
     accessorKey: "biayaAkad",
     header: "Biaya Akad",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.biayaAkad),
   },
 ];

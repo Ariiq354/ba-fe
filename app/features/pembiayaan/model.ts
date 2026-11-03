@@ -87,11 +87,13 @@ export const pembiayaanColumns: TableColumn<Pembiayaan>[] = [
   {
     accessorKey: "jumlahPokok",
     header: "Pokok",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.jumlahPokok),
   },
   {
     accessorKey: "totalPembiayaan",
     header: "Total Pokok + Margin",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.totalPembiayaan),
   },
   {

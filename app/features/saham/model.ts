@@ -40,11 +40,13 @@ export const sahamColumns: TableColumn<Saham>[] = [
   {
     accessorKey: "hargaNominal",
     header: "Harga Nominal",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.hargaNominal),
   },
   {
     accessorKey: "hargaJual",
     header: "Harga Jual",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.hargaJual),
   },
   {

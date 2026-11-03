@@ -203,6 +203,7 @@ export const mutasiColumns: TableColumn<MutasiSimpanan>[] = [
   {
     accessorKey: "nilaiTransaksi",
     header: "Nominal",
+    meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.nilaiTransaksi),
   },
   { accessorKey: "metodePembayaran", header: "Metode" },
