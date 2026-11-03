@@ -74,9 +74,8 @@ export interface JurnalDetail {
   kredit: number;
 }
 
-export type JurnalRow = Omit<JurnalHeader, "id"> & JurnalDetail;
 export type Jurnal = JurnalHeader & { details: JurnalDetail[] };
-export type JurnalSummary = JurnalHeader & {
+export type JurnalSummary = Jurnal & {
   users: Pick<JurnalDetail, "userId" | "userName">[];
   totalDebit: number;
   totalKredit: number;
@@ -84,7 +83,7 @@ export type JurnalSummary = JurnalHeader & {
 
 export interface JurnalResponse {
   total: number;
-  data: JurnalRow[];
+  data: Jurnal[];
 }
 
 export interface JurnalAkun {
@@ -119,30 +118,20 @@ export function initJurnalFormdata() {
   };
 }
 
-// Pagination and DELETE operate on journal headers, not the flat detail IDs.
-export function groupJurnalRows(rows: JurnalRow[]): JurnalSummary[] {
-  const journals = new Map<number, JurnalSummary>();
-  for (const row of rows) {
-    let journal = journals.get(row.jurnalId);
-    if (!journal) {
-      journal = {
-        id: row.jurnalId,
-        kodeTransaksi: row.kodeTransaksi,
-        tanggalTransaksi: row.tanggalTransaksi,
-        keterangan: row.keterangan,
-        createdAt: row.createdAt,
-        users: [],
-        totalDebit: 0,
-        totalKredit: 0,
-      };
-      journals.set(row.jurnalId, journal);
+export function getJurnalSummaries(journals: Jurnal[]): JurnalSummary[] {
+  return journals.map((journal) => {
+    const users = new Map<number, Pick<JurnalDetail, "userId" | "userName">>();
+    for (const detail of journal.details) {
+      users.set(detail.userId, { userId: detail.userId, userName: detail.userName });
     }
-    if (!journal.users.some((user) => user.userId === row.userId))
-      journal.users.push({ userId: row.userId, userName: row.userName });
-    journal.totalDebit += row.debit;
-    journal.totalKredit += row.kredit;
-  }
-  return [...journals.values()];
+    const totals = getJurnalTotals(journal.details);
+    return {
+      ...journal,
+      users: [...users.values()],
+      totalDebit: totals.debit,
+      totalKredit: totals.kredit,
+    };
+  });
 }
 
 export function formatJurnalDate(value: string) {

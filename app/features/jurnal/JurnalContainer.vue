@@ -11,7 +11,7 @@ import { authClient, can } from "~/utils/auth";
 import ModalDetailJurnal from "./components/ModalDetailJurnal.vue";
 import ModalJurnal from "./components/ModalJurnal.vue";
 import { JURNAL_LIST_KEY } from "./data";
-import { groupJurnalRows, jurnalColumns } from "./model";
+import { getJurnalSummaries, jurnalColumns } from "./model";
 
 const page = ref(1);
 const search = ref("");
@@ -32,7 +32,7 @@ const { data, status, error, refresh } = useApi<JurnalResponse>("/api/v1/jurnal"
   query: { page, limit, search },
 });
 const total = computed(() => data.value?.total ?? 0);
-const journals = computed(() => groupJurnalRows(data.value?.data ?? []));
+const journals = computed(() => getJurnalSummaries(data.value?.data ?? []));
 
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
@@ -42,7 +42,7 @@ function openForm() {
 }
 
 function viewJurnal(jurnal: JurnalSummary) {
-  openModal(ModalDetailJurnal, { id: jurnal.id });
+  openModal(ModalDetailJurnal, { jurnal });
 }
 
 function deleteJurnal(ids: number[]) {
