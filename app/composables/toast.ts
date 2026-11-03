@@ -1,7 +1,7 @@
 import { FetchError } from "ofetch";
 import { useToast } from "#ui/composables/useToast";
 
-export function useToastSuccess(title: string, description?: string) {
+export function useToastSuccess(title: string, description: string) {
   const toast = useToast();
   toast.add({
     title,
@@ -12,7 +12,7 @@ export function useToastSuccess(title: string, description?: string) {
   });
 }
 
-export function useToastError(title: string, description?: string) {
+export function useToastError(title: string, description: string) {
   const toast = useToast();
   toast.add({
     title,

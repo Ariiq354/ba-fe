@@ -32,7 +32,7 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
     return;
   }
 
-  useToastSuccess("Harga Saham Berhasil Ditambahkan");
+  useToastSuccess("Harga Saham Berhasil Ditambahkan", "Harga terbaru siap digunakan.");
   emit("close");
   await props.refresh();
 }

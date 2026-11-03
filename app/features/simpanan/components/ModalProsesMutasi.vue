@@ -22,18 +22,21 @@ const labels = {
     title: "Setujui Pengajuan",
     button: "Setujui",
     success: "Pengajuan Berhasil Disetujui",
+    description: "Simpanan anggota telah diperbarui.",
     color: "primary",
   },
   reject: {
     title: "Tolak Pengajuan",
     button: "Tolak",
     success: "Pengajuan Berhasil Ditolak",
+    description: "Pengajuan tidak dilanjutkan.",
     color: "error",
   },
   cancel: {
     title: "Batalkan Pengajuan",
     button: "Batalkan Pengajuan",
     success: "Pengajuan Berhasil Dibatalkan",
+    description: "Pengajuan telah dihapus dari daftar.",
     color: "warning",
   },
 } as const;
@@ -76,7 +79,7 @@ async function onConfirm(alasanPenolakan?: string) {
     isLoading.value = false;
     return;
   }
-  useToastSuccess(labels[props.action].success);
+  useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
   await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
 }
@@ -95,7 +98,7 @@ function onReject(event: FormSubmitEvent<RejectMutasiSchema>) {
   >
     <template #body>
       <div class="space-y-4">
-        <dl class="space-y-3 rounded-lg bg-elevated p-4">
+        <dl class="space-y-4">
           <div>
             <dt class="text-sm text-muted">Anggota</dt>
             <dd class="font-medium">
@@ -133,13 +136,6 @@ function onReject(event: FormSubmitEvent<RejectMutasiSchema>) {
             />
           </UFormField>
         </UForm>
-        <p v-else class="text-sm text-muted">
-          {{
-            action === "approve"
-              ? "Persetujuan akan memperbarui saldo atau jumlah saham dan membuat jurnal otomatis."
-              : "Pengajuan pending ini akan dibatalkan."
-          }}
-        </p>
       </div>
     </template>
     <template #footer>

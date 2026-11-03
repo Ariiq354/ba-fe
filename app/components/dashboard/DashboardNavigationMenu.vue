@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import type { PembiayaanResponse } from "~/features/pembiayaan/model";
 import type { PemindahbukuanResponse } from "~/features/pemindahbukuan/model";
 import type { MutasiResponse } from "~/features/simpanan/model";
 import { useDocumentVisibility, useIntervalFn, useWindowFocus } from "#imports";
 import { useApi } from "~/composables/fetch";
+import { PEMBIAYAAN_PENDING_KEY } from "~/features/pembiayaan/data";
 import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/data";
 import { APPROVAL_SIMPANAN_PENDING_KEY } from "~/features/simpanan/data";
 import { authClient, can } from "~/utils/auth";
@@ -50,6 +52,27 @@ watch(canViewPemindahbukuanMutasi, (allowed) => {
   if (!allowed) clearPendingPemindahbukuan();
 });
 
+const canViewPembiayaanApproval = computed(() =>
+  can(session.value.data?.user.role, "approvalPembiayaan", "view"),
+);
+const { data: pendingPembiayaan, clear: clearPendingPembiayaan } = useApi<PembiayaanResponse>(
+  "/api/v1/pembiayaan",
+  {
+    key: PEMBIAYAAN_PENDING_KEY,
+    query: { status: "pending", page: 1, limit: 1 },
+    pick: ["total"],
+    enabled: canViewPembiayaanApproval,
+    watch: [canViewPembiayaanApproval],
+  },
+);
+const pendingPembiayaanBadge = computed<NavigationMenuItem["badge"]>(() => {
+  const total = pendingPembiayaan.value?.total ?? 0;
+  return total > 0 ? { label: String(total), color: "warning", variant: "subtle" } : undefined;
+});
+watch(canViewPembiayaanApproval, (allowed) => {
+  if (!allowed) clearPendingPembiayaan();
+});
+
 const documentVisibility = useDocumentVisibility();
 const windowFocused = useWindowFocus();
 
@@ -58,6 +81,7 @@ function refreshPendingApprovals() {
   const keys = [
     ...(canViewApproval.value ? [APPROVAL_SIMPANAN_PENDING_KEY] : []),
     ...(canViewPemindahbukuanMutasi.value ? [PEMINDAHBUKUAN_PENDING_KEY] : []),
+    ...(canViewPembiayaanApproval.value ? [PEMBIAYAAN_PENDING_KEY] : []),
   ];
   if (keys.length) void refreshNuxtData(keys);
 }
@@ -91,11 +115,9 @@ const serviceItems = computed<NavigationMenuItem[]>(() => {
     ...(can(role, "pemindahbukuan", "view")
       ? [{ label: "Pemindahbukuan", to: "/dashboard/pemindahbukuan", icon: "i-tabler-transfer" }]
       : []),
-    {
-      label: "Pembiayaan",
-      to: "/dashboard/pembiayaan",
-      icon: "i-tabler-file-invoice",
-    },
+    ...(can(role, "pembiayaan", "view")
+      ? [{ label: "Pembiayaan", to: "/dashboard/pembiayaan", icon: "i-tabler-file-invoice" }]
+      : []),
     {
       label: "Angsuran",
       to: "/dashboard/angsuran",
@@ -127,11 +149,16 @@ const managementItems = computed<NavigationMenuItem[]>(() => {
           },
         ]
       : []),
-    {
-      label: "Daftar Pembiayaan",
-      to: "/dashboard/daftar-pembiayaan",
-      icon: "i-tabler-files",
-    },
+    ...(canViewPembiayaanApproval.value
+      ? [
+          {
+            label: "Daftar Pembiayaan",
+            to: "/dashboard/daftar-pembiayaan",
+            icon: "i-tabler-files",
+            badge: pendingPembiayaanBadge.value,
+          },
+        ]
+      : []),
     {
       label: "Daftar Angsuran",
       to: "/dashboard/daftar-angsuran",

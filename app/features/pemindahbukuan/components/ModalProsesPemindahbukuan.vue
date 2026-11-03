@@ -28,18 +28,21 @@ const labels = {
     title: "Setujui Pemindahbukuan",
     button: "Setujui",
     success: "Pemindahbukuan Berhasil Disetujui",
+    description: "Saldo atau saham telah dipindahkan.",
     color: "primary",
   },
   reject: {
     title: "Tolak Pemindahbukuan",
     button: "Tolak",
     success: "Pemindahbukuan Berhasil Ditolak",
+    description: "Pemindahbukuan tidak dilanjutkan.",
     color: "error",
   },
   cancel: {
     title: "Batalkan Pemindahbukuan",
     button: "Batalkan Pengajuan",
     success: "Pemindahbukuan Berhasil Dibatalkan",
+    description: "Pengajuan telah dihapus dari daftar.",
     color: "warning",
   },
 } as const;
@@ -89,7 +92,7 @@ async function onConfirm(alasanPenolakan?: string) {
     isLoading.value = false;
     return;
   }
-  useToastSuccess(labels[props.action].success);
+  useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
   await refreshPemindahbukuanData(
     [props.transfer.idUserSumber, props.transfer.idUserTujuan],
@@ -111,7 +114,7 @@ function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
   >
     <template #body>
       <div class="space-y-4">
-        <div class="space-y-2 rounded-lg bg-elevated p-4">
+        <div class="space-y-2">
           <p class="font-medium">
             {{ transfer.sourceMemberName }} → {{ transfer.destinationMemberName }}
           </p>
@@ -148,13 +151,6 @@ function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
             />
           </UFormField>
         </UForm>
-        <p v-else class="text-sm text-muted">
-          {{
-            action === "approve"
-              ? "Persetujuan akan memindahkan saldo atau saham dan membuat jurnal otomatis."
-              : "Pengajuan akan dibatalkan dan cadangan saldo atau saham sumber dilepas."
-          }}
-        </p>
       </div>
     </template>
     <template #footer>

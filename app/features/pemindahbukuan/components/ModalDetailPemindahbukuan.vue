@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import type { Pemindahbukuan } from "../model";
-import {
-  formatSimpananDate,
-  formatSimpananTimestamp,
-  statusMutasiLabels,
-} from "~/features/simpanan/model";
+import AlasanPenolakan from "~/components/modal/AlasanPenolakan.vue";
+import { formatSimpananDate, formatSimpananTimestamp } from "~/features/simpanan/model";
 import { formatRupiah } from "~/utils/format";
 import { formatPemindahbukuanValue, tipePemindahbukuanLabels } from "../model";
 
@@ -21,9 +18,6 @@ const emit = defineEmits<{ close: [] }>();
   >
     <template #body>
       <div class="space-y-5">
-        <UBadge :color="statusMutasiLabels[transfer.statusApproved].color" variant="subtle">
-          {{ statusMutasiLabels[transfer.statusApproved].label }}
-        </UBadge>
         <dl class="grid gap-4 sm:grid-cols-2">
           <div>
             <dt class="text-sm text-muted">Anggota Sumber</dt>
@@ -106,12 +100,9 @@ const emit = defineEmits<{ close: [] }>();
             </dd>
           </div>
         </dl>
-        <UAlert
+        <AlasanPenolakan
           v-if="transfer.statusApproved === 'rejected'"
-          title="Alasan Penolakan"
-          :description="transfer.alasanPenolakan || '—'"
-          color="error"
-          variant="subtle"
+          :reason="transfer.alasanPenolakan || '—'"
         />
       </div>
     </template>

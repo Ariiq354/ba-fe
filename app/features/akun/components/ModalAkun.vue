@@ -38,7 +38,10 @@ async function onSubmit(event: FormSubmitEvent<AkunSchema>) {
     return;
   }
 
-  useToastSuccess(props.akun ? "Akun Berhasil Diperbarui" : "Akun Berhasil Ditambahkan");
+  useToastSuccess(
+    props.akun ? "Akun Berhasil Diperbarui" : "Akun Berhasil Ditambahkan",
+    "Data akun telah disimpan.",
+  );
   emit("close");
   await props.refresh();
 }

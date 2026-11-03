@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { MutasiSimpanan } from "../model";
+import AlasanPenolakan from "~/components/modal/AlasanPenolakan.vue";
 import { formatRupiah } from "~/utils/format";
-import { formatSimpananDate, formatSimpananTimestamp, statusMutasiLabels } from "../model";
+import { formatSimpananDate, formatSimpananTimestamp } from "../model";
 
 defineProps<{ mutasi: MutasiSimpanan }>();
 const emit = defineEmits<{ close: [] }>();
@@ -16,9 +17,6 @@ const emit = defineEmits<{ close: [] }>();
   >
     <template #body>
       <div class="space-y-5">
-        <UBadge :color="statusMutasiLabels[mutasi.statusApproved].color" variant="subtle">
-          {{ statusMutasiLabels[mutasi.statusApproved].label }}
-        </UBadge>
         <dl class="grid gap-4 sm:grid-cols-2">
           <div>
             <dt class="text-sm text-muted">Anggota</dt>
@@ -105,12 +103,9 @@ const emit = defineEmits<{ close: [] }>();
             </dd>
           </div>
         </dl>
-        <UAlert
+        <AlasanPenolakan
           v-if="mutasi.statusApproved === 'rejected'"
-          title="Alasan Penolakan"
-          :description="mutasi.alasanPenolakan || '—'"
-          color="error"
-          variant="subtle"
+          :reason="mutasi.alasanPenolakan || '—'"
         />
       </div>
     </template>

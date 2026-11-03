@@ -1,0 +1,12 @@
+import { JURNAL_LIST_KEY } from "~/features/jurnal/data";
+
+export const PEMBIAYAAN_LIST_KEY = "pembiayaan-list";
+export const PEMBIAYAAN_APPROVAL_LIST_KEY = "pembiayaan-approval-list";
+export const PEMBIAYAAN_PENDING_KEY = "pembiayaan-pending";
+
+export async function refreshPembiayaanData(refreshList: () => Promise<void>, approved = false) {
+  await Promise.all([
+    refreshList(),
+    refreshNuxtData([PEMBIAYAAN_PENDING_KEY, ...(approved ? [JURNAL_LIST_KEY] : [])]),
+  ]);
+}

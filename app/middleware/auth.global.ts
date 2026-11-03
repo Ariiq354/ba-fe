@@ -10,6 +10,8 @@ const routeResources = {
   "daftar-simpanan": "mutasiSimpanan",
   pemindahbukuan: "pemindahbukuan",
   "daftar-pemindahbukuan": "approvalPemindahbukuan",
+  pembiayaan: "pembiayaan",
+  "daftar-pembiayaan": "approvalPembiayaan",
 } as const;
 
 export default defineNuxtRouteMiddleware(async (to) => {

@@ -69,7 +69,7 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
     isLoading.value = false;
     return;
   }
-  useToastSuccess("Jurnal Berhasil Ditambahkan");
+  useToastSuccess("Jurnal Berhasil Ditambahkan", "Pencatatan debit dan kredit telah disimpan.");
   emit("close");
   await props.refresh();
 }

@@ -52,7 +52,7 @@ const destinationOptions = computed(() => {
       required
     >
       <UInput
-        :model-value="source ? `${source.name} · ${source.noAnggota}` : ''"
+        :model-value="source ? `${source.name} · ${source.namaKelompok}` : ''"
         placeholder="Pilih anggota sumber terlebih dahulu"
         readonly
         class="w-full"
@@ -65,7 +65,7 @@ const destinationOptions = computed(() => {
           :items="destinationOptions"
           value-key="value"
           placeholder="Pilih anggota tujuan"
-          :search-input="{ placeholder: 'Cari nama atau nomor anggota...' }"
+          :search-input="{ placeholder: 'Cari nama atau kelompok...' }"
           :loading="destinationStatus === 'pending'"
           :disabled="disabled || !enabled || destinationStatus !== 'success'"
           class="w-full"

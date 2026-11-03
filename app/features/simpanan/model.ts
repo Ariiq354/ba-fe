@@ -153,7 +153,7 @@ export const pengajuanLabels = {
 
 export function getAnggotaOptions(anggota: AnggotaSimpanan[]) {
   return anggota.map((item) => ({
-    label: `${item.name} · ${item.noAnggota || "Belum menjadi anggota"} · ${item.namaKelompok}`,
+    label: `${item.name} · ${item.namaKelompok}`,
     value: item.id,
     disabled: !item.noAnggota?.trim(),
   }));

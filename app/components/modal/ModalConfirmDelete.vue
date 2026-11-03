@@ -40,6 +40,7 @@ async function onClick() {
       });
       useToastSuccess(
         props.method === "DELETE" ? "Berhasil Hapus Data" : "Berhasil Memproses Data",
+        props.method === "DELETE" ? "Data yang dipilih telah dihapus." : "Perubahan telah disimpan.",
       );
     }
     await props.refresh?.();

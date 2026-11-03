@@ -51,7 +51,10 @@ async function onSubmit(event: FormSubmitEvent<MarginSchema>) {
     return;
   }
 
-  useToastSuccess(props.margin ? "Margin Berhasil Diperbarui" : "Margin Berhasil Ditambahkan");
+  useToastSuccess(
+    props.margin ? "Margin Berhasil Diperbarui" : "Margin Berhasil Ditambahkan",
+    "Ketentuan margin telah disimpan.",
+  );
   emit("close");
   await props.refresh();
 }

@@ -3,12 +3,7 @@ import type { Pengguna, VerifikasiPenggunaResponse } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL, IMAGE_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
-import {
-  formatPenggunaDate,
-  formatPenggunaRole,
-  getPenggunaStatus,
-  statusPenggunaLabels,
-} from "../model";
+import { formatPenggunaDate, formatPenggunaRole, getPenggunaStatus } from "../model";
 
 const props = defineProps<{
   pengguna: Pengguna;
@@ -25,7 +20,6 @@ const canVerify = computed(
 const imageSrc = computed(() =>
   props.pengguna.image ? `${IMAGE_URL}/${props.pengguna.image}` : undefined,
 );
-const penggunaStatus = computed(() => statusPenggunaLabels[getPenggunaStatus(props.pengguna)]);
 
 async function onVerify() {
   if (isLoading.value || !canVerify.value) return;
@@ -111,9 +105,6 @@ async function onVerify() {
                 <span class="wrap-break-word">@{{ pengguna.username }}</span>
               </template>
             </div>
-            <UBadge :color="penggunaStatus.color" variant="subtle" size="sm" class="mt-3">
-              {{ penggunaStatus.label }}
-            </UBadge>
           </div>
         </div>
 

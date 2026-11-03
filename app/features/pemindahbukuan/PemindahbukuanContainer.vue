@@ -6,7 +6,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
-import { getAnggotaOptions, statusMutasiOptions } from "~/features/simpanan/model";
+import { statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
 import ModalPengajuanPemindahbukuan from "./components/ModalPengajuanPemindahbukuan.vue";
@@ -23,14 +23,10 @@ const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
 const tipe = ref<"all" | TipePemindahbukuan>("all");
-const selectedUserId = ref<number | "all">("all");
-const targetUserId = computed(() =>
-  selectedUserId.value === "all" ? undefined : selectedUserId.value,
-);
 const limit = 10;
 
 watch(
-  [search, statusFilter, tipe, targetUserId],
+  [search, statusFilter, tipe],
   () => {
     page.value = 1;
   },
@@ -39,7 +35,6 @@ watch(
 
 const {
   data: members,
-  status: membersStatus,
   error: membersError,
   refresh: refreshMembers,
 } = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
@@ -47,10 +42,6 @@ const {
   watch: [canView],
 });
 const accessibleSourceIds = computed(() => members.value?.data.map((member) => member.id) ?? []);
-const memberOptions = computed(() => [
-  { label: "Semua anggota dalam cakupan", value: "all" },
-  ...getAnggotaOptions(members.value?.data ?? []),
-]);
 const tipeOptions = [{ label: "Semua jenis", value: "all" }, ...tipePemindahbukuanOptions];
 const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1/pemindahbukuan", {
   key: PEMINDAHBUKUAN_LIST_KEY,
@@ -60,7 +51,6 @@ const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1
     search,
     status: statusFilter,
     tipePemindahbukuan: tipe,
-    userId: targetUserId,
   },
   enabled: canView,
   watch: [canView],
@@ -127,15 +117,6 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
             placeholder="Cari kode transaksi..."
             aria-label="Cari pemindahbukuan"
           />
-          <USelectMenu
-            v-model="selectedUserId"
-            :items="memberOptions"
-            value-key="value"
-            :loading="membersStatus === 'pending'"
-            :disabled="membersStatus !== 'success'"
-            aria-label="Filter anggota"
-            class="w-full lg:w-80"
-          />
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
           <USelect
@@ -153,7 +134,8 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
         </div>
         <UAlert
           v-if="membersError"
-          title="Gagal Memuat Pilihan Anggota"
+          title="Gagal Memuat Akses Anggota"
+          description="Aksi pembatalan belum tersedia. Silakan coba lagi."
           color="error"
           variant="subtle"
           :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshMembers() }]"

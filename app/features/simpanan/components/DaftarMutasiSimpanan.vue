@@ -36,12 +36,14 @@ const selectedUserId = ref<number | "all">("all");
 const limit = 10;
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canManage = computed(() =>
-  can(
-    session.value.data?.user.role,
-    props.scope === "member" && props.userId === actorId.value ? "simpananSaya" : "mutasiSimpanan",
-    "manage",
-  ),
+const canCancel = computed(
+  () =>
+    props.scope === "member" &&
+    can(
+      session.value.data?.user.role,
+      props.userId === actorId.value ? "simpananSaya" : "mutasiSimpanan",
+      "manage",
+    ),
 );
 const canApprove = computed(
   () =>
@@ -112,7 +114,7 @@ function viewMutasi(mutasi: MutasiSimpanan) {
 function processMutasi(mutasi: MutasiSimpanan, action: "approve" | "reject" | "cancel") {
   if (status.value === "pending" || mutasi.statusApproved !== "pending") return;
   if (action === "cancel") {
-    if (!canManage.value || !canCancelMutasi(mutasi, actorId.value)) return;
+    if (!canCancel.value || !canCancelMutasi(mutasi, actorId.value)) return;
   } else if (!canApprove.value) {
     return;
   }
@@ -137,7 +139,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
       },
     );
   }
-  if (canManage.value && canCancelMutasi(mutasi, actorId.value)) {
+  if (canCancel.value && canCancelMutasi(mutasi, actorId.value)) {
     items.push({
       label: "Batalkan Pengajuan",
       icon: "i-tabler-ban",
