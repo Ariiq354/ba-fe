@@ -332,7 +332,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
         <UFormField label="Keterangan" name="keterangan">
           <UTextarea
             v-model="state.keterangan"
-            placeholder="Keterangan pemindahbukuan (opsional)"
+            placeholder="Tambahkan keterangan (opsional)"
             class="w-full"
           />
         </UFormField>

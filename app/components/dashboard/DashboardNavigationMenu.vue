@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import type { AngsuranResponse } from "~/features/angsuran/model";
 import type { PembiayaanResponse } from "~/features/pembiayaan/model";
 import type { PemindahbukuanResponse } from "~/features/pemindahbukuan/model";
 import type { MutasiResponse } from "~/features/simpanan/model";
 import { useDocumentVisibility, useIntervalFn, useWindowFocus } from "#imports";
 import { useApi } from "~/composables/fetch";
+import { ANGSURAN_PENDING_KEY } from "~/features/angsuran/data";
 import { PEMBIAYAAN_PENDING_KEY } from "~/features/pembiayaan/data";
 import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/data";
 import { APPROVAL_SIMPANAN_PENDING_KEY } from "~/features/simpanan/data";
@@ -73,6 +75,27 @@ watch(canViewPembiayaanApproval, (allowed) => {
   if (!allowed) clearPendingPembiayaan();
 });
 
+const canViewAngsuranApproval = computed(() =>
+  can(session.value.data?.user.role, "approvalAngsuran", "view"),
+);
+const { data: pendingAngsuran, clear: clearPendingAngsuran } = useApi<AngsuranResponse>(
+  "/api/v1/angsuran",
+  {
+    key: ANGSURAN_PENDING_KEY,
+    query: { status: "pending", page: 1, limit: 1 },
+    pick: ["total"],
+    enabled: canViewAngsuranApproval,
+    watch: [canViewAngsuranApproval],
+  },
+);
+const pendingAngsuranBadge = computed<NavigationMenuItem["badge"]>(() => {
+  const total = pendingAngsuran.value?.total ?? 0;
+  return total > 0 ? { label: String(total), color: "warning", variant: "subtle" } : undefined;
+});
+watch(canViewAngsuranApproval, (allowed) => {
+  if (!allowed) clearPendingAngsuran();
+});
+
 const documentVisibility = useDocumentVisibility();
 const windowFocused = useWindowFocus();
 
@@ -82,6 +105,7 @@ function refreshPendingApprovals() {
     ...(canViewApproval.value ? [APPROVAL_SIMPANAN_PENDING_KEY] : []),
     ...(canViewPemindahbukuanMutasi.value ? [PEMINDAHBUKUAN_PENDING_KEY] : []),
     ...(canViewPembiayaanApproval.value ? [PEMBIAYAAN_PENDING_KEY] : []),
+    ...(canViewAngsuranApproval.value ? [ANGSURAN_PENDING_KEY] : []),
   ];
   if (keys.length) void refreshNuxtData(keys);
 }
@@ -118,11 +142,9 @@ const serviceItems = computed<NavigationMenuItem[]>(() => {
     ...(can(role, "pembiayaan", "view")
       ? [{ label: "Pembiayaan", to: "/dashboard/pembiayaan", icon: "i-tabler-file-invoice" }]
       : []),
-    {
-      label: "Angsuran",
-      to: "/dashboard/angsuran",
-      icon: "i-tabler-calendar-dollar",
-    },
+    ...(can(role, "angsuran", "view")
+      ? [{ label: "Angsuran", to: "/dashboard/angsuran", icon: "i-tabler-calendar-dollar" }]
+      : []),
   ];
 });
 
@@ -159,11 +181,16 @@ const managementItems = computed<NavigationMenuItem[]>(() => {
           },
         ]
       : []),
-    {
-      label: "Daftar Angsuran",
-      to: "/dashboard/daftar-angsuran",
-      icon: "i-tabler-calendar-check",
-    },
+    ...(canViewAngsuranApproval.value
+      ? [
+          {
+            label: "Daftar Angsuran",
+            to: "/dashboard/daftar-angsuran",
+            icon: "i-tabler-calendar-check",
+            badge: pendingAngsuranBadge.value,
+          },
+        ]
+      : []),
   ];
 });
 

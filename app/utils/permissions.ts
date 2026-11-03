@@ -16,6 +16,8 @@ export const statement = {
   approvalPemindahbukuan: ["view", "manage"],
   pembiayaan: ["view", "manage", "delegate"],
   approvalPembiayaan: ["view", "manage"],
+  angsuran: ["view", "manage", "delegate"],
+  approvalAngsuran: ["view", "manage"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -24,6 +26,7 @@ export const user = ac.newRole({
   simpananSaya: ["view", "manage"],
   pemindahbukuan: ["view", "manage"],
   pembiayaan: ["view", "manage"],
+  angsuran: ["view", "manage"],
 });
 
 export const pj = ac.newRole({
@@ -32,6 +35,7 @@ export const pj = ac.newRole({
   mutasiSimpanan: ["view", "manage"],
   pemindahbukuan: ["view", "manage"],
   pembiayaan: ["view", "manage", "delegate"],
+  angsuran: ["view", "manage", "delegate"],
 });
 
 export const admin = ac.newRole(statement);

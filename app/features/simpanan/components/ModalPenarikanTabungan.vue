@@ -155,10 +155,10 @@ async function onSubmit(event: FormSubmitEvent<PenarikanTabungan>) {
             variant="subtle"
           />
         </div>
-        <UFormField label="Keterangan" name="keterangan" hint="Opsional">
+        <UFormField label="Keterangan" name="keterangan">
           <UTextarea
             v-model="state.keterangan"
-            placeholder="Tambahkan catatan bila perlu"
+            placeholder="Tambahkan keterangan (opsional)"
             :rows="2"
             :maxrows="4"
             autoresize

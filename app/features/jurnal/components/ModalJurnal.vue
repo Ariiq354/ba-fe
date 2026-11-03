@@ -98,7 +98,7 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
         <UFormField label="Keterangan" name="keterangan">
           <UTextarea
             v-model="state.keterangan"
-            placeholder="Keterangan transaksi (opsional)"
+            placeholder="Tambahkan keterangan (opsional)"
             class="w-full"
           />
         </UFormField>

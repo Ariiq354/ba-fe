@@ -235,10 +235,10 @@ async function onSubmit(event: FormSubmitEvent<PembelianSaham>) {
           </dl>
           <p class="text-xs text-muted">Harga final mengikuti harga saat pengajuan disimpan.</p>
         </div>
-        <UFormField label="Keterangan" name="keterangan" hint="Opsional">
+        <UFormField label="Keterangan" name="keterangan">
           <UTextarea
             v-model="state.keterangan"
-            placeholder="Tambahkan catatan bila perlu"
+            placeholder="Tambahkan keterangan (opsional)"
             :rows="2"
             :maxrows="4"
             autoresize

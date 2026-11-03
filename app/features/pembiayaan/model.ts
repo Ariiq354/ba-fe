@@ -82,6 +82,20 @@ export interface PembiayaanResponse {
   data: Pembiayaan[];
 }
 
+export interface PembiayaanOption {
+  id: number;
+  kodeTransaksi: string;
+  tujuan: string;
+  totalTagihan: number;
+  sisaTagihan: number;
+  angsuranBulanan: number;
+  sisaPembayaranBulanIni: number;
+}
+
+export interface PembiayaanOptionsResponse {
+  data: PembiayaanOption[];
+}
+
 export function canProcessPembiayaan(
   item: Pick<Pembiayaan, "statusApproved" | "statusTransfer">,
   action: PembiayaanAction,
