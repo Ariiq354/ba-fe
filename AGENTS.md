@@ -1,5 +1,10 @@
 # Agent Instructions
 
+## UI
+
+- Keep UI copy minimal and direct; assume users understand the workflow.
+- Don't add explanatory cards, banners, or lengthy instructions unless explicitly requested. Use concise labels, validation, and actionable error messages where needed.
+
 ## Testing
 
 - Don't create test files (no `*.test.*`, `*.spec.*`, `test_*.py`, `tests/` directories, etc.) and don't add them to the repo.

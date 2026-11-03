@@ -41,6 +41,13 @@ export const rejectPembiayaanSchema = z.object({
 });
 export type RejectPembiayaan = z.output<typeof rejectPembiayaanSchema>;
 
+export type StatusTransfer = "belum_transfer" | "sudah_transfer";
+export type PembiayaanAction = "transfer" | "approve" | "reject" | "cancel";
+export const statusTransferLabels = {
+  belum_transfer: { label: "Belum Transfer", color: "warning" },
+  sudah_transfer: { label: "Sudah Transfer", color: "success" },
+} as const;
+
 export interface Pembiayaan {
   id: number;
   kodeTransaksi: string;
@@ -53,7 +60,12 @@ export interface Pembiayaan {
   totalPembiayaan: number;
   jangkaWaktuBulan: number;
   tujuan: string;
-  tanggalPembiayaan: string;
+  tanggalPengajuan: string;
+  tanggalTransfer: string | null;
+  tanggalPembiayaan: string | null;
+  statusTransfer: StatusTransfer;
+  transferredBy: number | null;
+  transferredAt: string | null;
   statusApproved: StatusMutasi;
   alasanPenolakan: string | null;
   createdBy: number;
@@ -70,22 +82,32 @@ export interface PembiayaanResponse {
   data: Pembiayaan[];
 }
 
+export function canProcessPembiayaan(
+  item: Pick<Pembiayaan, "statusApproved" | "statusTransfer">,
+  action: PembiayaanAction,
+) {
+  return (
+    item.statusApproved === "pending" &&
+    item.statusTransfer === (action === "approve" ? "sudah_transfer" : "belum_transfer")
+  );
+}
+
 // Rows must come from the backend's access-scoped pembiayaan list.
 export function canCancelPembiayaan(
-  item: Pick<Pembiayaan, "statusApproved" | "userId" | "createdBy">,
+  item: Pick<Pembiayaan, "statusApproved" | "statusTransfer" | "userId" | "createdBy">,
   actorId: number,
 ) {
   return (
-    item.statusApproved === "pending" && (item.userId === actorId || item.createdBy === actorId)
+    canProcessPembiayaan(item, "cancel") && (item.userId === actorId || item.createdBy === actorId)
   );
 }
 
 export const pembiayaanColumns: TableColumn<Pembiayaan>[] = [
   { accessorKey: "kodeTransaksi", header: "Kode Transaksi" },
   {
-    accessorKey: "tanggalPembiayaan",
-    header: "Tanggal",
-    cell: ({ row }) => formatSimpananDate(row.original.tanggalPembiayaan),
+    accessorKey: "tanggalPengajuan",
+    header: "Tanggal Pengajuan",
+    cell: ({ row }) => formatSimpananDate(row.original.tanggalPengajuan),
   },
   { accessorKey: "memberName", header: "Anggota" },
   {

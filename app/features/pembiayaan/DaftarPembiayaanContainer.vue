@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
-import type { Pembiayaan, PembiayaanResponse } from "./model";
+import type { Pembiayaan, PembiayaanAction, PembiayaanResponse } from "./model";
 import type { AnggotaOptionsResponse, StatusMutasi } from "~/features/simpanan/model";
 import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
@@ -12,6 +12,7 @@ import ModalDetailPembiayaan from "./components/ModalDetailPembiayaan.vue";
 import ModalProsesPembiayaan from "./components/ModalProsesPembiayaan.vue";
 import TabelPembiayaan from "./components/TabelPembiayaan.vue";
 import { PEMBIAYAAN_APPROVAL_LIST_KEY } from "./data";
+import { canProcessPembiayaan } from "./model";
 
 const session = authClient.useSession();
 const canView = computed(() => can(session.value.data?.user.role, "approvalPembiayaan", "view"));
@@ -49,7 +50,13 @@ const memberOptions = computed(() => [
 ]);
 const { data, status, error, refresh } = useApi<PembiayaanResponse>("/api/v1/pembiayaan", {
   key: PEMBIAYAAN_APPROVAL_LIST_KEY,
-  query: { page, limit, search, status: statusFilter, userId: targetUserId },
+  query: {
+    page,
+    limit,
+    search,
+    status: statusFilter,
+    userId: targetUserId,
+  },
   enabled: canView,
   watch: [canView],
 });
@@ -59,26 +66,35 @@ const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 function viewPembiayaan(item: Pembiayaan) {
   openModal(ModalDetailPembiayaan, { pembiayaan: item });
 }
-function processPembiayaan(item: Pembiayaan, action: "approve" | "reject") {
-  if (status.value === "pending" || item.statusApproved !== "pending" || !canApprove.value) return;
+function processPembiayaan(item: Pembiayaan, action: Exclude<PembiayaanAction, "cancel">) {
+  if (status.value === "pending" || !canApprove.value || !canProcessPembiayaan(item, action))
+    return;
   openModal(ModalProsesPembiayaan, { pembiayaan: item, action, refresh: refreshList });
 }
 function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {
   if (item.statusApproved !== "pending" || status.value === "pending" || !canApprove.value)
     return [];
-  return [
-    {
+  const items: DropdownMenuItem[] = [];
+  if (canProcessPembiayaan(item, "transfer"))
+    items.push({
+      label: "Transfer",
+      icon: "i-tabler-cash-banknote",
+      onSelect: () => processPembiayaan(item, "transfer"),
+    });
+  if (canProcessPembiayaan(item, "approve"))
+    items.push({
       label: "Setujui",
       icon: "i-tabler-check",
       onSelect: () => processPembiayaan(item, "approve"),
-    },
-    {
+    });
+  if (canProcessPembiayaan(item, "reject"))
+    items.push({
       label: "Tolak",
       icon: "i-tabler-x",
       color: "error",
       onSelect: () => processPembiayaan(item, "reject"),
-    },
-  ];
+    });
+  return items;
 }
 </script>
 
@@ -92,7 +108,7 @@ function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {
     </div>
     <UCard>
       <div class="space-y-4">
-        <div class="flex flex-col gap-3 lg:flex-row">
+        <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
           <InputSearch
             v-model="search"
             placeholder="Cari kode transaksi..."

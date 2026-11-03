@@ -14,6 +14,7 @@ import { maxPembiayaanAmount, pembiayaanSchema } from "../model";
 const props = defineProps<{ refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
+const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const actorId = computed(() => Number(session.value.data?.user.id));
 const canManage = computed(() => can(session.value.data?.user.role, "pembiayaan", "manage"));
 const canDelegate = computed(() => can(session.value.data?.user.role, "pembiayaan", "delegate"));
@@ -145,12 +146,14 @@ const ready = computed(
 async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
   if (isLoading.value || !ready.value) return;
   if (!canDelegate.value && event.data.userId !== actorId.value) return;
+  const recordsTransfer = isAdmin.value;
   isLoading.value = true;
   try {
     await $fetch("/api/v1/pembiayaan", {
       baseURL: API_URL,
       method: "POST",
       credentials: "include",
+      retry: 0,
       body: {
         ...event.data,
         persenMarginTahun:
@@ -165,16 +168,25 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
     isLoading.value = false;
     return;
   }
-  useToastSuccess("Pembiayaan Berhasil Diajukan", "Pengajuan menunggu persetujuan admin.");
+  useToastSuccess(
+    "Pembiayaan Berhasil Diajukan",
+    recordsTransfer
+      ? "Dana wakalah dan jurnal telah dicatat. Pengajuan menunggu persetujuan akad."
+      : "Pengajuan menunggu penyaluran dana wakalah oleh admin, lalu persetujuan akad.",
+  );
   emit("close");
-  await refreshPembiayaanData(props.refresh);
+  await refreshPembiayaanData(props.refresh, recordsTransfer);
 }
 </script>
 
 <template>
   <UModal
     title="Ajukan Pembiayaan"
-    description="Isi kebutuhan pembiayaan untuk diajukan kepada admin."
+    :description="
+      isAdmin
+        ? 'Input pembiayaan sekaligus mencatat penyaluran dana wakalah.'
+        : 'Ajukan pembiayaan untuk penyaluran dana wakalah dan persetujuan akad oleh admin.'
+    "
     :ui="{ content: 'sm:max-w-2xl' }"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
@@ -337,7 +349,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
           icon="i-tabler-send"
           :loading="isLoading"
           :disabled="!ready"
-          >Ajukan</UButton
+          >{{ isAdmin ? "Simpan & Catat Wakalah" : "Ajukan" }}</UButton
         >
       </div>
     </template>

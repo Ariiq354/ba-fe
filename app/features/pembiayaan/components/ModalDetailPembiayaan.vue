@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import type { Pembiayaan } from "../model";
 import AlasanPenolakan from "~/components/modal/AlasanPenolakan.vue";
-import { formatSimpananDate, formatSimpananTimestamp } from "~/features/simpanan/model";
+import {
+  formatSimpananDate,
+  formatSimpananTimestamp,
+  statusMutasiLabels,
+} from "~/features/simpanan/model";
 import { formatRupiah } from "~/utils/format";
+import { statusTransferLabels } from "../model";
 
 const props = defineProps<{ pembiayaan: Pembiayaan }>();
 const emit = defineEmits<{ close: [] }>();
@@ -10,7 +15,17 @@ const details = computed(() => {
   const item = props.pembiayaan;
   return [
     { label: "Anggota", value: item.memberName },
-    { label: "Tanggal Pembiayaan", value: formatSimpananDate(item.tanggalPembiayaan) },
+    { label: "Tanggal Pengajuan", value: formatSimpananDate(item.tanggalPengajuan) },
+    { label: "Dana Wakalah", value: statusTransferLabels[item.statusTransfer].label },
+    { label: "Status Akad", value: statusMutasiLabels[item.statusApproved].label },
+    {
+      label: "Tanggal Transfer Wakalah",
+      value: item.tanggalTransfer ? formatSimpananDate(item.tanggalTransfer) : "—",
+    },
+    {
+      label: "Tanggal Akad Pembiayaan",
+      value: item.tanggalPembiayaan ? formatSimpananDate(item.tanggalPembiayaan) : "—",
+    },
     { label: "Jumlah Pokok", value: formatRupiah(item.jumlahPokok) },
     { label: "Jangka Waktu", value: `${item.jangkaWaktuBulan} bulan` },
     {
@@ -24,6 +39,10 @@ const details = computed(() => {
     { label: "Diajukan Oleh", value: item.creatorName },
     { label: "Diproses Oleh", value: item.approverName || "—" },
     { label: "Waktu Pengajuan", value: formatSimpananTimestamp(item.createdAt) },
+    {
+      label: "Waktu Pencatatan Transfer",
+      value: item.transferredAt ? formatSimpananTimestamp(item.transferredAt) : "—",
+    },
     {
       label: "Waktu Diproses",
       value: item.approvedAt ? formatSimpananTimestamp(item.approvedAt) : "—",

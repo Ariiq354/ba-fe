@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { Pembiayaan, RejectPembiayaan } from "../model";
+import type { Pembiayaan, PembiayaanAction, RejectPembiayaan } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import { refreshPembiayaanData } from "../data";
-import { canCancelPembiayaan, rejectPembiayaanSchema } from "../model";
+import { canCancelPembiayaan, canProcessPembiayaan, rejectPembiayaanSchema } from "../model";
 
 const props = defineProps<{
   pembiayaan: Pembiayaan;
-  action: "approve" | "reject" | "cancel";
+  action: PembiayaanAction;
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
@@ -18,11 +18,18 @@ const session = authClient.useSession();
 const isLoading = ref(false);
 const state = reactive({ alasanPenolakan: "" });
 const labels = {
+  transfer: {
+    title: "Transfer",
+    button: "Transfer",
+    success: "Dana wakalah berhasil dicatat.",
+    description: "Jurnal wakalah telah dibuat. Pengajuan menunggu persetujuan akad.",
+    color: "warning",
+  },
   approve: {
     title: "Setujui Pembiayaan",
     button: "Setujui",
     success: "Pembiayaan disetujui.",
-    description: "Pencairan dan jurnal telah dicatat.",
+    description: "Jurnal akad telah dicatat. Pembiayaan sudah dapat diangsur.",
     color: "primary",
   },
   reject: {
@@ -41,7 +48,7 @@ const labels = {
   },
 } as const;
 const canProcess = computed(() => {
-  if (props.pembiayaan.statusApproved !== "pending") return false;
+  if (!canProcessPembiayaan(props.pembiayaan, props.action)) return false;
   const role = session.value.data?.user.role;
   return props.action === "cancel"
     ? can(role, "pembiayaan", "manage") &&
@@ -65,6 +72,7 @@ async function onConfirm(alasanPenolakan?: string) {
         baseURL: API_URL,
         method: props.action === "cancel" ? "DELETE" : "PATCH",
         credentials: "include",
+        retry: 0,
         body:
           props.action === "cancel"
             ? { ids: [props.pembiayaan.id] }
@@ -83,7 +91,10 @@ async function onConfirm(alasanPenolakan?: string) {
   }
   useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
-  await refreshPembiayaanData(props.refresh, props.action === "approve");
+  await refreshPembiayaanData(
+    props.refresh,
+    props.action === "approve" || props.action === "transfer",
+  );
 }
 function onReject(event: FormSubmitEvent<RejectPembiayaan>) {
   return onConfirm(event.data.alasanPenolakan);
@@ -107,7 +118,12 @@ function onReject(event: FormSubmitEvent<RejectPembiayaan>) {
               pembiayaan.persenMarginTahun.toLocaleString("id-ID")
             }}% per tahun)
           </p>
-          <p class="text-lg font-semibold">Total: {{ formatRupiah(pembiayaan.totalPembiayaan) }}</p>
+          <p v-if="action === 'transfer'" class="text-lg font-semibold">
+            Dana wakalah: {{ formatRupiah(pembiayaan.jumlahPokok) }}
+          </p>
+          <p class="text-lg font-semibold">
+            Total Pokok + Margin: {{ formatRupiah(pembiayaan.totalPembiayaan) }}
+          </p>
           <p class="text-sm text-muted">
             {{ pembiayaan.jangkaWaktuBulan }} bulan · {{ pembiayaan.metodePembayaran }}
           </p>
