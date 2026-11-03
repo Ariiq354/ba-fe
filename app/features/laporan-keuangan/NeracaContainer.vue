@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import type { BagianLaporan, NeracaResponse } from "./model";
 import { useApi } from "~/composables/fetch";
+import { formatRupiah } from "~/utils/format";
 import TabelLaporanKeuangan from "./components/TabelLaporanKeuangan.vue";
+import { bulanLaporan } from "./model";
 
 const tahun = ref(new Date().getFullYear());
 const { data, status, error, refresh } = useApi<NeracaResponse>("/api/v1/jurnal/neraca", {
   query: { tahun },
+});
+const bulanTidakBalance = computed(() => {
+  if (!data.value || status.value !== "success") return [];
+  const { aktivaBulanan, pasivaBulanan } = data.value.ringkasan;
+  return bulanLaporan
+    .map((bulan, index) => ({
+      bulan,
+      selisih: (aktivaBulanan[index] ?? 0) - (pasivaBulanan[index] ?? 0),
+    }))
+    .filter((item) => item.selisih !== 0);
 });
 const bagian = computed<BagianLaporan[]>(() => {
   if (!data.value) return [];
@@ -57,13 +69,31 @@ function updateTahun(value: number) {
           { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refresh() },
         ]"
       />
-      <TabelLaporanKeuangan
-        v-else
-        title="Neraca"
-        :tahun="tahun"
-        :bagian="bagian"
-        :loading="status === 'pending'"
-      />
+      <template v-else>
+        <UAlert
+          v-if="bulanTidakBalance.length"
+          title="Neraca Tidak Balance"
+          color="warning"
+          variant="subtle"
+          icon="i-tabler-alert-triangle"
+          class="mb-4"
+        >
+          <template #description>
+            <ul class="list-disc space-y-1 pl-4">
+              <li v-for="item in bulanTidakBalance" :key="item.bulan">
+                Ada tidak balance di bulan {{ item.bulan }} {{ tahun }} dengan jumlah
+                {{ formatRupiah(item.selisih) }}.
+              </li>
+            </ul>
+          </template>
+        </UAlert>
+        <TabelLaporanKeuangan
+          title="Neraca"
+          :tahun="tahun"
+          :bagian="bagian"
+          :loading="status === 'pending'"
+        />
+      </template>
     </UCard>
   </div>
 </template>
