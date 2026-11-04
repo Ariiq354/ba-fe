@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import BerandaContainer from "~/features/beranda/BerandaContainer.vue";
+
 definePageMeta({
   layout: {
     name: "default",
@@ -14,5 +16,5 @@ useHead({
 </script>
 
 <template>
-  <div>Ini Dashboard</div>
+  <BerandaContainer />
 </template>

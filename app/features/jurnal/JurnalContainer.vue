@@ -10,8 +10,13 @@ import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailJurnal from "./components/ModalDetailJurnal.vue";
 import ModalJurnal from "./components/ModalJurnal.vue";
+import ModalJurnalTemplate from "./components/ModalJurnalTemplate.vue";
 import { JURNAL_LIST_KEY } from "./data";
 import { getJurnalSummaries, jurnalColumns } from "./model";
+
+const props = withDefaults(defineProps<{ mode?: "manual" | "transaksi" }>(), {
+  mode: "manual",
+});
 
 const page = ref(1);
 const search = ref("");
@@ -38,6 +43,10 @@ const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm() {
   if (!canManage.value) return;
+  if (props.mode === "transaksi") {
+    openModal(ModalJurnalTemplate, { refresh: refreshList });
+    return;
+  }
   openModal(ModalJurnal, { refresh: refreshList });
 }
 
@@ -47,15 +56,22 @@ function viewJurnal(jurnal: JurnalSummary) {
 
 function deleteJurnal(ids: number[]) {
   if (!canManage.value || !ids.length) return;
+  const allowedIds = new Set(journals.value.filter(canDeleteJurnal).map((jurnal) => jurnal.id));
+  const deletableIds = [...new Set(ids)].filter((id) => allowedIds.has(id));
+  if (!deletableIds.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Jurnal",
-    description: `Apakah Anda yakin ingin menghapus ${ids.length} jurnal beserta seluruh rincian akunnya?`,
+    description: `Apakah Anda yakin ingin menghapus ${deletableIds.length} jurnal beserta seluruh rincian akunnya?`,
     path: `${API_URL}/api/v1/jurnal`,
-    body: { ids },
+    body: { ids: deletableIds },
     confirmText: "Hapus",
     cancelText: "Batal",
     refresh: refreshList,
   });
+}
+
+function canDeleteJurnal(jurnal: JurnalSummary) {
+  return canManage.value && jurnal.kodeTransaksi.startsWith("TRX");
 }
 </script>
 
@@ -63,7 +79,9 @@ function deleteJurnal(ids: number[]) {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-highlighted">Jurnal Transaksi</h1>
+        <h1 class="text-2xl font-semibold text-highlighted">
+          {{ mode === "transaksi" ? "Input Transaksi" : "Input Manual" }}
+        </h1>
         <p class="mt-1 text-sm text-muted">
           Kelola pencatatan transaksi dan rincian debit–kredit setiap jurnal.
         </p>
@@ -101,6 +119,7 @@ function deleteJurnal(ids: number[]) {
           :total="total"
           :selectable="canManage"
           :deletable="canManage"
+          :row-deletable="canDeleteJurnal"
           viewable
           enumerate
           pagination

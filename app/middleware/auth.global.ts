@@ -30,6 +30,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo({ path: "/" });
     }
 
+    const masterInputPath = "/dashboard/jurnal/master-input";
+    if (
+      (to.path === masterInputPath || to.path.startsWith(`${masterInputPath}/`)) &&
+      session.user.role !== "admin"
+    ) {
+      return navigateTo({ path: "/dashboard/jurnal" });
+    }
+
     for (const [route, resource] of Object.entries(routeResources)) {
       const path = `/dashboard/${route}`;
       if (

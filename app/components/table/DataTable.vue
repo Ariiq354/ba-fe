@@ -5,6 +5,7 @@ const {
   data,
   viewable,
   deletable,
+  rowDeletable,
   editable,
   selectable,
   columns,
@@ -17,6 +18,7 @@ const {
   loading?: boolean;
   viewable?: boolean;
   deletable?: boolean;
+  rowDeletable?: (row: any) => boolean;
   editable?: boolean;
   selectable?: boolean;
   enumerate?: boolean;
@@ -31,6 +33,28 @@ const emit = defineEmits<{
 const slots = useSlots();
 const page = defineModel("page", { default: 1 });
 const rowSelection = ref<Record<string, boolean>>({});
+
+function isRowDeletable(row: any) {
+  return !!deletable && (rowDeletable?.(row) ?? true);
+}
+
+function canSelectRow(row: { original: any }) {
+  return !!selectable && (rowDeletable?.(row.original) ?? true);
+}
+
+const selectedIds = computed(() =>
+  Object.entries(rowSelection.value)
+    .filter(([, selected]) => selected)
+    .map(([index]) => data?.[Number(index)])
+    .filter((row) => row && canSelectRow({ original: row }) && isRowDeletable(row))
+    .map((row) => row.id)
+    .filter((id) => id != null),
+);
+
+function deleteSelectedRows() {
+  if (!selectedIds.value.length) return;
+  emit("delete", selectedIds.value);
+}
 
 const UButton = resolveComponent("UButton");
 const UCheckbox = resolveComponent("UCheckbox");
@@ -49,14 +73,17 @@ const newColumns = computed<TableColumn<any>[]>(() => [
               "onUpdate:modelValue": (value: boolean | "indeterminate") =>
                 table.toggleAllPageRowsSelected(!!value),
               "aria-label": "Select all",
+              disabled: !table.getRowModel().rows.some((row) => row.getCanSelect()),
             }),
           cell: ({ row }) =>
-            h(UCheckbox, {
-              modelValue: row.getIsSelected(),
-              "onUpdate:modelValue": (value: boolean | "indeterminate") =>
-                row.toggleSelected(!!value),
-              "aria-label": "Select row",
-            }),
+            row.getCanSelect()
+              ? h(UCheckbox, {
+                  modelValue: row.getIsSelected(),
+                  "onUpdate:modelValue": (value: boolean | "indeterminate") =>
+                    row.toggleSelected(!!value),
+                  "aria-label": "Select row",
+                })
+              : null,
         } as TableColumn<any>,
       ]
     : []),
@@ -75,6 +102,7 @@ const newColumns = computed<TableColumn<any>[]>(() => [
           header: "",
           accessorKey: "actions",
           cell: ({ row }) => {
+            const canDelete = isRowDeletable(row.original);
             const items: DropdownMenuItem[] = [
               ...(viewable
                 ? [
@@ -99,17 +127,17 @@ const newColumns = computed<TableColumn<any>[]>(() => [
                   ]
                 : []),
               ...(dropdownItems ? dropdownItems(row.original) : []),
-              ...(deletable && (viewable || editable)
+              ...(canDelete && (viewable || editable)
                 ? [{ type: "separator" as const } as DropdownMenuItem]
                 : []),
-              ...(deletable
+              ...(canDelete
                 ? [
                     {
                       label: "Hapus",
                       icon: "i-tabler-trash",
                       color: "error",
                       onSelect() {
-                        emit("delete", [row.original.id]);
+                        if (isRowDeletable(row.original)) emit("delete", [row.original.id]);
                       },
                     } as DropdownMenuItem,
                   ]
@@ -160,7 +188,7 @@ watch([() => data, page], () => {
         leave-to-class="translate-y-10 opacity-0"
       >
         <div
-          v-if="Object.keys(rowSelection).length > 0"
+          v-if="selectedIds.length > 0"
           class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2.5 rounded-full shadow-2xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md"
         >
           <UButton
@@ -171,21 +199,14 @@ watch([() => data, page], () => {
             class="rounded-full font-medium"
             @click="rowSelection = {}"
           >
-            {{ Object.keys(rowSelection).length }} Terpilih
+            {{ selectedIds.length }} Terpilih
           </UButton>
           <UButton
             icon="i-tabler-trash"
             color="error"
             size="sm"
             class="rounded-full font-medium"
-            @click="
-              emit(
-                'delete',
-                Object.keys(rowSelection)
-                  .map((k) => data?.[Number(k)]?.id)
-                  .filter((id) => id != null),
-              )
-            "
+            @click="deleteSelectedRows"
           >
             Hapus
           </UButton>
@@ -197,6 +218,7 @@ watch([() => data, page], () => {
       class="border-accented rounded-lg border"
       :data="data"
       :columns="newColumns"
+      :row-selection-options="{ enableRowSelection: canSelectRow }"
       :loading="loading"
       :ui="{
         th: 'text-muted font-medium',

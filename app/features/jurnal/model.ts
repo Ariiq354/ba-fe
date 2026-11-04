@@ -19,11 +19,13 @@ export function getJurnalTotals(details: { debit?: number; kredit?: number }[]) 
   );
 }
 
+const tanggalTransaksiSchema = z.iso
+  .date("Tanggal transaksi tidak valid")
+  .refine((value) => !value.startsWith("0000-"), "Tanggal transaksi tidak valid");
+
 export const jurnalSchema = z
   .object({
-    tanggalTransaksi: z.iso
-      .date("Tanggal transaksi tidak valid")
-      .refine((value) => !value.startsWith("0000-"), "Tanggal transaksi tidak valid"),
+    tanggalTransaksi: tanggalTransaksiSchema,
     keterangan: z.string().trim(),
     details: z
       .array(
@@ -53,6 +55,27 @@ export const jurnalSchema = z
   });
 
 export type JurnalSchema = z.output<typeof jurnalSchema>;
+
+export const jurnalTemplateSchema = z.object({
+  masterInputTransaksiId: z
+    .number()
+    .optional()
+    .pipe(z.number("Pilih transaksi").int().positive("Pilih transaksi")),
+  tanggalTransaksi: tanggalTransaksiSchema,
+  nominal: z
+    .number()
+    .optional()
+    .pipe(
+      z
+        .number("Nominal wajib diisi")
+        .int("Nominal harus berupa bilangan bulat")
+        .min(1, "Nominal harus lebih dari nol")
+        .max(maxJurnalAmount, "Nominal maksimal Rp2.147.483.647"),
+    ),
+  keterangan: z.string().trim(),
+});
+
+export type JurnalTemplateSchema = z.output<typeof jurnalTemplateSchema>;
 
 export interface JurnalHeader {
   id: number;
@@ -101,11 +124,23 @@ export interface JurnalFormRow {
   kredit?: number;
 }
 
-export function initJurnalFormdata() {
+function getTodayDate() {
   const now = new Date();
-  const tanggalTransaksi = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+export function initJurnalTemplateFormdata(): z.input<typeof jurnalTemplateSchema> {
   return {
-    tanggalTransaksi,
+    masterInputTransaksiId: undefined,
+    tanggalTransaksi: getTodayDate(),
+    nominal: 0,
+    keterangan: "",
+  };
+}
+
+export function initJurnalFormdata() {
+  return {
+    tanggalTransaksi: getTodayDate(),
     keterangan: "",
     details: [
       { key: 0, akunId: undefined, debit: 0, kredit: 0 },

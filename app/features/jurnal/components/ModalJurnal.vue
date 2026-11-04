@@ -78,7 +78,6 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
 <template>
   <UModal
     title="Tambah Jurnal"
-    description="Catat transaksi dengan minimal dua baris akun dan total debit–kredit yang seimbang."
     :ui="{ content: 'sm:max-w-4xl' }"
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
@@ -93,12 +92,15 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
         @submit="onSubmit"
       >
         <UFormField label="Tanggal Transaksi" name="tanggalTransaksi" required>
-          <UInput v-model="state.tanggalTransaksi" type="date" class="w-full sm:w-64" />
+          <UInput v-model="state.tanggalTransaksi" type="date" class="w-full" />
         </UFormField>
         <UFormField label="Keterangan" name="keterangan">
           <UTextarea
             v-model="state.keterangan"
             placeholder="Tambahkan keterangan (opsional)"
+            :rows="2"
+            :maxrows="4"
+            autoresize
             class="w-full"
           />
         </UFormField>
@@ -131,12 +133,12 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
             <div
               v-for="(detail, index) in state.details"
               :key="detail.key"
-              class="grid gap-3 rounded-lg border border-default p-3 sm:grid-cols-12"
+              class="grid grid-cols-2 gap-3 border-t border-default pt-4 first:border-t-0 first:pt-0 sm:grid-cols-12"
             >
               <UFormField
                 :label="`Akun ${index + 1}`"
                 :name="`details.${index}.akunId`"
-                class="sm:col-span-5"
+                class="col-span-2 sm:col-span-5"
                 required
               >
                 <USelectMenu
@@ -150,7 +152,7 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
                 />
               </UFormField>
               <UFormField
-                label="Debit (Rp)"
+                label="Debit"
                 :name="`details.${index}.debit`"
                 class="sm:col-span-3"
                 required
@@ -160,11 +162,17 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
                   :min="0"
                   :max="maxJurnalAmount"
                   :step="1"
+                  :increment="false"
+                  :decrement="false"
+                  :format-options="{ style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }"
+                  locale="id-ID"
+                  placeholder="Rp 0"
+                  disable-wheel-change
                   class="w-full"
                 />
               </UFormField>
               <UFormField
-                label="Kredit (Rp)"
+                label="Kredit"
                 :name="`details.${index}.kredit`"
                 class="sm:col-span-3"
                 required
@@ -174,10 +182,16 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
                   :min="0"
                   :max="maxJurnalAmount"
                   :step="1"
+                  :increment="false"
+                  :decrement="false"
+                  :format-options="{ style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }"
+                  locale="id-ID"
+                  placeholder="Rp 0"
+                  disable-wheel-change
                   class="w-full"
                 />
               </UFormField>
-              <div class="flex items-end justify-end sm:col-span-1">
+              <div class="col-span-2 flex items-end justify-end sm:col-span-1">
                 <UButton
                   icon="i-tabler-trash"
                   color="error"
@@ -200,17 +214,17 @@ async function onSubmit(event: FormSubmitEvent<JurnalSchema>) {
           </div>
         </UFormField>
 
-        <div class="space-y-3 rounded-lg bg-elevated p-4" aria-live="polite">
-          <div class="grid gap-3 sm:grid-cols-2">
+        <div class="space-y-3 border-t border-default pt-4" aria-live="polite">
+          <div class="grid grid-cols-2 gap-3">
             <div>
               <p class="text-sm text-muted">Total Debit</p>
-              <p class="font-semibold">
+              <p class="font-semibold text-highlighted tabular-nums">
                 {{ formatRupiah(totals.debit) }}
               </p>
             </div>
             <div>
               <p class="text-sm text-muted">Total Kredit</p>
-              <p class="font-semibold">
+              <p class="font-semibold text-highlighted tabular-nums">
                 {{ formatRupiah(totals.kredit) }}
               </p>
             </div>
