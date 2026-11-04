@@ -200,14 +200,14 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
         class="space-y-5"
         @submit="onSubmit"
       >
-        <UFormField label="Anggota" name="userId" required>
+        <UFormField v-if="canDelegate" label="Anggota" name="userId" required>
           <USelectMenu
             v-model="state.userId"
             :items="memberOptions"
             value-key="value"
             placeholder="Pilih anggota"
             :loading="membersStatus === 'pending'"
-            :disabled="!canDelegate || membersStatus !== 'success' || isLoading"
+            :disabled="membersStatus !== 'success' || isLoading"
             class="w-full"
           />
         </UFormField>

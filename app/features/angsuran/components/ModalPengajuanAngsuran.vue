@@ -169,7 +169,6 @@ async function onSubmit(event: FormSubmitEvent<PengajuanAngsuran>) {
             class="w-full"
           />
         </UFormField>
-        <p v-else class="font-medium">{{ session.data?.user.name ?? "Saya" }}</p>
         <UAlert
           v-if="membersError"
           title="Gagal Memuat Anggota"

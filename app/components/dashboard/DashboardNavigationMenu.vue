@@ -184,11 +184,10 @@ const managementItems = computed<NavigationMenuItem[]>(() => {
 });
 
 const accountingItems = computed<NavigationMenuItem[]>(() => {
-  const role = session.value.data?.user.role;
+  if (session.value.data?.user.role !== "admin") return [];
+
   return [
-    ...(can(role, "jurnal", "view")
-      ? [{ label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-notebook" }]
-      : []),
+    { label: "Jurnal Transaksi", to: "/dashboard/jurnal", icon: "i-tabler-notebook" },
     { label: "Neraca", to: "/dashboard/neraca", icon: "i-tabler-scale" },
     { label: "Laba Rugi", to: "/dashboard/laba-rugi", icon: "i-tabler-chart-bar" },
   ];
