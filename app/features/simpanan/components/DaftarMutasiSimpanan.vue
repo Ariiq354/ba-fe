@@ -221,16 +221,6 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
         pagination
         @view="viewMutasi"
       >
-        <template #kodeTransaksi-cell="{ row }">
-          <UButton
-            color="neutral"
-            variant="link"
-            class="p-0 font-mono"
-            @click="viewMutasi(row.original)"
-          >
-            {{ row.original.kodeTransaksi }}
-          </UButton>
-        </template>
         <template #statusApproved-cell="{ row }">
           <UBadge
             :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"

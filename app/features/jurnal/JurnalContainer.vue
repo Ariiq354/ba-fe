@@ -126,16 +126,6 @@ function canDeleteJurnal(jurnal: JurnalSummary) {
           @view="viewJurnal"
           @delete="deleteJurnal"
         >
-          <template #kodeTransaksi-cell="{ row }">
-            <UButton
-              color="neutral"
-              variant="link"
-              class="p-0 font-mono"
-              @click="viewJurnal(row.original)"
-            >
-              {{ row.original.kodeTransaksi }}
-            </UButton>
-          </template>
           <template #keterangan-cell="{ row }">
             <p class="max-w-xs truncate" :title="row.original.keterangan || undefined">
               {{ row.original.keterangan || "—" }}

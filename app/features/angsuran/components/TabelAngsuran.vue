@@ -29,15 +29,6 @@ const page = defineModel<number>("page", { default: 1 });
     pagination
     @view="emit('view', $event)"
   >
-    <template #kodeTransaksi-cell="{ row }">
-      <UButton
-        color="neutral"
-        variant="link"
-        class="p-0 font-mono"
-        @click="emit('view', row.original)"
-        >{{ row.original.kodeTransaksi }}</UButton
-      >
-    </template>
     <template #statusApproved-cell="{ row }">
       <UBadge
         :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"
