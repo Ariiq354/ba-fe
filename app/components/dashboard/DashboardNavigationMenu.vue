@@ -204,7 +204,14 @@ const administrationItems = computed<NavigationMenuItem[]>(() => {
 });
 
 const items = computed<NavigationMenuItem[][]>(() => [
-  [{ label: "Beranda", to: "/dashboard", icon: "i-tabler-layout-dashboard" }],
+  [
+    { label: "Beranda", to: "/dashboard", icon: "i-tabler-layout-dashboard" },
+    {
+      label: "Bagi Hasil Usaha",
+      to: "/dashboard/bagi-hasil-usaha",
+      icon: "i-tabler-report-money",
+    },
+  ],
   ...(serviceItems.value.length
     ? [[{ label: "Layanan", type: "label" as const }, ...serviceItems.value]]
     : []),
