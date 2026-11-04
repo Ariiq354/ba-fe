@@ -1,6 +1,5 @@
 export interface LaporanAkun<Kategori extends string> {
   id: number;
-  kodeAkun: string;
   namaAkun: string;
   kategori: Kategori;
   jumlahBulanan: number[];
@@ -8,7 +7,6 @@ export interface LaporanAkun<Kategori extends string> {
 }
 
 export interface NeracaResponse {
-  total: number;
   data: LaporanAkun<"aktiva" | "pasiva">[];
   ringkasan: {
     aktivaBulanan: number[];
@@ -19,7 +17,6 @@ export interface NeracaResponse {
 }
 
 export interface LabaRugiResponse {
-  total: number;
   data: LaporanAkun<"pendapatan" | "biaya">[];
   ringkasan: {
     pendapatanBulanan: number[];

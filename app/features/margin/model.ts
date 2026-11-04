@@ -31,8 +31,6 @@ export const marginSchema = z
 export type MarginSchema = z.output<typeof marginSchema>;
 export type Margin = MarginSchema & {
   id: number;
-  createdAt: string;
-  updatedAt: string;
 };
 
 export interface MarginResponse {

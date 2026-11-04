@@ -91,10 +91,7 @@ async function onConfirm(alasanPenolakan?: string) {
   }
   useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
-  await refreshPembiayaanData(
-    props.refresh,
-    props.action === "approve" || props.action === "transfer",
-  );
+  await refreshPembiayaanData(props.refresh);
 }
 function onReject(event: FormSubmitEvent<RejectPembiayaan>) {
   return onConfirm(event.data.alasanPenolakan);

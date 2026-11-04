@@ -4,7 +4,6 @@ import { useApi } from "~/composables/fetch";
 interface Kota {
   data: {
     id: string;
-    idProvinsi: string;
     kabupatenKota: string;
   }[];
 }

@@ -58,9 +58,6 @@ export type MutasiScope = "member" | "members";
 export interface SaldoSimpanan {
   saldoTabungan: number;
   jumlahSaham: number;
-  totalPenarikanPending: number;
-  totalPemindahbukuanPending: number;
-  totalSahamPending: number;
   saldoEfektif: number;
   jumlahSahamEfektif: number;
 }
@@ -69,7 +66,6 @@ export interface AnggotaSimpanan {
   id: number;
   name: string;
   noAnggota: string | null;
-  idKelompok: number;
   namaKelompok: string;
 }
 export interface AnggotaOptionsResponse {
@@ -99,10 +95,8 @@ export interface MutasiSimpanan {
   alasanPenolakan: string | null;
   keterangan: string | null;
   createdBy: number;
-  approvedBy: number | null;
   approvedAt: string | null;
   createdAt: string;
-  updatedAt: string;
   memberName: string;
   creatorName: string;
   approverName: string | null;

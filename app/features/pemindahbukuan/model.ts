@@ -112,9 +112,7 @@ export interface Pemindahbukuan {
   id: number;
   kodeTransaksi: string;
   idUserSumber: number;
-  akunIdSumber: number;
   idUserTujuan: number;
-  akunIdTujuan: number;
   nominal: number;
   jumlahSaham: number;
   hargaPerSaham: number;
@@ -126,10 +124,8 @@ export interface Pemindahbukuan {
   alasanPenolakan: string | null;
   keterangan: string | null;
   createdBy: number;
-  approvedBy: number | null;
   approvedAt: string | null;
   createdAt: string;
-  updatedAt: string;
   sourceMemberName: string;
   destinationMemberName: string;
   sourceAccountName: string;

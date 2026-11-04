@@ -6,7 +6,6 @@ interface Kelompok {
     id: number;
     kodeKelompok: string;
     namaKelompok: string;
-    createdAt: Date;
   }[];
 }
 

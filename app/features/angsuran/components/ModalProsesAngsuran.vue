@@ -10,7 +10,7 @@ import { canCancelAngsuran, rejectAngsuranSchema } from "../model";
 const props = defineProps<{
   angsuran: Angsuran;
   action: AngsuranAction;
-  refresh: (userId: number, journalChanged?: boolean) => Promise<void>;
+  refresh: (userId: number) => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
@@ -93,7 +93,7 @@ async function onConfirm(alasanPenolakan?: string) {
     props.action === "approve" ? "Pembayaran dan jurnal telah dicatat." : "",
   );
   emit("close");
-  await props.refresh(props.angsuran.userId, props.action === "approve");
+  await props.refresh(props.angsuran.userId);
 }
 function onReject(event: FormSubmitEvent<RejectAngsuran>) {
   return onConfirm(event.data.alasanPenolakan);

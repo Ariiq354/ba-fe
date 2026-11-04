@@ -64,15 +64,12 @@ export interface Pembiayaan {
   tanggalTransfer: string | null;
   tanggalPembiayaan: string | null;
   statusTransfer: StatusTransfer;
-  transferredBy: number | null;
   transferredAt: string | null;
   statusApproved: StatusMutasi;
   alasanPenolakan: string | null;
   createdBy: number;
-  approvedBy: number | null;
   approvedAt: string | null;
   createdAt: string;
-  updatedAt: string;
   memberName: string;
   creatorName: string;
   approverName: string | null;
@@ -84,7 +81,6 @@ export interface PembiayaanResponse {
 
 export interface PembiayaanOption {
   id: number;
-  kodeTransaksi: string;
   tujuan: string;
   totalTagihan: number;
   sisaTagihan: number;

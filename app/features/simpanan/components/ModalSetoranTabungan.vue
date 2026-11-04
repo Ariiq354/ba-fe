@@ -3,7 +3,6 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { SetoranTabungan } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { APPROVAL_SIMPANAN_PENDING_KEY } from "../data";
 import { maxSimpananAmount, paymentMethodOptions, setoranTabunganSchema } from "../model";
 
@@ -13,13 +12,6 @@ const props = defineProps<{
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
-const canManage = computed(() => {
-  const role = session.value.data?.user.role;
-  return props.userId === Number(session.value.data?.user.id)
-    ? can(role, "simpananSaya", "manage") || can(role, "inputSimpanan", "manage")
-    : can(role, "inputSimpanan", "manage");
-});
 const isLoading = ref(false);
 const state = reactive({
   userId: props.userId,
@@ -27,7 +19,7 @@ const state = reactive({
   nilaiTransaksi: undefined as number | undefined,
   keterangan: "",
 });
-const ready = computed(() => canManage.value && !!state.metodePembayaran);
+const ready = computed(() => !!state.metodePembayaran);
 
 async function onSubmit(event: FormSubmitEvent<SetoranTabungan>) {
   if (isLoading.value || !ready.value) return;

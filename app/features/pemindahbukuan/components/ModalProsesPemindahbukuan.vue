@@ -97,7 +97,6 @@ async function onConfirm(alasanPenolakan?: string) {
   await refreshPemindahbukuanData(
     [props.transfer.idUserSumber, props.transfer.idUserTujuan],
     props.refresh,
-    props.action === "approve",
   );
 }
 function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {

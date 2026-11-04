@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
-import type { AngsuranResponse } from "~/features/angsuran/model";
-import type { PembiayaanResponse } from "~/features/pembiayaan/model";
-import type { PemindahbukuanResponse } from "~/features/pemindahbukuan/model";
-import type { MutasiResponse } from "~/features/simpanan/model";
 import { useDocumentVisibility, useIntervalFn, useWindowFocus } from "#imports";
 import { useApi } from "~/composables/fetch";
 import { ANGSURAN_PENDING_KEY } from "~/features/angsuran/data";
@@ -16,12 +12,10 @@ const session = authClient.useSession();
 const canViewApproval = computed(() =>
   can(session.value.data?.user.role, "approvalSimpanan", "view"),
 );
-const { data: pendingApproval, clear: clearPendingApproval } = useApi<MutasiResponse>(
-  "/api/v1/simpanan/mutasi",
+const { data: pendingApproval, clear: clearPendingApproval } = useApi<{ total: number }>(
+  "/api/v1/simpanan/mutasi/pending-count",
   {
     key: APPROVAL_SIMPANAN_PENDING_KEY,
-    query: { status: "pending", page: 1, limit: 1 },
-    pick: ["total"],
     enabled: canViewApproval,
     watch: [canViewApproval],
   },
@@ -38,14 +32,13 @@ watch(canViewApproval, (allowed) => {
 const canViewPemindahbukuanMutasi = computed(() =>
   can(session.value.data?.user.role, "approvalPemindahbukuan", "view"),
 );
-const { data: pendingPemindahbukuan, clear: clearPendingPemindahbukuan } =
-  useApi<PemindahbukuanResponse>("/api/v1/pemindahbukuan", {
-    key: PEMINDAHBUKUAN_PENDING_KEY,
-    query: { status: "pending", page: 1, limit: 1 },
-    pick: ["total"],
-    enabled: canViewPemindahbukuanMutasi,
-    watch: [canViewPemindahbukuanMutasi],
-  });
+const { data: pendingPemindahbukuan, clear: clearPendingPemindahbukuan } = useApi<{
+  total: number;
+}>("/api/v1/pemindahbukuan/pending-count", {
+  key: PEMINDAHBUKUAN_PENDING_KEY,
+  enabled: canViewPemindahbukuanMutasi,
+  watch: [canViewPemindahbukuanMutasi],
+});
 const pendingPemindahbukuanBadge = computed<NavigationMenuItem["badge"]>(() => {
   const total = pendingPemindahbukuan.value?.total ?? 0;
   return total > 0 ? { label: String(total), color: "warning", variant: "subtle" } : undefined;
@@ -57,12 +50,10 @@ watch(canViewPemindahbukuanMutasi, (allowed) => {
 const canViewPembiayaanApproval = computed(() =>
   can(session.value.data?.user.role, "approvalPembiayaan", "view"),
 );
-const { data: pendingPembiayaan, clear: clearPendingPembiayaan } = useApi<PembiayaanResponse>(
-  "/api/v1/pembiayaan",
+const { data: pendingPembiayaan, clear: clearPendingPembiayaan } = useApi<{ total: number }>(
+  "/api/v1/pembiayaan/pending-count",
   {
     key: PEMBIAYAAN_PENDING_KEY,
-    query: { status: "pending", page: 1, limit: 1 },
-    pick: ["total"],
     enabled: canViewPembiayaanApproval,
     watch: [canViewPembiayaanApproval],
   },
@@ -78,12 +69,10 @@ watch(canViewPembiayaanApproval, (allowed) => {
 const canViewAngsuranApproval = computed(() =>
   can(session.value.data?.user.role, "approvalAngsuran", "view"),
 );
-const { data: pendingAngsuran, clear: clearPendingAngsuran } = useApi<AngsuranResponse>(
-  "/api/v1/angsuran",
+const { data: pendingAngsuran, clear: clearPendingAngsuran } = useApi<{ total: number }>(
+  "/api/v1/angsuran/pending-count",
   {
     key: ANGSURAN_PENDING_KEY,
-    query: { status: "pending", page: 1, limit: 1 },
-    pick: ["total"],
     enabled: canViewAngsuranApproval,
     watch: [canViewAngsuranApproval],
   },

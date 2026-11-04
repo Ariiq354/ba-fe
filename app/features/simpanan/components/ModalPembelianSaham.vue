@@ -4,12 +4,7 @@ import type { HargaSaham, PembelianSaham, SaldoSimpanan } from "../model";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import {
-  PEMINDAHBUKUAN_MUTASI_LIST_KEY,
-  PEMINDAHBUKUAN_LIST_KEY,
-  refreshPemindahbukuanData,
-} from "~/features/pemindahbukuan/data";
-import { authClient, can } from "~/utils/auth";
+import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/data";
 import { formatRupiah } from "~/utils/format";
 import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "../data";
 import { maxSimpananAmount, setoranSahamSchema, sharePaymentMethodOptions } from "../model";
@@ -20,13 +15,6 @@ const props = defineProps<{
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
-const canManage = computed(() => {
-  const role = session.value.data?.user.role;
-  return props.userId === Number(session.value.data?.user.id)
-    ? can(role, "simpananSaya", "manage") || can(role, "inputSimpanan", "manage")
-    : can(role, "inputSimpanan", "manage");
-});
 const isLoading = ref(false);
 const state = reactive({
   userId: props.userId,
@@ -100,7 +88,7 @@ const insufficientBalance = computed(() => {
   return priceStatus.value === "success" && maxShares.value === 0;
 });
 const ready = computed(() => {
-  if (!canManage.value || !state.metodePembayaran) return false;
+  if (!state.metodePembayaran) return false;
   if (priceStatus.value !== "success" || maxShares.value <= 0) return false;
   if (usesTabungan.value)
     return balanceStatus.value === "success" && !!balance.value && balance.value.saldoEfektif > 0;
@@ -133,14 +121,12 @@ async function onSubmit(event: FormSubmitEvent<PembelianSaham>) {
       : "Transaksi menunggu persetujuan admin.",
   );
   emit("close");
-  if (paidFromTabungan) {
-    await Promise.all([
-      refreshPemindahbukuanData([props.userId], props.refresh),
-      refreshNuxtData([PEMINDAHBUKUAN_LIST_KEY, PEMINDAHBUKUAN_MUTASI_LIST_KEY]),
-    ]);
-  } else {
-    await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
-  }
+  await Promise.all([
+    props.refresh(),
+    refreshNuxtData(
+      paidFromTabungan ? PEMINDAHBUKUAN_PENDING_KEY : APPROVAL_SIMPANAN_PENDING_KEY,
+    ),
+  ]);
 }
 </script>
 

@@ -43,12 +43,8 @@ const { data, status, error, refresh } = useApi<AngsuranResponse>("/api/v1/angsu
 const total = computed(() => data.value?.total ?? 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
-async function refreshData(userId: number, journalChanged = false) {
-  await Promise.all([
-    refreshList(),
-    refreshAngsuranData(userId, journalChanged),
-    refreshNuxtData(props.approval ? ANGSURAN_LIST_KEY : ANGSURAN_APPROVAL_LIST_KEY),
-  ]);
+async function refreshData(userId: number) {
+  await Promise.all([refreshList(), refreshAngsuranData(userId)]);
 }
 function openForm() {
   if (props.approval || !canManage.value) return;

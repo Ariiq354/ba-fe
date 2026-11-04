@@ -4,7 +4,6 @@ import type { PenarikanTabungan, SaldoSimpanan } from "../model";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "../data";
 import { maxSimpananAmount, paymentMethodOptions, penarikanSchema } from "../model";
@@ -15,13 +14,6 @@ const props = defineProps<{
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
-const canManage = computed(() => {
-  const role = session.value.data?.user.role;
-  return props.userId === Number(session.value.data?.user.id)
-    ? can(role, "simpananSaya", "manage") || can(role, "inputSimpanan", "manage")
-    : can(role, "inputSimpanan", "manage");
-});
 const isLoading = ref(false);
 const state = reactive({
   userId: props.userId,
@@ -59,7 +51,6 @@ const insufficientBalance = computed(
 );
 const ready = computed(
   () =>
-    canManage.value &&
     !!state.metodePembayaran &&
     balanceStatus.value === "success" &&
     !!balance.value &&

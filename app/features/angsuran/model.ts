@@ -31,7 +31,6 @@ export type AngsuranAction = "approve" | "reject" | "cancel";
 
 export interface Angsuran {
   id: number;
-  pembiayaanId: number;
   kodePembiayaan: string;
   userId: number;
   kodeTransaksi: string;
@@ -42,10 +41,8 @@ export interface Angsuran {
   alasanPenolakan: string | null;
   keterangan: string | null;
   createdBy: number;
-  approvedBy: number | null;
   approvedAt: string | null;
   createdAt: string;
-  updatedAt: string;
   memberName: string;
   creatorName: string;
   approverName: string | null;

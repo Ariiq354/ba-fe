@@ -175,7 +175,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
       : "Pengajuan menunggu penyaluran dana wakalah oleh admin, lalu persetujuan akad.",
   );
   emit("close");
-  await refreshPembiayaanData(props.refresh, recordsTransfer);
+  await refreshPembiayaanData(props.refresh);
 }
 </script>
 

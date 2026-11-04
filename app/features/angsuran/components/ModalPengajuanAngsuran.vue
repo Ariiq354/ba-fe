@@ -14,7 +14,7 @@ import PemilihPembiayaan from "./PemilihPembiayaan.vue";
 import RingkasanAngsuran from "./RingkasanAngsuran.vue";
 
 const props = defineProps<{
-  refresh: (userId: number, journalChanged?: boolean) => Promise<void>;
+  refresh: (userId: number) => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();

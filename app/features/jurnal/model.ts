@@ -59,13 +59,9 @@ export interface JurnalHeader {
   kodeTransaksi: string;
   tanggalTransaksi: string;
   keterangan: string | null;
-  createdAt: string;
 }
 
 export interface JurnalDetail {
-  id: number;
-  jurnalId: number;
-  akunId: number;
   kodeAkun: string;
   namaAkun: string;
   userId: number;

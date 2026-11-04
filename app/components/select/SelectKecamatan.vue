@@ -4,7 +4,6 @@ import { useApi } from "~/composables/fetch";
 interface Kecamatan {
   data: {
     id: string;
-    idKota: string;
     kecamatan: string;
   }[];
 }

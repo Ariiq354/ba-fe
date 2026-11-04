@@ -13,11 +13,8 @@ import { API_URL } from "~/constants";
 import { authClient } from "~/utils/auth";
 
 interface UserProfile {
-  id: number;
   name: string;
-  email: string;
   image: string | null;
-  noAnggota: string | null;
   noHp: string | null;
   nik: string | null;
   namaBank: string | null;
