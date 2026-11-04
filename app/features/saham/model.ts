@@ -22,6 +22,12 @@ export interface SahamResponse {
   data: Saham[];
 }
 
+export type HargaSahamResponse = Pick<Saham, "hargaNominal" | "hargaJual">;
+
+export interface HargaSahamRealtimeResponse {
+  hargaRealtime: number | null;
+}
+
 export const initSahamFormdata: Partial<SahamSchema> = {
   hargaJual: undefined,
 };

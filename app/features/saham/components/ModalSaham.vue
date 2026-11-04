@@ -4,6 +4,7 @@ import type { SahamSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { initSahamFormdata, sahamSchema } from "../model";
+import HargaSahamRealtime from "./HargaSahamRealtime.vue";
 
 const props = defineProps<{
   refresh: () => Promise<void>;
@@ -41,11 +42,12 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
 <template>
   <UModal
     title="Tambah Harga Saham"
-    description="Harga jual baru akan berlaku sebagai harga terbaru dan tercatat dalam riwayat."
+    description="Harga terbaru yang berlaku dan tercatat dalam riwayat."
     :dismissible="!isLoading"
     :close="isLoading ? false : { onClick: () => emit('close') }"
   >
     <template #body>
+      <HargaSahamRealtime class="mb-4 rounded-lg border border-default p-4" />
       <UForm
         id="form-saham"
         :schema="sahamSchema"
@@ -59,11 +61,15 @@ async function onSubmit(event: FormSubmitEvent<SahamSchema>) {
             v-model="state.hargaJual"
             :min="1"
             :step="1"
-            placeholder="Masukkan harga jual"
+            :increment="false"
+            :decrement="false"
+            :format-options="{ style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }"
+            locale="id-ID"
+            placeholder="Rp 0"
+            disable-wheel-change
             class="w-full"
           />
         </UFormField>
-        <p class="text-sm text-muted">Harga nominal saham ditentukan otomatis oleh sistem.</p>
       </UForm>
     </template>
     <template #footer>
