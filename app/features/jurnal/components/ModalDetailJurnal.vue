@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Jurnal } from "../model";
-import DataTable from "~/components/table/DataTable.vue";
 import { formatRupiah } from "~/utils/format";
 import { formatJurnalDate, getJurnalTotals, jurnalDetailColumns } from "../model";
 
@@ -71,7 +70,15 @@ const difference = computed(() => Math.abs(totals.value.debit - totals.value.kre
           <h3 id="jurnal-detail-heading" class="text-sm font-semibold text-highlighted">
             Rincian Pencatatan
           </h3>
-          <DataTable :data="jurnal.details" :columns="jurnalDetailColumns">
+          <UTable
+            :data="jurnal.details"
+            :columns="jurnalDetailColumns"
+            sticky="header"
+            class="max-h-[min(24rem,50vh)] overflow-auto rounded-lg border border-accented"
+            :ui="{ th: 'text-muted font-medium', td: 'text-highlighted' }"
+            tabindex="0"
+            aria-labelledby="jurnal-detail-heading"
+          >
             <template #kodeAkun-cell="{ row }">
               <span class="rounded-md bg-muted px-2 py-1 font-mono text-xs text-toned">{{
                 row.original.kodeAkun
@@ -101,7 +108,7 @@ const difference = computed(() => Math.abs(totals.value.debit - totals.value.kre
                 {{ row.original.kredit ? formatRupiah(row.original.kredit) : "—" }}
               </span>
             </template>
-          </DataTable>
+          </UTable>
           <p v-if="!isBalanced" class="text-right text-sm text-warning">
             Selisih debit dan kredit:
             <span class="font-medium tabular-nums">{{ formatRupiah(difference) }}</span>

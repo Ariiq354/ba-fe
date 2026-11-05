@@ -195,11 +195,6 @@ export const jurnalColumns: TableColumn<JurnalSummary>[] = [
     meta: { class: { th: "text-right", td: "text-right tabular-nums" } },
     cell: ({ row }) => formatRupiah(row.original.totalKredit),
   },
-  {
-    accessorKey: "users",
-    header: "Pengguna",
-    cell: ({ row }) => row.original.users.map((user) => user.userName).join(", ") || "—",
-  },
 ];
 
 export const jurnalDetailColumns: TableColumn<JurnalDetail>[] = [
