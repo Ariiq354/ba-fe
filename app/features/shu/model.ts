@@ -3,15 +3,10 @@ import { z } from "zod";
 import { formatRupiah } from "~/utils/format";
 
 export interface Shu {
-  id: number;
   tahun: number;
-  idUser: number;
-  nama: string;
-  noAnggota: string | null;
   jumlahShuSaham: number;
   jumlahShuTabungan: number;
   totalShu: number;
-  dialihkanAt: string | null;
 }
 
 export interface ShuResponse {

@@ -3,10 +3,8 @@ import { formatSimpananDate } from "~/features/simpanan/model";
 import { formatRupiah } from "~/utils/format";
 
 export interface MonitoringSimpanan {
-  userId: number;
   nama: string;
   noAnggota: string | null;
-  idKelompok: number;
   namaKelompok: string;
   saldoTabungan: number;
   jumlahSaham: number;
@@ -14,39 +12,24 @@ export interface MonitoringSimpanan {
 }
 
 export interface MonitoringPembiayaan {
-  id: number;
   kodeTransaksi: string;
-  userId: number;
   memberName: string;
-  noAnggota: string | null;
-  idKelompok: number;
-  namaKelompok: string;
   jumlahPokok: number;
-  persenMarginTahun: number;
   jumlahMargin: number;
   biayaAkad: number;
   totalPembiayaan: number;
   tujuan: string;
   jangkaWaktuBulan: number;
-  tanggalPembiayaan: string | null;
-  statusApproved: "approved";
-  totalPembayaran: number;
   sisaPembiayaan: number;
   tanggalAkhirAngsuran: string | null;
 }
 
 export interface MonitoringShu {
-  id: number | null;
-  tahun: number;
-  idUser: number;
   nama: string;
   noAnggota: string | null;
-  idKelompok: number;
-  namaKelompok: string;
   jumlahShuSaham: number;
   jumlahShuTabungan: number;
   totalShu: number;
-  dialihkanAt: string | null;
 }
 
 const numberFormatter = new Intl.NumberFormat("id-ID");

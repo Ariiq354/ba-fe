@@ -11,7 +11,6 @@ export const sahamSchema = z.object({
 
 export type SahamSchema = z.output<typeof sahamSchema>;
 export type Saham = SahamSchema & {
-  id: number;
   hargaNominal: number;
   updatedByName: string;
   createdAt: string;

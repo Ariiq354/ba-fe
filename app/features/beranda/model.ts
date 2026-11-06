@@ -5,10 +5,7 @@ interface Periode {
 
 export interface DashboardResponse {
   hargaSaham: {
-    hargaNominal: number;
     hargaJual: number | null;
-    diperbaruiPada: string | null;
-    hargaSebelumnya: number | null;
     perubahanNominal: number | null;
     perubahanPersen: number | null;
   };
@@ -18,16 +15,16 @@ export interface DashboardResponse {
       total: number;
     }[];
   };
-  pembiayaanBerjalan: Periode & {
+  pembiayaanBerjalan: {
+    periodeMulai: string;
     total: number;
   };
-  labaBerjalan: Periode & {
+  labaBerjalan: {
+    periodeMulai: string;
     total: number;
   };
   grafikLabaTahunan: {
     tahun: number;
-    pendapatan: number;
-    biaya: number;
     laba: number;
   }[];
 }
