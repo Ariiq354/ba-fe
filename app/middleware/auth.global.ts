@@ -30,10 +30,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo({ path: "/" });
     }
 
-    const accountingPaths = ["/dashboard/jurnal", "/dashboard/neraca", "/dashboard/laba-rugi"];
+    const adminPaths = [
+      "/dashboard/jurnal",
+      "/dashboard/neraca",
+      "/dashboard/laba-rugi",
+      "/dashboard/monitoring",
+    ];
     if (
       session.user.role !== "admin" &&
-      accountingPaths.some((path) => to.path === path || to.path.startsWith(`${path}/`))
+      adminPaths.some((path) => to.path === path || to.path.startsWith(`${path}/`))
     ) {
       return navigateTo({ path: "/dashboard" });
     }

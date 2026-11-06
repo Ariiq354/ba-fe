@@ -183,6 +183,28 @@ const managementItems = computed<NavigationMenuItem[]>(() => {
   ];
 });
 
+const monitoringItems = computed<NavigationMenuItem[]>(() => {
+  if (session.value.data?.user.role !== "admin") return [];
+
+  return [
+    {
+      label: "Monitoring Simpanan",
+      to: "/dashboard/monitoring/simpanan",
+      icon: "i-tabler-wallet",
+    },
+    {
+      label: "Monitoring Pembiayaan",
+      to: "/dashboard/monitoring/pembiayaan",
+      icon: "i-tabler-file-invoice",
+    },
+    {
+      label: "Monitoring SHU",
+      to: "/dashboard/monitoring/shu",
+      icon: "i-tabler-report-money",
+    },
+  ];
+});
+
 const accountingItems = computed<NavigationMenuItem[]>(() => {
   if (session.value.data?.user.role !== "admin") return [];
 
@@ -217,6 +239,9 @@ const items = computed<NavigationMenuItem[][]>(() => [
     : []),
   ...(managementItems.value.length
     ? [[{ label: "Pengelolaan", type: "label" as const }, ...managementItems.value]]
+    : []),
+  ...(monitoringItems.value.length
+    ? [[{ label: "Monitoring", type: "label" as const }, ...monitoringItems.value]]
     : []),
   ...(accountingItems.value.length
     ? [[{ label: "Akuntansi", type: "label" as const }, ...accountingItems.value]]

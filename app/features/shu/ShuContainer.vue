@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import type { AnggotaOptionsResponse } from "~/features/simpanan/model";
-import type { ReferensiShu, ShuResponse } from "./model";
+import type { ShuResponse } from "./model";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
-import { openModal } from "~/composables/modal";
 import { getAnggotaOptions } from "~/features/simpanan/model";
 import { authClient } from "~/utils/auth";
-import ModalGenerateShu from "./components/ModalGenerateShu.vue";
-import ModalPengalihanShu from "./components/ModalPengalihanShu.vue";
 import { shuColumns } from "./model";
 
 const session = authClient.useSession();
@@ -53,46 +50,8 @@ const { data, status, error, refresh } = useApi<ShuResponse>("/api/v1/shu", {
   enabled: isLoggedIn,
   query: { tahun, userId },
 });
-const {
-  data: referensi,
-  status: referensiStatus,
-  error: referensiError,
-  refresh: refreshReferensi,
-} = useApi<ReferensiShu>("/api/v1/shu/referensi", {
-  enabled: isAdmin,
-  query: { tahun },
-});
-const currentReferensi = computed(() =>
-  isAdmin.value && referensiStatus.value === "success" && referensi.value?.tahun === tahun.value
-    ? referensi.value
-    : undefined,
-);
-const canGenerate = computed(
-  () =>
-    !!currentReferensi.value &&
-    !currentReferensi.value.sudahDibagikan &&
-    currentReferensi.value.batasShu > 0,
-);
-const canTransfer = computed(
-  () => !!currentReferensi.value?.sudahDibagikan && !currentReferensi.value.sudahDialihkan,
-);
-
 function updateTahun(value: number) {
   if (Number.isInteger(value) && value >= 1 && value <= 9999) tahun.value = value;
-}
-
-async function refreshAfterChange() {
-  await Promise.all([refresh(), refreshReferensi()]);
-}
-
-function generateShu() {
-  if (!canGenerate.value || !currentReferensi.value) return;
-  openModal(ModalGenerateShu, { referensi: currentReferensi.value, refresh: refreshAfterChange });
-}
-
-function transferShu() {
-  if (!canTransfer.value || !currentReferensi.value) return;
-  openModal(ModalPengalihanShu, { referensi: currentReferensi.value, refresh: refreshAfterChange });
 }
 </script>
 
@@ -131,21 +90,6 @@ function transferShu() {
       color="error"
       variant="subtle"
       :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshMembers() }]"
-    />
-    <div v-if="isAdmin" class="flex flex-wrap gap-3">
-      <UButton icon="i-tabler-calculator" :disabled="!canGenerate" @click="generateShu">
-        Generate SHU
-      </UButton>
-      <UButton icon="i-tabler-wallet" :disabled="!canTransfer" @click="transferShu">
-        Alihkan ke Tabungan
-      </UButton>
-    </div>
-    <UAlert
-      v-if="isAdmin && referensiError"
-      title="Gagal Memuat Referensi SHU"
-      color="error"
-      variant="subtle"
-      :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshReferensi() }]"
     />
     <UCard>
       <UAlert
