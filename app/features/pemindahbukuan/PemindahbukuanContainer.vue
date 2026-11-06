@@ -6,13 +6,14 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
+import { PAGE_SIZE } from "~/constants";
 import { statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
 import ModalPengajuanPemindahbukuan from "./components/ModalPengajuanPemindahbukuan.vue";
 import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
 import TabelPemindahbukuan from "./components/TabelPemindahbukuan.vue";
-import { PEMINDAHBUKUAN_LIST_KEY } from "./data";
+import { PEMINDAHBUKUAN_LIST_KEY, refreshPemindahbukuanData } from "./data";
 import { canCancelPemindahbukuan, tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
@@ -23,7 +24,7 @@ const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
 const tipe = ref<"all" | TipePemindahbukuan>("all");
-const limit = 10;
+const limit = PAGE_SIZE;
 
 watch(
   [search, statusFilter, tipe],
@@ -59,8 +60,12 @@ const total = computed(() => data.value?.total ?? 0);
 
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
+function refreshAfterChange(userIds: number[]) {
+  return refreshPemindahbukuanData(userIds, refreshList);
+}
+
 function openForm() {
-  if (canManage.value) openModal(ModalPengajuanPemindahbukuan, { refresh: refreshList });
+  if (canManage.value) openModal(ModalPengajuanPemindahbukuan, { refresh: refreshAfterChange });
 }
 function viewTransfer(transfer: Pemindahbukuan) {
   openModal(ModalDetailPemindahbukuan, { transfer });
@@ -76,7 +81,7 @@ function cancelTransfer(transfer: Pemindahbukuan) {
     transfer,
     action: "cancel",
     accessibleSourceIds: accessibleSourceIds.value,
-    refresh: refreshList,
+    refresh: refreshAfterChange,
   });
 }
 function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {

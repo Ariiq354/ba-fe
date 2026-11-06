@@ -5,13 +5,13 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
-import { API_URL } from "~/constants";
+import { API_URL, PAGE_SIZE } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalMargin from "./components/ModalMargin.vue";
 import { marginColumns } from "./model";
 
 const page = ref(1);
-const limit = 10;
+const limit = PAGE_SIZE;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "masterMargin", "manage"));
 const { data, status, error, refresh } = useApi<MarginResponse>("/api/v1/master-margin", {

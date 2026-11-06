@@ -6,12 +6,13 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
+import { PAGE_SIZE } from "~/constants";
 import { getAnggotaOptions, statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
 import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
 import TabelPemindahbukuan from "./components/TabelPemindahbukuan.vue";
-import { PEMINDAHBUKUAN_MUTASI_LIST_KEY } from "./data";
+import { PEMINDAHBUKUAN_MUTASI_LIST_KEY, refreshPemindahbukuanData } from "./data";
 import { tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
@@ -29,7 +30,7 @@ const selectedUserId = ref<number | "all">("all");
 const targetUserId = computed(() =>
   selectedUserId.value === "all" ? undefined : selectedUserId.value,
 );
-const limit = 10;
+const limit = PAGE_SIZE;
 
 watch(
   [search, statusFilter, tipe, targetUserId],
@@ -70,6 +71,10 @@ const total = computed(() => data.value?.total ?? 0);
 
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
+function refreshAfterChange(userIds: number[]) {
+  return refreshPemindahbukuanData(userIds, refreshList);
+}
+
 function viewTransfer(transfer: Pemindahbukuan) {
   openModal(ModalDetailPemindahbukuan, { transfer });
 }
@@ -77,7 +82,7 @@ function viewTransfer(transfer: Pemindahbukuan) {
 function processTransfer(transfer: Pemindahbukuan, action: "approve" | "reject") {
   if (status.value === "pending" || transfer.statusApproved !== "pending" || !canApprove.value)
     return;
-  openModal(ModalProsesPemindahbukuan, { transfer, action, refresh: refreshList });
+  openModal(ModalProsesPemindahbukuan, { transfer, action, refresh: refreshAfterChange });
 }
 
 function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {

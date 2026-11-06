@@ -3,6 +3,7 @@ import type { HargaSahamResponse, SahamResponse } from "./model";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { PAGE_SIZE } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import HargaSahamRealtime from "./components/HargaSahamRealtime.vue";
@@ -13,7 +14,7 @@ const page = ref(1);
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "masterSaham", "manage"));
 const { data, status, error, refresh } = useApi<SahamResponse>("/api/v1/master-saham", {
-  query: { page, limit: 10 },
+  query: { page, limit: PAGE_SIZE },
 });
 const {
   data: latestPrice,

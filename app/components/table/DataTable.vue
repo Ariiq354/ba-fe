@@ -1,5 +1,8 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends object">
 import type { DropdownMenuItem, TableColumn } from "@nuxt/ui";
+import { PAGE_SIZE } from "~/constants";
+
+type RowId = T extends { id: infer Id extends string | number } ? Id : never;
 
 const {
   data,
@@ -13,162 +16,134 @@ const {
   dropdownItems,
   total = 0,
 } = defineProps<{
-  data: any[] | undefined;
-  columns: TableColumn<any>[];
+  data: T[] | undefined;
+  columns: TableColumn<T>[];
   loading?: boolean;
   viewable?: boolean;
   deletable?: boolean;
-  rowDeletable?: (row: any) => boolean;
+  rowDeletable?: (row: T) => boolean;
   editable?: boolean;
   selectable?: boolean;
   enumerate?: boolean;
   total?: number;
   pagination?: boolean;
-  dropdownItems?: (e: any) => DropdownMenuItem[];
+  dropdownItems?: (row: T) => DropdownMenuItem[];
 }>();
 const emit = defineEmits<{
-  (e: "edit" | "view", row: any): void;
-  (e: "delete", payload: any | any[]): void;
+  edit: [row: T];
+  view: [row: T];
+  delete: [ids: RowId[]];
 }>();
 const slots = useSlots();
 const page = defineModel("page", { default: 1 });
 const rowSelection = ref<Record<string, boolean>>({});
 
-function isRowDeletable(row: any) {
+function getForwardedSlotNames() {
+  return Object.keys(slots).filter((name) => name !== "actions-cell");
+}
+
+function getRowId(row: T): RowId | undefined {
+  if ("id" in row && (typeof row.id === "string" || typeof row.id === "number")) {
+    return row.id as RowId;
+  }
+}
+
+function isRowDeletable(row: T) {
   return !!deletable && (rowDeletable?.(row) ?? true);
 }
 
-function canSelectRow(row: { original: any }) {
+function canSelectRow(row: { original: T }) {
   return !!selectable && (rowDeletable?.(row.original) ?? true);
 }
 
-const selectedIds = computed(() =>
-  Object.entries(rowSelection.value)
-    .filter(([, selected]) => selected)
-    .map(([index]) => data?.[Number(index)])
-    .filter((row) => row && canSelectRow({ original: row }) && isRowDeletable(row))
-    .map((row) => row.id)
-    .filter((id) => id != null),
-);
+const selectedIds = computed(() => {
+  const ids: RowId[] = [];
+  for (const [index, selected] of Object.entries(rowSelection.value)) {
+    const row = data?.[Number(index)];
+    if (!selected || !row || !canSelectRow({ original: row }) || !isRowDeletable(row)) continue;
+    const id = getRowId(row);
+    if (id !== undefined) ids.push(id);
+  }
+  return ids;
+});
 
 function deleteSelectedRows() {
   if (!selectedIds.value.length) return;
   emit("delete", selectedIds.value);
 }
 
-const UButton = resolveComponent("UButton");
 const UCheckbox = resolveComponent("UCheckbox");
-const UDropdownMenu = resolveComponent("UDropdownMenu");
 
-const newColumns = computed<TableColumn<any>[]>(() => [
-  ...(selectable
-    ? [
-        {
-          id: "select",
-          header: ({ table }) =>
-            h(UCheckbox, {
-              modelValue: table.getIsSomePageRowsSelected()
-                ? "indeterminate"
-                : table.getIsAllPageRowsSelected(),
+function getActions(row: T): DropdownMenuItem[] {
+  const items: DropdownMenuItem[] = [];
+  if (viewable) {
+    items.push({
+      label: "Lihat Detail",
+      icon: "i-tabler-eye",
+      onSelect: () => emit("view", row),
+    });
+  }
+  if (editable) {
+    items.push({
+      label: "Edit",
+      icon: "i-tabler-edit",
+      onSelect: () => emit("edit", row),
+    });
+  }
+  if (dropdownItems) items.push(...dropdownItems(row));
+  const id = getRowId(row);
+  if (isRowDeletable(row) && id !== undefined) {
+    if (items.length) items.push({ type: "separator" });
+    items.push({
+      label: "Hapus",
+      icon: "i-tabler-trash",
+      color: "error",
+      onSelect() {
+        if (isRowDeletable(row)) emit("delete", [id]);
+      },
+    });
+  }
+  return items;
+}
+
+const newColumns = computed<TableColumn<T>[]>(() => {
+  const result: TableColumn<T>[] = [];
+  if (selectable) {
+    result.push({
+      id: "select",
+      header: ({ table }) =>
+        h(UCheckbox, {
+          modelValue: table.getIsSomePageRowsSelected()
+            ? "indeterminate"
+            : table.getIsAllPageRowsSelected(),
+          "onUpdate:modelValue": (value: boolean | "indeterminate") =>
+            table.toggleAllPageRowsSelected(!!value),
+          "aria-label": "Select all",
+          disabled: !table.getRowModel().rows.some((row) => row.getCanSelect()),
+        }),
+      cell: ({ row }) =>
+        row.getCanSelect()
+          ? h(UCheckbox, {
+              modelValue: row.getIsSelected(),
               "onUpdate:modelValue": (value: boolean | "indeterminate") =>
-                table.toggleAllPageRowsSelected(!!value),
-              "aria-label": "Select all",
-              disabled: !table.getRowModel().rows.some((row) => row.getCanSelect()),
-            }),
-          cell: ({ row }) =>
-            row.getCanSelect()
-              ? h(UCheckbox, {
-                  modelValue: row.getIsSelected(),
-                  "onUpdate:modelValue": (value: boolean | "indeterminate") =>
-                    row.toggleSelected(!!value),
-                  "aria-label": "Select row",
-                })
-              : null,
-        } as TableColumn<any>,
-      ]
-    : []),
-  ...(enumerate
-    ? [
-        {
-          header: "No.",
-          cell: (info: any) => info.row.index + 1 + (page.value! - 1) * 10,
-        },
-      ]
-    : []),
-  ...columns,
-  ...(viewable || deletable || editable || dropdownItems
-    ? [
-        {
-          header: "",
-          accessorKey: "actions",
-          cell: ({ row }) => {
-            const canDelete = isRowDeletable(row.original);
-            const items: DropdownMenuItem[] = [
-              ...(viewable
-                ? [
-                    {
-                      label: "Lihat Detail",
-                      icon: "i-tabler-eye",
-                      onSelect() {
-                        emit("view", row.original);
-                      },
-                    } as DropdownMenuItem,
-                  ]
-                : []),
-              ...(editable
-                ? [
-                    {
-                      label: "Edit",
-                      icon: "i-tabler-edit",
-                      onSelect() {
-                        emit("edit", row.original);
-                      },
-                    } as DropdownMenuItem,
-                  ]
-                : []),
-              ...(dropdownItems ? dropdownItems(row.original) : []),
-              ...(canDelete && (viewable || editable)
-                ? [{ type: "separator" as const } as DropdownMenuItem]
-                : []),
-              ...(canDelete
-                ? [
-                    {
-                      label: "Hapus",
-                      icon: "i-tabler-trash",
-                      color: "error",
-                      onSelect() {
-                        if (isRowDeletable(row.original)) emit("delete", [row.original.id]);
-                      },
-                    } as DropdownMenuItem,
-                  ]
-                : []),
-            ];
-
-            return h(
-              "div",
-              { class: "text-center" },
-              h(
-                UDropdownMenu,
-                {
-                  items,
-                  ui: {
-                    content: "w-48",
-                  },
-                },
-                () =>
-                  h(UButton, {
-                    icon: "i-tabler-dots-vertical",
-                    color: "neutral",
-                    variant: "ghost",
-                    "aria-label": "Actions dropdown",
-                  }),
-              ),
-            );
-          },
-        } as TableColumn<any>,
-      ]
-    : []),
-]);
+                row.toggleSelected(!!value),
+              "aria-label": "Select row",
+            })
+          : null,
+    });
+  }
+  if (enumerate) {
+    result.push({
+      header: "No.",
+      cell: ({ row }) => row.index + 1 + (page.value - 1) * PAGE_SIZE,
+    });
+  }
+  result.push(...columns);
+  if (viewable || deletable || editable || dropdownItems) {
+    result.push({ id: "actions", header: "" });
+  }
+  return result;
+});
 
 watch([() => data, page], () => {
   rowSelection.value = {};
@@ -225,18 +200,32 @@ watch([() => data, page], () => {
         td: 'text-highlighted',
       }"
     >
-      <template v-for="(_, slotName) in slots" :key="slotName" #[slotName]="slotData">
+      <template #actions-cell="slotData">
+        <slot name="actions-cell" v-bind="slotData">
+          <div class="text-center">
+            <UDropdownMenu :items="getActions(slotData.row.original)" :ui="{ content: 'w-48' }">
+              <UButton
+                icon="i-tabler-dots-vertical"
+                color="neutral"
+                variant="ghost"
+                aria-label="Actions dropdown"
+              />
+            </UDropdownMenu>
+          </div>
+        </slot>
+      </template>
+      <template v-for="slotName in getForwardedSlotNames()" :key="slotName" #[slotName]="slotData">
         <slot :name="slotName" v-bind="slotData ?? {}" />
       </template>
     </UTable>
 
     <div v-if="pagination" class="mt-2 flex items-center justify-center md:justify-between">
       <p class="text-muted hidden px-2 text-sm md:block">
-        Menampilkan {{ total === 0 ? 0 : (page - 1) * 10 + 1 }} sampai
-        {{ Math.min((page - 1) * 10 + 10, total) }} dari {{ total }} item
+        Menampilkan {{ total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1 }} sampai
+        {{ Math.min(page * PAGE_SIZE, total) }} dari {{ total }} item
       </p>
       <div class="flex justify-center">
-        <UPagination v-model:page="page" :total="total" />
+        <UPagination v-model:page="page" :total="total" :items-per-page="PAGE_SIZE" />
       </div>
     </div>
   </div>

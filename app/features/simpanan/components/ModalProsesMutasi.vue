@@ -5,7 +5,6 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { APPROVAL_SIMPANAN_PENDING_KEY } from "../data";
 import { canCancelMutasi, rejectMutasiSchema } from "../model";
 
 const props = defineProps<{
@@ -81,7 +80,7 @@ async function onConfirm(alasanPenolakan?: string) {
   }
   useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
-  await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
+  await props.refresh();
 }
 
 function onReject(event: FormSubmitEvent<RejectMutasiSchema>) {

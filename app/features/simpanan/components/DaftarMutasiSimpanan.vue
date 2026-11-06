@@ -12,7 +12,9 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
+import { PAGE_SIZE } from "~/constants";
 import { authClient, can } from "~/utils/auth";
+import { APPROVAL_SIMPANAN_PENDING_KEY } from "../data";
 import {
   canCancelMutasi,
   getAnggotaOptions,
@@ -33,7 +35,7 @@ const statusFilter = ref<"all" | StatusMutasi>("all");
 const jenisSimpanan = ref<"all" | "tabungan" | "saham">("all");
 const jenisTransaksi = ref<"all" | "setoran" | "penarikan">("all");
 const selectedUserId = ref<number | "all">("all");
-const limit = 10;
+const limit = PAGE_SIZE;
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
 const canCancel = computed(
@@ -103,7 +105,7 @@ const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 defineExpose({ refreshList });
 
 async function refreshAfterChange() {
-  await refreshList();
+  await Promise.all([refreshList(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
   emit("changed");
 }
 

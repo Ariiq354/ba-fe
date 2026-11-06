@@ -6,7 +6,7 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
-import { IMAGE_URL } from "~/constants";
+import { IMAGE_URL, PAGE_SIZE } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPengguna from "./components/ModalDetailPengguna.vue";
 import {
@@ -23,7 +23,7 @@ import {
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<StatusPenggunaFilter>("all");
-const limit = 10;
+const limit = PAGE_SIZE;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "pengguna", "manage"));
 const pendingRoles = ref<Partial<Record<number, RolePengguna>>>({});
@@ -52,6 +52,13 @@ function getRoleOptions(pengguna: Pengguna) {
     ...option,
     disabled: !canChangePenggunaRole(pengguna, option.value),
   }));
+}
+
+function getSelectedRole(pengguna: Pengguna) {
+  const pendingRole = pendingRoles.value[pengguna.id];
+  if (pendingRole) return pendingRole;
+  const result = rolePenggunaSchema.safeParse(pengguna.role ?? "user");
+  return result.success ? result.data : undefined;
 }
 
 async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
@@ -182,7 +189,7 @@ async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
           <template #role-cell="{ row }">
             <USelect
               v-if="canManage"
-              :model-value="pendingRoles[row.original.id] ?? row.original.role ?? 'user'"
+              :model-value="getSelectedRole(row.original)"
               :items="getRoleOptions(row.original)"
               :loading="!!pendingRoles[row.original.id]"
               :disabled="

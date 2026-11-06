@@ -5,7 +5,6 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { refreshPembiayaanData } from "../data";
 import { canCancelPembiayaan, canProcessPembiayaan, rejectPembiayaanSchema } from "../model";
 
 const props = defineProps<{
@@ -91,7 +90,7 @@ async function onConfirm(alasanPenolakan?: string) {
   }
   useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
-  await refreshPembiayaanData(props.refresh);
+  await props.refresh();
 }
 function onReject(event: FormSubmitEvent<RejectPembiayaan>) {
   return onConfirm(event.data.alasanPenolakan);

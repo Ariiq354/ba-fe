@@ -6,7 +6,7 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
-import { API_URL } from "~/constants";
+import { API_URL, PAGE_SIZE } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailJurnal from "./components/ModalDetailJurnal.vue";
 import ModalJurnal from "./components/ModalJurnal.vue";
@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<{ mode?: "manual" | "transaksi" }>(), {
 
 const page = ref(1);
 const search = ref("");
-const limit = 10;
+const limit = PAGE_SIZE;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "jurnal", "manage"));
 

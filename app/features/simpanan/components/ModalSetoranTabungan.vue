@@ -3,7 +3,6 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { SetoranTabungan } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { APPROVAL_SIMPANAN_PENDING_KEY } from "../data";
 import { maxSimpananAmount, paymentMethodOptions, setoranTabunganSchema } from "../model";
 
 const props = defineProps<{
@@ -41,7 +40,7 @@ async function onSubmit(event: FormSubmitEvent<SetoranTabungan>) {
   }
   useToastSuccess("Pengajuan Berhasil", "Transaksi menunggu persetujuan admin.");
   emit("close");
-  await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
+  await props.refresh();
 }
 </script>
 

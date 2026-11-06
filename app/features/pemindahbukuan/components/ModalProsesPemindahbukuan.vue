@@ -5,7 +5,6 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { refreshPemindahbukuanData } from "../data";
 import {
   canCancelPemindahbukuan,
   formatPemindahbukuanValue,
@@ -17,7 +16,7 @@ const props = defineProps<{
   transfer: Pemindahbukuan;
   action: "approve" | "reject" | "cancel";
   accessibleSourceIds?: number[];
-  refresh: () => Promise<void>;
+  refresh: (userIds: number[]) => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
@@ -94,10 +93,7 @@ async function onConfirm(alasanPenolakan?: string) {
   }
   useToastSuccess(labels[props.action].success, labels[props.action].description);
   emit("close");
-  await refreshPemindahbukuanData(
-    [props.transfer.idUserSumber, props.transfer.idUserTujuan],
-    props.refresh,
-  );
+  await props.refresh([props.transfer.idUserSumber, props.transfer.idUserTujuan]);
 }
 function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
   return onConfirm(event.data.alasanPenolakan);

@@ -8,7 +8,6 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { getAnggotaOptions, paymentMethodOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
-import { refreshPembiayaanData } from "../data";
 import { maxPembiayaanAmount, pembiayaanSchema } from "../model";
 
 const props = defineProps<{ refresh: () => Promise<void> }>();
@@ -175,7 +174,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPembiayaan>) {
       : "Pengajuan menunggu penyaluran dana wakalah oleh admin, lalu persetujuan akad.",
   );
   emit("close");
-  await refreshPembiayaanData(props.refresh);
+  await props.refresh();
 }
 </script>
 

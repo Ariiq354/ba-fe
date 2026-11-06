@@ -5,7 +5,7 @@ import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
 import { formatRupiah } from "~/utils/format";
-import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "../data";
+import { getSaldoSimpananKey } from "../data";
 import { maxSimpananAmount, paymentMethodOptions, penarikanSchema } from "../model";
 
 const props = defineProps<{
@@ -77,7 +77,7 @@ async function onSubmit(event: FormSubmitEvent<PenarikanTabungan>) {
   }
   useToastSuccess("Pengajuan Berhasil", "Transaksi menunggu persetujuan admin.");
   emit("close");
-  await Promise.all([props.refresh(), refreshNuxtData(APPROVAL_SIMPANAN_PENDING_KEY)]);
+  await props.refresh();
 }
 </script>
 

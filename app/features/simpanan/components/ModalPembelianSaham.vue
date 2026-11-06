@@ -4,15 +4,14 @@ import type { HargaSaham, PembelianSaham, SaldoSimpanan } from "../model";
 import { useApi } from "~/composables/fetch";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/data";
 import { formatRupiah } from "~/utils/format";
-import { APPROVAL_SIMPANAN_PENDING_KEY, getSaldoSimpananKey } from "../data";
+import { getSaldoSimpananKey } from "../data";
 import { maxSimpananAmount, setoranSahamSchema, sharePaymentMethodOptions } from "../model";
 
 const props = defineProps<{
   userId: number;
   memberName: string;
-  refresh: () => Promise<void>;
+  refresh: (result: { paidFromTabungan: boolean }) => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
 const isLoading = ref(false);
@@ -121,12 +120,7 @@ async function onSubmit(event: FormSubmitEvent<PembelianSaham>) {
       : "Transaksi menunggu persetujuan admin.",
   );
   emit("close");
-  await Promise.all([
-    props.refresh(),
-    refreshNuxtData(
-      paidFromTabungan ? PEMINDAHBUKUAN_PENDING_KEY : APPROVAL_SIMPANAN_PENDING_KEY,
-    ),
-  ]);
+  await props.refresh({ paidFromTabungan });
 }
 </script>
 

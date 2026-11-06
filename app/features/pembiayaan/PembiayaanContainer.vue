@@ -6,13 +6,14 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
+import { PAGE_SIZE } from "~/constants";
 import { statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPembiayaan from "./components/ModalDetailPembiayaan.vue";
 import ModalPengajuanPembiayaan from "./components/ModalPengajuanPembiayaan.vue";
 import ModalProsesPembiayaan from "./components/ModalProsesPembiayaan.vue";
 import TabelPembiayaan from "./components/TabelPembiayaan.vue";
-import { PEMBIAYAAN_LIST_KEY } from "./data";
+import { PEMBIAYAAN_LIST_KEY, refreshPembiayaanData } from "./data";
 import { canCancelPembiayaan } from "./model";
 
 const session = authClient.useSession();
@@ -22,7 +23,7 @@ const canManage = computed(() => can(session.value.data?.user.role, "pembiayaan"
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
-const limit = 10;
+const limit = PAGE_SIZE;
 watch(
   [search, statusFilter],
   () => {
@@ -40,8 +41,12 @@ const { data, status, error, refresh } = useApi<PembiayaanResponse>("/api/v1/pem
 const total = computed(() => data.value?.total ?? 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
+function refreshAfterChange() {
+  return refreshPembiayaanData(refreshList);
+}
+
 function openForm() {
-  if (canManage.value) openModal(ModalPengajuanPembiayaan, { refresh: refreshList });
+  if (canManage.value) openModal(ModalPengajuanPembiayaan, { refresh: refreshAfterChange });
 }
 function viewPembiayaan(item: Pembiayaan) {
   openModal(ModalDetailPembiayaan, { pembiayaan: item });
@@ -52,7 +57,7 @@ function cancelPembiayaan(item: Pembiayaan) {
   openModal(ModalProsesPembiayaan, {
     pembiayaan: item,
     action: "cancel",
-    refresh: refreshList,
+    refresh: refreshAfterChange,
   });
 }
 function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {

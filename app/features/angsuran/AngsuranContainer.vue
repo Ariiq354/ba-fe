@@ -6,6 +6,7 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
+import { PAGE_SIZE } from "~/constants";
 import { statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailAngsuran from "./components/ModalDetailAngsuran.vue";
@@ -24,7 +25,7 @@ const canManage = computed(() => can(session.value.data?.user.role, resource.val
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
-const limit = 10;
+const limit = PAGE_SIZE;
 const listKey = props.approval ? ANGSURAN_APPROVAL_LIST_KEY : ANGSURAN_LIST_KEY;
 watch(
   [search, statusFilter],

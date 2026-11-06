@@ -14,7 +14,6 @@ import { getSaldoSimpananKey } from "~/features/simpanan/data";
 import { getAnggotaOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { refreshPemindahbukuanData } from "../data";
 import {
   getPemindahbukuanLimit,
   getPemindahbukuanSchema,
@@ -22,7 +21,7 @@ import {
 } from "../model";
 import PemilihTujuanPemindahbukuan from "./PemilihTujuanPemindahbukuan.vue";
 
-const props = defineProps<{ refresh: () => Promise<void> }>();
+const props = defineProps<{ refresh: (userIds: number[]) => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
@@ -32,7 +31,6 @@ const isLoading = ref(false);
 const state = reactive({
   tipePemindahbukuan: "tabungan_ke_tabungan" as TipePemindahbukuan,
   idUserSumber: actorId.value as number | undefined,
-  idUserTujuan: undefined as number | undefined,
   nominal: undefined as number | undefined,
   jumlahSaham: undefined as number | undefined,
   keterangan: "",
@@ -86,30 +84,25 @@ watch(
 );
 
 const selectedDestination = ref<AnggotaSimpanan>();
-watch(
-  selectedDestination,
-  (member) => {
-    if (!conversion.value) state.idUserTujuan = member?.id;
-  },
-  { flush: "sync" },
-);
 const destinationMember = computed(() =>
   conversion.value ? sourceMember.value : selectedDestination.value,
 );
+const formState = computed(() => ({
+  ...state,
+  idUserTujuan: destinationMember.value?.id,
+}));
 watch(
   () => state.tipePemindahbukuan,
   () => {
     state.nominal = undefined;
     state.jumlahSaham = undefined;
     selectedDestination.value = undefined;
-    state.idUserTujuan = conversion.value ? state.idUserSumber : undefined;
   },
 );
 watch(
   () => state.idUserSumber,
   (id) => {
-    if (conversion.value) state.idUserTujuan = id;
-    else if (selectedDestination.value?.id === id) selectedDestination.value = undefined;
+    if (selectedDestination.value?.id === id) selectedDestination.value = undefined;
   },
 );
 
@@ -170,10 +163,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
   }
   useToastSuccess("Pemindahbukuan Berhasil Diajukan", "Pengajuan menunggu persetujuan admin.");
   emit("close");
-  await refreshPemindahbukuanData(
-    [event.data.idUserSumber, event.data.idUserTujuan],
-    props.refresh,
-  );
+  await props.refresh([event.data.idUserSumber, event.data.idUserTujuan]);
 }
 </script>
 
@@ -189,7 +179,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
       <UForm
         id="form-pemindahbukuan"
         :schema="schema"
-        :state="state"
+        :state="formState"
         :disabled="isLoading"
         class="space-y-5"
         @submit="onSubmit"

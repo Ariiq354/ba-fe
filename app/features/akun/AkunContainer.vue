@@ -6,7 +6,7 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
-import { API_URL } from "~/constants";
+import { API_URL, PAGE_SIZE } from "~/constants";
 import { authClient, can } from "~/utils/auth";
 import ModalAkun from "./components/ModalAkun.vue";
 import { akunColumns, kategoriFilterOptions } from "./model";
@@ -14,7 +14,7 @@ import { akunColumns, kategoriFilterOptions } from "./model";
 const page = ref(1);
 const search = ref("");
 const kategori = ref<KategoriFilter>("all");
-const limit = 10;
+const limit = PAGE_SIZE;
 const session = authClient.useSession();
 const canManage = computed(() => can(session.value.data?.user.role, "masterAkun", "manage"));
 

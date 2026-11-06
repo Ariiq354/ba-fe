@@ -7,7 +7,6 @@ import { authClient } from "~/utils/auth";
 const props = defineProps<{ referensi: ReferensiShu; refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
-const nuxtApp = useNuxtApp();
 const isLoading = ref(false);
 const canTransfer = computed(
   () =>
@@ -40,10 +39,7 @@ async function onConfirm() {
     `SHU ${props.referensi.tahun} telah masuk ke tabungan anggota.`,
   );
   emit("close");
-  const saldoKeys = Object.keys(nuxtApp.payload.data).filter((key) =>
-    key.startsWith("simpanan-saldo-"),
-  );
-  await Promise.all([props.refresh(), ...(saldoKeys.length ? [refreshNuxtData(saldoKeys)] : [])]);
+  await props.refresh();
 }
 </script>
 

@@ -2,12 +2,14 @@
 import type { AnggotaOptionsResponse, JenisPengajuan } from "./model";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
+import { PEMINDAHBUKUAN_PENDING_KEY } from "~/features/pemindahbukuan/data";
 import { authClient, can } from "~/utils/auth";
 import DaftarMutasiSimpanan from "./components/DaftarMutasiSimpanan.vue";
 import ModalPembelianSaham from "./components/ModalPembelianSaham.vue";
 import ModalPenarikanTabungan from "./components/ModalPenarikanTabungan.vue";
 import ModalSetoranTabungan from "./components/ModalSetoranTabungan.vue";
 import RingkasanSaldo from "./components/RingkasanSaldo.vue";
+import { APPROVAL_SIMPANAN_PENDING_KEY } from "./data";
 import { getAnggotaOptions, pengajuanLabels } from "./model";
 
 const session = authClient.useSession();
@@ -71,8 +73,11 @@ async function refreshSaldo() {
   await saldo.value?.refresh();
 }
 
-async function refreshAfterCreate() {
-  await Promise.all([refreshSaldo(), mutasi.value?.refreshList()]);
+async function refreshAfterCreate(result?: { paidFromTabungan: boolean }) {
+  const pendingKey = result?.paidFromTabungan
+    ? PEMINDAHBUKUAN_PENDING_KEY
+    : APPROVAL_SIMPANAN_PENDING_KEY;
+  await Promise.all([refreshSaldo(), mutasi.value?.refreshList(), refreshNuxtData(pendingKey)]);
 }
 
 const pengajuanModals = {

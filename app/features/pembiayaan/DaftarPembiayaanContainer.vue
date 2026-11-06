@@ -6,12 +6,13 @@ import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
+import { PAGE_SIZE } from "~/constants";
 import { getAnggotaOptions, statusMutasiOptions } from "~/features/simpanan/model";
 import { authClient, can } from "~/utils/auth";
 import ModalDetailPembiayaan from "./components/ModalDetailPembiayaan.vue";
 import ModalProsesPembiayaan from "./components/ModalProsesPembiayaan.vue";
 import TabelPembiayaan from "./components/TabelPembiayaan.vue";
-import { PEMBIAYAAN_APPROVAL_LIST_KEY } from "./data";
+import { PEMBIAYAAN_APPROVAL_LIST_KEY, refreshPembiayaanData } from "./data";
 import { canProcessPembiayaan } from "./model";
 
 const session = authClient.useSession();
@@ -26,7 +27,7 @@ const selectedUserId = ref<number | "all">("all");
 const targetUserId = computed(() =>
   selectedUserId.value === "all" ? undefined : selectedUserId.value,
 );
-const limit = 10;
+const limit = PAGE_SIZE;
 watch(
   [search, statusFilter, targetUserId],
   () => {
@@ -63,13 +64,17 @@ const { data, status, error, refresh } = useApi<PembiayaanResponse>("/api/v1/pem
 const total = computed(() => data.value?.total ?? 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
+function refreshAfterChange() {
+  return refreshPembiayaanData(refreshList);
+}
+
 function viewPembiayaan(item: Pembiayaan) {
   openModal(ModalDetailPembiayaan, { pembiayaan: item });
 }
 function processPembiayaan(item: Pembiayaan, action: Exclude<PembiayaanAction, "cancel">) {
   if (status.value === "pending" || !canApprove.value || !canProcessPembiayaan(item, action))
     return;
-  openModal(ModalProsesPembiayaan, { pembiayaan: item, action, refresh: refreshList });
+  openModal(ModalProsesPembiayaan, { pembiayaan: item, action, refresh: refreshAfterChange });
 }
 function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {
   if (item.statusApproved !== "pending" || status.value === "pending" || !canApprove.value)
