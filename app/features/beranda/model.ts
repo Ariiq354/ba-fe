@@ -12,17 +12,20 @@ export interface DashboardResponse {
     perubahanNominal: number | null;
     perubahanPersen: number | null;
   };
-  grafikHargaSaham: Periode & {
+  grafikPembiayaanTahunan: Periode & {
     data: {
-      bulan: string;
-      hargaJual: number | null;
+      tahun: number;
+      total: number;
     }[];
+  };
+  pembiayaanBerjalan: Periode & {
+    total: number;
   };
   labaBerjalan: Periode & {
     total: number;
   };
-  grafikLabaBulanan: {
-    bulan: string;
+  grafikLabaTahunan: {
+    tahun: number;
     pendapatan: number;
     biaya: number;
     laba: number;

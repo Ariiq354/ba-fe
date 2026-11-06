@@ -7,7 +7,7 @@ const details = computed(() => [
   { label: "Total Tagihan", value: props.ringkasan.totalTagihan },
   { label: "Sisa Tagihan", value: props.ringkasan.sisaTagihan },
   { label: "Angsuran Bulanan", value: props.ringkasan.angsuranBulanan },
-  { label: "Sisa Pembayaran Bulan Ini", value: props.ringkasan.sisaPembayaranBulanIni },
+  { label: "Tunggakan Angsuran", value: props.ringkasan.sisaPembayaranBulanIni },
 ]);
 </script>
 

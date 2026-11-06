@@ -129,7 +129,7 @@ function openForm(jenis: JenisPengajuan) {
     </UCard>
     <div v-if="userId" :key="userId" class="space-y-6">
       <RingkasanSaldo ref="saldo" :user-id="userId" />
-      <div v-if="canManage" class="flex flex-wrap gap-3">
+      <div v-if="canManage" class="flex flex-wrap justify-end gap-3">
         <UButton
           v-for="jenis in ['tabungan', 'saham', 'penarikan'] as const"
           :key="jenis"
