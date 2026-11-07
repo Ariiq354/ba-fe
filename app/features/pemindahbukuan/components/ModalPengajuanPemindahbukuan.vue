@@ -161,15 +161,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
       baseURL: API_URL,
       method: "POST",
       credentials: "include",
-      body:
-        event.data.tipePemindahbukuan === "pembelian_kembali_saham"
-          ? {
-              tipePemindahbukuan: event.data.tipePemindahbukuan,
-              idUserSumber: event.data.idUserSumber,
-              jumlahSaham: event.data.jumlahSaham,
-              keterangan: event.data.keterangan,
-            }
-          : event.data,
+      body: event.data,
     });
   } catch (error) {
     useToastError(

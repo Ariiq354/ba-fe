@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
-import type { Pemindahbukuan, PemindahbukuanResponse } from "./model";
+import type { Pemindahbukuan, PemindahbukuanResponse, TipePemindahbukuan } from "./model";
 import type { AnggotaOptionsResponse, StatusMutasi } from "~/features/simpanan/model";
 import InputSearch from "~/components/input/InputSearch.vue";
 import { useApi } from "~/composables/fetch";
@@ -14,7 +14,7 @@ import ModalPengajuanPemindahbukuan from "./components/ModalPengajuanPemindahbuk
 import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
 import TabelPemindahbukuan from "./components/TabelPemindahbukuan.vue";
 import { PEMINDAHBUKUAN_LIST_KEY, refreshPemindahbukuanData } from "./data";
-import { canCancelPemindahbukuan } from "./model";
+import { canCancelPemindahbukuan, tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
@@ -26,10 +26,11 @@ const canBuyback = computed(() =>
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
+const tipe = ref<"all" | TipePemindahbukuan>("all");
 const limit = PAGE_SIZE;
 
 watch(
-  [search, statusFilter],
+  [search, statusFilter, tipe],
   () => {
     page.value = 1;
   },
@@ -45,6 +46,7 @@ const {
   watch: [canView],
 });
 const accessibleSourceIds = computed(() => members.value?.data.map((member) => member.id) ?? []);
+const tipeOptions = [{ label: "Semua jenis", value: "all" }, ...tipePemindahbukuanOptions];
 const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1/pemindahbukuan", {
   key: PEMINDAHBUKUAN_LIST_KEY,
   query: {
@@ -52,6 +54,7 @@ const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1
     limit,
     search,
     status: statusFilter,
+    tipePemindahbukuan: tipe,
   },
   enabled: canView,
   watch: [canView],
@@ -122,11 +125,19 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
             placeholder="Cari kode transaksi..."
             aria-label="Cari pemindahbukuan"
           />
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <USelect
+            v-model="tipe"
+            :items="tipeOptions"
+            aria-label="Filter jenis pemindahbukuan"
+            class="w-full"
+          />
           <USelect
             v-model="statusFilter"
             :items="statusMutasiOptions"
             aria-label="Filter status pemindahbukuan"
-            class="w-full lg:w-56"
+            class="w-full"
           />
         </div>
         <UAlert
