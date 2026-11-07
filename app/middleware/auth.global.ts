@@ -31,6 +31,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     const adminPaths = [
+      "/dashboard/pembiayaan-eksternal",
+      "/dashboard/angsuran-eksternal",
       "/dashboard/jurnal",
       "/dashboard/neraca",
       "/dashboard/laba-rugi",

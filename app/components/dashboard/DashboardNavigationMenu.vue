@@ -180,6 +180,20 @@ const managementItems = computed<NavigationMenuItem[]>(() => {
           },
         ]
       : []),
+    ...(role === "admin"
+      ? [
+          {
+            label: "Pembiayaan Eksternal",
+            to: "/dashboard/pembiayaan-eksternal",
+            icon: "i-tabler-building-bank",
+          },
+          {
+            label: "Angsuran Eksternal",
+            to: "/dashboard/angsuran-eksternal",
+            icon: "i-tabler-cash-banknote",
+          },
+        ]
+      : []),
   ];
 });
 
