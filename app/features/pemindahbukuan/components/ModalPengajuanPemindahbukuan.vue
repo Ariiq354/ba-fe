@@ -16,8 +16,8 @@ import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import {
   getPemindahbukuanLimit,
+  getPemindahbukuanOptions,
   getPemindahbukuanSchema,
-  tipePemindahbukuanOptions,
 } from "../model";
 import PemilihTujuanPemindahbukuan from "./PemilihTujuanPemindahbukuan.vue";
 
@@ -27,6 +27,10 @@ const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
 const canManage = computed(() => can(session.value.data?.user.role, "pemindahbukuan", "manage"));
 const canDelegate = computed(() => can(session.value.data?.user.role, "inputSimpanan", "manage"));
+const canBuyback = computed(() =>
+  can(session.value.data?.user.role, "approvalPemindahbukuan", "manage"),
+);
+const tipeOptions = computed(() => getPemindahbukuanOptions(canBuyback.value));
 const isLoading = ref(false);
 const state = reactive({
   tipePemindahbukuan: "tabungan_ke_tabungan" as TipePemindahbukuan,
@@ -37,6 +41,11 @@ const state = reactive({
 });
 const conversion = computed(() => state.tipePemindahbukuan === "tabungan_ke_saham");
 const shareTransfer = computed(() => state.tipePemindahbukuan === "saham_ke_saham");
+const buyback = computed(() => state.tipePemindahbukuan === "pembelian_kembali_saham");
+const needsPrice = computed(() => conversion.value || buyback.value);
+watch(canBuyback, (allowed) => {
+  if (!allowed && buyback.value) state.tipePemindahbukuan = "tabungan_ke_tabungan";
+});
 const {
   data: sources,
   status: sourceStatus,
@@ -118,7 +127,7 @@ const {
   enabled: balanceEnabled,
   watch: [balanceEnabled],
 });
-const priceEnabled = computed(() => canManage.value && conversion.value);
+const priceEnabled = computed(() => canManage.value && needsPrice.value);
 const {
   data: price,
   status: priceStatus,
@@ -135,12 +144,13 @@ const maxAmount = computed(() =>
 const ready = computed(
   () =>
     canManage.value &&
+    (!buyback.value || canBuyback.value) &&
     sourceStatus.value === "success" &&
     !!sourceMember.value?.noAnggota?.trim() &&
-    !!destinationMember.value?.noAnggota?.trim() &&
+    (buyback.value || !!destinationMember.value?.noAnggota?.trim()) &&
     balanceStatus.value === "success" &&
     maxAmount.value > 0 &&
-    (!conversion.value || priceStatus.value === "success"),
+    (!needsPrice.value || priceStatus.value === "success"),
 );
 
 async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
@@ -151,7 +161,15 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
       baseURL: API_URL,
       method: "POST",
       credentials: "include",
-      body: event.data,
+      body:
+        event.data.tipePemindahbukuan === "pembelian_kembali_saham"
+          ? {
+              tipePemindahbukuan: event.data.tipePemindahbukuan,
+              idUserSumber: event.data.idUserSumber,
+              jumlahSaham: event.data.jumlahSaham,
+              keterangan: event.data.keterangan,
+            }
+          : event.data,
     });
   } catch (error) {
     useToastError(
@@ -163,7 +181,11 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
   }
   useToastSuccess("Pemindahbukuan Berhasil Diajukan", "Pengajuan menunggu persetujuan admin.");
   emit("close");
-  await props.refresh([event.data.idUserSumber, event.data.idUserTujuan]);
+  await props.refresh(
+    event.data.tipePemindahbukuan === "pembelian_kembali_saham"
+      ? [event.data.idUserSumber]
+      : [event.data.idUserSumber, event.data.idUserTujuan],
+  );
 }
 </script>
 
@@ -185,11 +207,7 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
         @submit="onSubmit"
       >
         <UFormField label="Jenis Pemindahbukuan" name="tipePemindahbukuan" required>
-          <USelect
-            v-model="state.tipePemindahbukuan"
-            :items="tipePemindahbukuanOptions"
-            class="w-full"
-          />
+          <USelect v-model="state.tipePemindahbukuan" :items="tipeOptions" class="w-full" />
         </UFormField>
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-3 rounded-lg border border-default p-4">
@@ -244,13 +262,13 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
             />
             <template v-else-if="sourceMember">
               <p class="text-sm text-muted">
-                {{ shareTransfer ? "Saham tersedia" : "Saldo tabungan tersedia" }}
+                {{ shareTransfer || buyback ? "Saham tersedia" : "Saldo tabungan tersedia" }}
               </p>
               <USkeleton v-if="balanceStatus === 'pending'" class="h-6 w-32" />
               <p v-else class="text-lg font-semibold">
                 {{
                   balance
-                    ? shareTransfer
+                    ? shareTransfer || buyback
                       ? `${balance.jumlahSahamEfektif.toLocaleString("id-ID")} lembar`
                       : formatRupiah(balance.saldoEfektif)
                     : "—"
@@ -258,7 +276,11 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
               </p>
             </template>
           </div>
+          <UFormField v-if="buyback" label="Pembayaran melalui">
+            <UInput model-value="Bank BSI" readonly class="w-full" />
+          </UFormField>
           <PemilihTujuanPemindahbukuan
+            v-else
             v-model="selectedDestination"
             :source="sourceMember"
             :tipe="state.tipePemindahbukuan"
@@ -289,30 +311,38 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
         <UFormField v-else label="Jumlah Saham (Lembar)" name="jumlahSaham" required>
           <UInputNumber
             v-model="state.jumlahSaham"
-            :min="1"
-            :max="Math.max(1, maxAmount)"
-            :step="1"
+            :min="buyback ? 0.5 : 1"
+            :max="Math.max(buyback ? 0.5 : 1, maxAmount)"
+            :step="buyback ? 0.5 : 1"
+            :format-options="{ maximumFractionDigits: buyback ? 1 : 0 }"
+            locale="id-ID"
             class="w-full"
           />
         </UFormField>
         <UAlert
-          v-if="conversion && priceError"
+          v-if="needsPrice && priceError"
           title="Harga Saham Belum Tersedia"
           color="error"
           variant="subtle"
           :actions="[{ label: 'Coba lagi', color: 'error', onClick: () => refreshPrice() }]"
         />
-        <p v-else-if="conversion" class="text-sm text-muted">
+        <p v-else-if="needsPrice" class="text-sm text-muted">
           Harga jual per lembar:
           {{
             priceStatus === "pending" ? "Memuat..." : price ? formatRupiah(price.hargaJual) : "—"
           }}. Harga final ditetapkan saat pengajuan dan digunakan saat approval.
         </p>
+        <p
+          v-if="buyback && priceStatus === 'success' && price && state.jumlahSaham"
+          class="font-semibold"
+        >
+          Estimasi pembayaran: {{ formatRupiah(state.jumlahSaham * price.hargaJual) }}
+        </p>
         <UAlert
           v-if="
             balanceStatus === 'success' &&
             maxAmount === 0 &&
-            (!conversion || priceStatus === 'success')
+            (!needsPrice || priceStatus === 'success')
           "
           title="Saldo atau Saham Tidak Mencukupi"
           description="Tidak ada saldo atau saham tersedia untuk pengajuan ini."

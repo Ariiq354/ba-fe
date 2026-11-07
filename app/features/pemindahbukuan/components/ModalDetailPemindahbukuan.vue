@@ -3,7 +3,11 @@ import type { Pemindahbukuan } from "../model";
 import AlasanPenolakan from "~/components/modal/AlasanPenolakan.vue";
 import { formatSimpananDate, formatSimpananTimestamp } from "~/features/simpanan/model";
 import { formatRupiah } from "~/utils/format";
-import { formatPemindahbukuanValue, tipePemindahbukuanLabels } from "../model";
+import {
+  formatPemindahbukuanValue,
+  getPemindahbukuanNominalLabel,
+  tipePemindahbukuanLabels,
+} from "../model";
 
 defineProps<{ transfer: Pemindahbukuan }>();
 const emit = defineEmits<{ close: [] }>();
@@ -25,7 +29,7 @@ const emit = defineEmits<{ close: [] }>();
               {{ transfer.sourceMemberName }}
             </dd>
           </div>
-          <div>
+          <div v-if="transfer.idUserTujuan !== null">
             <dt class="text-sm text-muted">Anggota Tujuan</dt>
             <dd class="font-medium">
               {{ transfer.destinationMemberName }}
@@ -36,7 +40,13 @@ const emit = defineEmits<{ close: [] }>();
             <dd>{{ transfer.sourceAccountName }}</dd>
           </div>
           <div>
-            <dt class="text-sm text-muted">Akun Tujuan</dt>
+            <dt class="text-sm text-muted">
+              {{
+                transfer.tipePemindahbukuan === "pembelian_kembali_saham"
+                  ? "Pembayaran melalui"
+                  : "Akun Tujuan"
+              }}
+            </dt>
             <dd>{{ transfer.destinationAccountName }}</dd>
           </div>
           <div>
@@ -55,15 +65,16 @@ const emit = defineEmits<{ close: [] }>();
           </div>
           <div v-if="transfer.tipePemindahbukuan !== 'tabungan_ke_tabungan'">
             <dt class="text-sm text-muted">
-              {{
-                transfer.tipePemindahbukuan === "saham_ke_saham"
-                  ? "Nilai Referensi Saham"
-                  : "Tabungan Digunakan"
-              }}
+              {{ getPemindahbukuanNominalLabel(transfer.tipePemindahbukuan) }}
             </dt>
             <dd>{{ formatRupiah(transfer.nominal) }}</dd>
           </div>
-          <template v-if="transfer.tipePemindahbukuan === 'tabungan_ke_saham'">
+          <template
+            v-if="
+              transfer.tipePemindahbukuan === 'tabungan_ke_saham' ||
+              transfer.tipePemindahbukuan === 'pembelian_kembali_saham'
+            "
+          >
             <div>
               <dt class="text-sm text-muted">Harga Jual per Lembar saat Pengajuan</dt>
               <dd>{{ formatRupiah(transfer.hargaPerSaham) }}</dd>

@@ -10,8 +10,14 @@ export const tipePemindahbukuanOptions = [
   { label: "Transfer Tabungan", value: "tabungan_ke_tabungan" as const },
   { label: "Transfer Saham", value: "saham_ke_saham" as const },
   { label: "Tabungan ke Saham", value: "tabungan_ke_saham" as const },
+  { label: "Pembelian Kembali Saham", value: "pembelian_kembali_saham" as const },
 ];
 export type TipePemindahbukuan = (typeof tipePemindahbukuanOptions)[number]["value"];
+export function getPemindahbukuanOptions(canBuyback: boolean) {
+  return tipePemindahbukuanOptions.filter(
+    (option) => canBuyback || option.value !== "pembelian_kembali_saham",
+  );
+}
 export const tipePemindahbukuanLabels = Object.fromEntries(
   tipePemindahbukuanOptions.map((item) => [item.value, item.label]),
 );
@@ -49,6 +55,21 @@ export const pemindahbukuanSchema = z.discriminatedUnion("tipePemindahbukuan", [
     tipePemindahbukuan: z.literal("tabungan_ke_saham"),
     jumlahSaham: positiveIntegerSchema("Jumlah saham wajib diisi"),
   }),
+  z.object({
+    idUserSumber: commonFields.idUserSumber,
+    tipePemindahbukuan: z.literal("pembelian_kembali_saham"),
+    jumlahSaham: z
+      .number()
+      .optional()
+      .pipe(
+        z
+          .number("Jumlah saham wajib diisi")
+          .min(0.5, "Jumlah saham minimal 0,5 lembar")
+          .multipleOf(0.5, "Jumlah saham harus kelipatan 0,5 lembar")
+          .max(maxPemindahbukuanAmount, "Jumlah saham melebihi batas transaksi"),
+      ),
+    keterangan: commonFields.keterangan,
+  }),
 ]);
 export type PengajuanPemindahbukuan = z.output<typeof pemindahbukuanSchema>;
 export const rejectPemindahbukuanSchema = z.object({
@@ -66,8 +87,20 @@ export function getPemindahbukuanLimit(
     return Math.max(0, Math.min(balance.saldoEfektif, maxPemindahbukuanAmount));
   const nominalLimit = Math.floor(maxPemindahbukuanAmount / hargaNominalSaham);
   if (tipe === "saham_ke_saham")
-    return Math.max(0, Math.min(balance.jumlahSahamEfektif, nominalLimit));
+    return Math.max(0, Math.min(Math.floor(balance.jumlahSahamEfektif), nominalLimit));
   if (!price || price.hargaJual <= 0) return 0;
+  if (tipe === "pembelian_kembali_saham") {
+    const maxUnitValue = Math.max(
+      hargaNominalSaham,
+      price.hargaJual,
+      Math.abs(price.hargaJual - hargaNominalSaham),
+    );
+    return Math.max(
+      0,
+      Math.floor(Math.min(balance.jumlahSahamEfektif, maxPemindahbukuanAmount / maxUnitValue) * 2) /
+        2,
+    );
+  }
   return Math.max(
     0,
     Math.min(
@@ -80,7 +113,11 @@ export function getPemindahbukuanLimit(
 export function getPemindahbukuanSchema(balance?: SaldoSimpanan | null, price?: HargaSaham | null) {
   return pemindahbukuanSchema.superRefine((data, ctx) => {
     const conversion = data.tipePemindahbukuan === "tabungan_ke_saham";
-    if ((data.idUserSumber === data.idUserTujuan) !== conversion) {
+    const buyback = data.tipePemindahbukuan === "pembelian_kembali_saham";
+    if (
+      data.tipePemindahbukuan !== "pembelian_kembali_saham" &&
+      (data.idUserSumber === data.idUserTujuan) !== conversion
+    ) {
       ctx.addIssue({
         code: "custom",
         path: ["idUserTujuan"],
@@ -92,7 +129,7 @@ export function getPemindahbukuanSchema(balance?: SaldoSimpanan | null, price?: 
     const field = data.tipePemindahbukuan === "tabungan_ke_tabungan" ? "nominal" : "jumlahSaham";
     const amount =
       data.tipePemindahbukuan === "tabungan_ke_tabungan" ? data.nominal : data.jumlahSaham;
-    if (!balance || (conversion && !price)) {
+    if (!balance || ((conversion || buyback) && !price)) {
       ctx.addIssue({
         code: "custom",
         path: [field],
@@ -105,6 +142,21 @@ export function getPemindahbukuanSchema(balance?: SaldoSimpanan | null, price?: 
         message: "Nilai melebihi saldo/saham tersedia atau batas transaksi",
       });
     }
+    if (buyback && price) {
+      const amounts = [
+        data.jumlahSaham * price.hargaJual,
+        data.jumlahSaham * hargaNominalSaham,
+        data.jumlahSaham * Math.abs(price.hargaJual - hargaNominalSaham),
+      ];
+      if (amounts.some((amount) => !Number.isSafeInteger(amount))) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["jumlahSaham"],
+          message:
+            "Nilai pembayaran harus berupa rupiah bulat. Gunakan jumlah saham bulat untuk harga ini.",
+        });
+      }
+    }
   });
 }
 
@@ -112,7 +164,7 @@ export interface Pemindahbukuan {
   id: number;
   kodeTransaksi: string;
   idUserSumber: number;
-  idUserTujuan: number;
+  idUserTujuan: number | null;
   nominal: number;
   jumlahSaham: number;
   hargaPerSaham: number;
@@ -127,7 +179,7 @@ export interface Pemindahbukuan {
   approvedAt: string | null;
   createdAt: string;
   sourceMemberName: string;
-  destinationMemberName: string;
+  destinationMemberName: string | null;
   sourceAccountName: string;
   destinationAccountName: string;
   creatorName: string;
@@ -140,15 +192,38 @@ export interface PemindahbukuanResponse {
 
 // Recipient-visible rows do not necessarily grant access to their source.
 export function canCancelPemindahbukuan(
-  transfer: Pick<Pemindahbukuan, "statusApproved" | "idUserSumber" | "createdBy">,
+  transfer: Pick<
+    Pemindahbukuan,
+    "statusApproved" | "idUserSumber" | "createdBy" | "tipePemindahbukuan"
+  >,
   actorId: number,
   accessibleSourceIds: number[],
+  canBuyback: boolean,
 ) {
+  if (transfer.tipePemindahbukuan === "pembelian_kembali_saham") {
+    return (
+      transfer.statusApproved === "pending" &&
+      canBuyback &&
+      accessibleSourceIds.includes(transfer.idUserSumber)
+    );
+  }
   return (
     transfer.statusApproved === "pending" &&
     (transfer.idUserSumber === actorId || transfer.createdBy === actorId) &&
     accessibleSourceIds.includes(transfer.idUserSumber)
   );
+}
+
+export function getPemindahbukuanDestination(
+  transfer: Pick<Pemindahbukuan, "destinationMemberName" | "destinationAccountName">,
+) {
+  return transfer.destinationMemberName ?? transfer.destinationAccountName;
+}
+
+export function getPemindahbukuanNominalLabel(tipe: TipePemindahbukuan) {
+  if (tipe === "saham_ke_saham") return "Nilai Referensi Saham";
+  if (tipe === "pembelian_kembali_saham") return "Total Pembayaran";
+  return "Tabungan Digunakan";
 }
 
 export function formatPemindahbukuanValue(
@@ -174,7 +249,8 @@ export const pemindahbukuanColumns: TableColumn<Pemindahbukuan>[] = [
   {
     id: "members",
     header: "Sumber → Tujuan",
-    cell: ({ row }) => `${row.original.sourceMemberName} → ${row.original.destinationMemberName}`,
+    cell: ({ row }) =>
+      `${row.original.sourceMemberName} → ${getPemindahbukuanDestination(row.original)}`,
   },
   {
     accessorKey: "nominal",

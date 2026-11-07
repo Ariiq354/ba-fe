@@ -5,7 +5,11 @@ import type { StatusMutasi } from "~/features/simpanan/model";
 import DataTable from "~/components/table/DataTable.vue";
 import { statusMutasiLabels } from "~/features/simpanan/model";
 import { formatRupiah } from "~/utils/format";
-import { formatPemindahbukuanValue, pemindahbukuanColumns } from "../model";
+import {
+  formatPemindahbukuanValue,
+  getPemindahbukuanDestination,
+  pemindahbukuanColumns,
+} from "../model";
 
 withDefaults(
   defineProps<{
@@ -42,7 +46,7 @@ const page = defineModel<number>("page", { default: 1 });
       <p class="font-medium">
         {{ row.original.sourceMemberName }}
       </p>
-      <p class="text-sm text-muted">→ {{ row.original.destinationMemberName }}</p>
+      <p class="text-sm text-muted">→ {{ getPemindahbukuanDestination(row.original) }}</p>
     </template>
     <template #nominal-cell="{ row }">
       <p class="font-medium">
@@ -52,7 +56,12 @@ const page = defineModel<number>("page", { default: 1 });
         v-if="row.original.tipePemindahbukuan !== 'tabungan_ke_tabungan'"
         class="text-sm text-muted"
       >
-        {{ row.original.tipePemindahbukuan === "saham_ke_saham" ? "Referensi: " : ""
+        {{
+          row.original.tipePemindahbukuan === "saham_ke_saham"
+            ? "Referensi: "
+            : row.original.tipePemindahbukuan === "pembelian_kembali_saham"
+              ? "Pembayaran: "
+              : ""
         }}{{ formatRupiah(row.original.nominal) }}
       </p>
     </template>

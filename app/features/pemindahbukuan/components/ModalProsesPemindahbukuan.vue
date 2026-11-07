@@ -8,6 +8,8 @@ import { formatRupiah } from "~/utils/format";
 import {
   canCancelPemindahbukuan,
   formatPemindahbukuanValue,
+  getPemindahbukuanDestination,
+  getPemindahbukuanNominalLabel,
   rejectPemindahbukuanSchema,
   tipePemindahbukuanLabels,
 } from "../model";
@@ -54,6 +56,7 @@ const canProcess = computed(() => {
           props.transfer,
           Number(session.value.data?.user.id),
           props.accessibleSourceIds ?? [],
+          can(role, "approvalPemindahbukuan", "manage"),
         )
     : can(role, "approvalPemindahbukuan", "manage");
 });
@@ -91,9 +94,18 @@ async function onConfirm(alasanPenolakan?: string) {
     isLoading.value = false;
     return;
   }
-  useToastSuccess(labels[props.action].success, labels[props.action].description);
+  useToastSuccess(
+    labels[props.action].success,
+    props.action === "approve" && props.transfer.tipePemindahbukuan === "pembelian_kembali_saham"
+      ? "Pembelian kembali saham telah dicatat."
+      : labels[props.action].description,
+  );
   emit("close");
-  await props.refresh([props.transfer.idUserSumber, props.transfer.idUserTujuan]);
+  await props.refresh(
+    [props.transfer.idUserSumber, props.transfer.idUserTujuan].filter(
+      (id): id is number => id != null,
+    ),
+  );
 }
 function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
   return onConfirm(event.data.alasanPenolakan);
@@ -111,7 +123,7 @@ function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
       <div class="space-y-4">
         <div class="space-y-2">
           <p class="font-medium">
-            {{ transfer.sourceMemberName }} → {{ transfer.destinationMemberName }}
+            {{ transfer.sourceMemberName }} → {{ getPemindahbukuanDestination(transfer) }}
           </p>
           <p class="text-sm text-muted">
             {{ tipePemindahbukuanLabels[transfer.tipePemindahbukuan] }}
@@ -123,11 +135,8 @@ function onReject(event: FormSubmitEvent<RejectPemindahbukuan>) {
             v-if="transfer.tipePemindahbukuan !== 'tabungan_ke_tabungan'"
             class="text-sm text-muted"
           >
-            {{
-              transfer.tipePemindahbukuan === "saham_ke_saham"
-                ? "Nilai referensi saham"
-                : "Tabungan digunakan"
-            }}: {{ formatRupiah(transfer.nominal) }}
+            {{ getPemindahbukuanNominalLabel(transfer.tipePemindahbukuan) }}:
+            {{ formatRupiah(transfer.nominal) }}
           </p>
         </div>
         <UForm
