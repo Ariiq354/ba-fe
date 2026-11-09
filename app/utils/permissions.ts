@@ -40,6 +40,4 @@ export const pj = ac.newRole({
 
 export const admin = ac.newRole(statement);
 
-export const wanhat = ac.newRole({});
-
-export const roles = { user, admin, pj, wanhat };
+export const roles = { user, admin, pj };

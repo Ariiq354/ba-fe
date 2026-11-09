@@ -1,7 +1,7 @@
 import type { TableColumn } from "@nuxt/ui";
 import { z } from "zod";
 
-export const rolePenggunaSchema = z.enum(["admin", "user", "pj", "wanhat"]);
+export const rolePenggunaSchema = z.enum(["admin", "user", "pj"]);
 
 export const penggunaSchema = z.object({
   id: z.number().int().positive(),
@@ -65,7 +65,6 @@ const roleLabels: Record<string, string> = {
   admin: "Admin",
   user: "Anggota",
   pj: "PJ Kelompok",
-  wanhat: "Wanhat",
 };
 
 export const rolePenggunaOptions = rolePenggunaSchema.options.map((value) => ({
