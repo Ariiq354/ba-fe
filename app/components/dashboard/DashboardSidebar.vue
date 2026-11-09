@@ -1,14 +1,30 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 import { openModal } from "~/composables/modal";
-import { useToastError } from "~/composables/toast";
+import { extractErrorMessage, useToastError } from "~/composables/toast";
 import { IMAGE_URL } from "~/constants";
 import ModalChangePassword from "~/features/auth/components/ModalChangePassword.vue";
+import ModalImpersonate from "~/features/auth/components/ModalImpersonate.vue";
 import ModalChangeProfile from "~/features/pengguna/components/ModalChangeProfile.vue";
 import { authClient } from "~/utils/auth";
 import DashboardNavigationMenu from "./DashboardNavigationMenu.vue";
 
 const session = authClient.useSession();
+const isImpersonating = computed(() => !!session.value.data?.session.impersonatedBy);
+const isReturning = ref(false);
+
+async function stopImpersonating() {
+  if (isReturning.value || !isImpersonating.value) return;
+  isReturning.value = true;
+  try {
+    const { error } = await authClient.admin.stopImpersonating();
+    if (error) throw new Error(error.message || "Gagal kembali ke akun semula.");
+    await navigateTo("/dashboard", { external: true, replace: true });
+  } catch (error) {
+    useToastError("Gagal Kembali ke Akun Semula", extractErrorMessage(error, "Silakan coba lagi."));
+    isReturning.value = false;
+  }
+}
 
 async function signOut() {
   try {
@@ -38,19 +54,40 @@ const items = computed<DropdownMenuItem[][]>(() => [
     {
       label: "Profil",
       icon: "i-tabler-user",
+      disabled: isReturning.value,
       onSelect: () => openModal(ModalChangeProfile),
     },
     {
       label: "Ubah Password",
       icon: "i-tabler-lock-password",
+      disabled: isReturning.value,
       onSelect: () => openModal(ModalChangePassword),
     },
+    ...(isImpersonating.value
+      ? [
+          {
+            label: "Kembali ke akun saya",
+            icon: "i-tabler-arrow-back-up",
+            disabled: isReturning.value,
+            onSelect: stopImpersonating,
+          },
+        ]
+      : session.value.data?.user.role === "admin"
+        ? [
+            {
+              label: "Masuk sebagai pengguna",
+              icon: "i-tabler-user-share",
+              onSelect: () => openModal(ModalImpersonate),
+            },
+          ]
+        : []),
   ],
   [
     {
       label: "Keluar",
       icon: "i-tabler-logout",
       color: "error",
+      disabled: isReturning.value,
       onSelect: signOut,
     },
   ],
