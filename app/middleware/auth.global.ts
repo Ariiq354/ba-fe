@@ -7,7 +7,7 @@ const routeResources = {
   jurnal: "jurnal",
   users: "pengguna",
   simpanan: "simpananSaya",
-  "daftar-simpanan": "mutasiSimpanan",
+  "daftar-simpanan": "approvalSimpanan",
   pemindahbukuan: "pemindahbukuan",
   "daftar-pemindahbukuan": "approvalPemindahbukuan",
   pembiayaan: "pembiayaan",

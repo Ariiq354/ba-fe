@@ -140,7 +140,7 @@ const serviceItems = computed<NavigationMenuItem[]>(() => {
 const managementItems = computed<NavigationMenuItem[]>(() => {
   const role = session.value.data?.user.role;
   return [
-    ...(can(role, "mutasiSimpanan", "view")
+    ...(canViewApproval.value
       ? [
           {
             label: "Daftar Simpanan",
