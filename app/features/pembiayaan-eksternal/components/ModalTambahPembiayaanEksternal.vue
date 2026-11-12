@@ -3,14 +3,11 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { TambahPembiayaanEksternal } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient } from "~/utils/auth";
 import { getJakartaDate } from "~/utils/date";
 import { maxExternalAmount, pembiayaanEksternalSchema } from "../model";
 
 const props = defineProps<{ refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
-const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const isLoading = ref(false);
 const today = getJakartaDate();
 const state = reactive({
@@ -22,7 +19,7 @@ const state = reactive({
 });
 
 async function onSubmit(event: FormSubmitEvent<TambahPembiayaanEksternal>) {
-  if (isLoading.value || !isAdmin.value) return;
+  if (isLoading.value) return;
   isLoading.value = true;
   try {
     await $fetch("/api/v1/pembiayaan-eksternal", {
@@ -123,11 +120,7 @@ async function onSubmit(event: FormSubmitEvent<TambahPembiayaanEksternal>) {
         <UButton color="neutral" variant="outline" :disabled="isLoading" @click="emit('close')"
           >Batal</UButton
         >
-        <UButton
-          type="submit"
-          form="form-pembiayaan-eksternal"
-          :loading="isLoading"
-          :disabled="!isAdmin || isLoading"
+        <UButton type="submit" form="form-pembiayaan-eksternal" :loading="isLoading"
           >Simpan</UButton
         >
       </div>

@@ -25,7 +25,6 @@ const props = defineProps<{ refresh: (userIds: number[]) => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canManage = computed(() => can(session.value.data?.user.role, "pemindahbukuan", "manage"));
 const canDelegate = computed(() => can(session.value.data?.user.role, "inputSimpanan", "manage"));
 const canBuyback = computed(() =>
   can(session.value.data?.user.role, "approvalPemindahbukuan", "manage"),
@@ -51,10 +50,7 @@ const {
   status: sourceStatus,
   error: sourceError,
   refresh: refreshSources,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  enabled: canManage,
-  watch: [canManage],
-});
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options");
 const sourceOptions = computed(() => {
   const options = getAnggotaOptions(sources.value?.data ?? []).map((option) =>
     option.value === actorId.value ? { ...option, label: `${option.label} (Saya)` } : option,
@@ -115,7 +111,7 @@ watch(
   },
 );
 
-const balanceEnabled = computed(() => canManage.value && !!sourceMember.value?.noAnggota?.trim());
+const balanceEnabled = computed(() => !!sourceMember.value?.noAnggota?.trim());
 const {
   data: balance,
   status: balanceStatus,
@@ -127,15 +123,14 @@ const {
   enabled: balanceEnabled,
   watch: [balanceEnabled],
 });
-const priceEnabled = computed(() => canManage.value && needsPrice.value);
 const {
   data: price,
   status: priceStatus,
   error: priceError,
   refresh: refreshPrice,
 } = useApi<HargaSaham>("/api/v1/master-saham/latest", {
-  enabled: priceEnabled,
-  watch: [priceEnabled],
+  enabled: needsPrice,
+  watch: [needsPrice],
 });
 const schema = computed(() => getPemindahbukuanSchema(balance.value, price.value));
 const maxAmount = computed(() =>
@@ -143,7 +138,6 @@ const maxAmount = computed(() =>
 );
 const ready = computed(
   () =>
-    canManage.value &&
     (!buyback.value || canBuyback.value) &&
     sourceStatus.value === "success" &&
     !!sourceMember.value?.noAnggota?.trim() &&
@@ -276,7 +270,6 @@ async function onSubmit(event: FormSubmitEvent<PengajuanPemindahbukuan>) {
             v-model="selectedDestination"
             :source="sourceMember"
             :tipe="state.tipePemindahbukuan"
-            :enabled="canManage"
             :disabled="isLoading"
           />
         </div>

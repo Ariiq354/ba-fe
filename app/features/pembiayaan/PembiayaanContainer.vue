@@ -8,7 +8,7 @@ import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { PAGE_SIZE } from "~/constants";
 import { statusMutasiOptions } from "~/features/simpanan/model";
-import { authClient, can } from "~/utils/auth";
+import { authClient } from "~/utils/auth";
 import ModalDetailPembiayaan from "./components/ModalDetailPembiayaan.vue";
 import ModalPengajuanPembiayaan from "./components/ModalPengajuanPembiayaan.vue";
 import ModalProsesPembiayaan from "./components/ModalProsesPembiayaan.vue";
@@ -18,8 +18,6 @@ import { canCancelPembiayaan } from "./model";
 
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canView = computed(() => can(session.value.data?.user.role, "pembiayaan", "view"));
-const canManage = computed(() => can(session.value.data?.user.role, "pembiayaan", "manage"));
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
@@ -35,8 +33,6 @@ watch(
 const { data, status, error, refresh } = useApi<PembiayaanResponse>("/api/v1/pembiayaan", {
   key: PEMBIAYAAN_LIST_KEY,
   query: { page, limit, search, status: statusFilter },
-  enabled: canView,
-  watch: [canView],
 });
 const total = computed(() => data.value?.total ?? 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
@@ -46,14 +42,14 @@ function refreshAfterChange() {
 }
 
 function openForm() {
-  if (canManage.value) openModal(ModalPengajuanPembiayaan, { refresh: refreshAfterChange });
+  openModal(ModalPengajuanPembiayaan, { refresh: refreshAfterChange });
 }
 function viewPembiayaan(item: Pembiayaan) {
   openModal(ModalDetailPembiayaan, { pembiayaan: item });
 }
 function cancelPembiayaan(item: Pembiayaan) {
   if (status.value === "pending" || item.statusApproved !== "pending") return;
-  if (!canManage.value || !canCancelPembiayaan(item, actorId.value)) return;
+  if (!canCancelPembiayaan(item, actorId.value)) return;
   openModal(ModalProsesPembiayaan, {
     pembiayaan: item,
     action: "cancel",
@@ -62,7 +58,7 @@ function cancelPembiayaan(item: Pembiayaan) {
 }
 function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {
   if (item.statusApproved !== "pending" || status.value === "pending") return [];
-  if (canManage.value && canCancelPembiayaan(item, actorId.value))
+  if (canCancelPembiayaan(item, actorId.value))
     return [
       {
         label: "Batalkan Pengajuan",
@@ -84,7 +80,7 @@ function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {
           Ajukan pembiayaan dan pantau status pengajuan anggota dalam cakupan akses Anda.
         </p>
       </div>
-      <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm"
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm"
         >Ajukan Pembiayaan</UButton
       >
     </div>

@@ -3,9 +3,8 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { Angsuran, AngsuranAction, RejectAngsuran } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { canCancelAngsuran, rejectAngsuranSchema } from "../model";
+import { rejectAngsuranSchema } from "../model";
 
 const props = defineProps<{
   angsuran: Angsuran;
@@ -13,7 +12,6 @@ const props = defineProps<{
   refresh: (userId: number) => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
 const stale = ref(false);
 const state = reactive({ alasanPenolakan: "" });
@@ -37,14 +35,7 @@ const labels = {
     color: "warning",
   },
 } as const;
-const canProcess = computed(() => {
-  if (stale.value || props.angsuran.statusApproved !== "pending") return false;
-  const role = session.value.data?.user.role;
-  return props.action === "cancel"
-    ? can(role, "angsuran", "manage") &&
-        canCancelAngsuran(props.angsuran, Number(session.value.data?.user.id))
-    : can(role, "approvalAngsuran", "manage");
-});
+const canProcess = computed(() => !stale.value && props.angsuran.statusApproved === "pending");
 
 async function onConfirm(alasanPenolakan?: string) {
   if (

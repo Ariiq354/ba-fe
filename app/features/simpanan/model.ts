@@ -130,17 +130,14 @@ export const pengajuanLabels = {
   tabungan: {
     title: "Setor Tabungan",
     icon: "i-tabler-wallet",
-    description: "Ajukan setoran tabungan untuk anggota pilihan.",
   },
   saham: {
     title: "Beli Saham",
     icon: "i-tabler-chart-candle",
-    description: "Ajukan pembelian saham menggunakan harga terbaru.",
   },
   penarikan: {
     title: "Tarik Tabungan",
     icon: "i-tabler-cash-banknote",
-    description: "Ajukan penarikan berdasarkan saldo efektif anggota.",
   },
 } as const;
 

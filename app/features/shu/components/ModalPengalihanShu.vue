@@ -2,17 +2,12 @@
 import type { ReferensiShu } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient } from "~/utils/auth";
 
 const props = defineProps<{ referensi: ReferensiShu; refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
 const canTransfer = computed(
-  () =>
-    session.value.data?.user.role === "admin" &&
-    props.referensi.sudahDibagikan &&
-    !props.referensi.sudahDialihkan,
+  () => props.referensi.sudahDibagikan && !props.referensi.sudahDialihkan,
 );
 
 async function onConfirm() {

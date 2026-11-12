@@ -8,7 +8,7 @@ import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { PAGE_SIZE } from "~/constants";
 import { statusMutasiOptions } from "~/features/simpanan/model";
-import { authClient, can } from "~/utils/auth";
+import { authClient } from "~/utils/auth";
 import ModalDetailAngsuran from "./components/ModalDetailAngsuran.vue";
 import ModalPengajuanAngsuran from "./components/ModalPengajuanAngsuran.vue";
 import ModalProsesAngsuran from "./components/ModalProsesAngsuran.vue";
@@ -19,9 +19,6 @@ import { canCancelAngsuran } from "./model";
 const props = withDefaults(defineProps<{ approval?: boolean }>(), { approval: false });
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const resource = computed(() => (props.approval ? "approvalAngsuran" : "angsuran"));
-const canView = computed(() => can(session.value.data?.user.role, resource.value, "view"));
-const canManage = computed(() => can(session.value.data?.user.role, resource.value, "manage"));
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
@@ -38,8 +35,6 @@ watch(
 const { data, status, error, refresh } = useApi<AngsuranResponse>("/api/v1/angsuran", {
   key: listKey,
   query: { page, limit, search, status: statusFilter },
-  enabled: canView,
-  watch: [canView],
 });
 const total = computed(() => data.value?.total ?? 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
@@ -48,7 +43,6 @@ async function refreshData(userId: number) {
   await Promise.all([refreshList(), refreshAngsuranData(userId)]);
 }
 function openForm() {
-  if (props.approval || !canManage.value) return;
   openModal(ModalPengajuanAngsuran, {
     refresh: refreshData,
   });
@@ -57,7 +51,7 @@ function viewAngsuran(item: Angsuran) {
   openModal(ModalDetailAngsuran, { angsuran: item });
 }
 function processAngsuran(item: Angsuran, action: AngsuranAction) {
-  if (status.value !== "success" || !canManage.value || item.statusApproved !== "pending") return;
+  if (status.value !== "success" || item.statusApproved !== "pending") return;
   if (
     action === "cancel"
       ? props.approval || !canCancelAngsuran(item, actorId.value)
@@ -67,8 +61,7 @@ function processAngsuran(item: Angsuran, action: AngsuranAction) {
   openModal(ModalProsesAngsuran, { angsuran: item, action, refresh: refreshData });
 }
 function getDropdownItems(item: Angsuran): DropdownMenuItem[] {
-  if (status.value !== "success" || !canManage.value || item.statusApproved !== "pending")
-    return [];
+  if (status.value !== "success" || item.statusApproved !== "pending") return [];
   if (props.approval)
     return [
       {
@@ -97,7 +90,7 @@ function getDropdownItems(item: Angsuran): DropdownMenuItem[] {
 </script>
 
 <template>
-  <div v-if="canView" class="space-y-6">
+  <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="text-2xl font-semibold text-highlighted">
@@ -111,11 +104,7 @@ function getDropdownItems(item: Angsuran): DropdownMenuItem[] {
           }}
         </p>
       </div>
-      <UButton
-        v-if="!approval && canManage"
-        icon="i-tabler-plus"
-        class="justify-center"
-        @click="openForm"
+      <UButton v-if="!approval" icon="i-tabler-plus" class="justify-center" @click="openForm"
         >Ajukan Angsuran</UButton
       >
     </div>

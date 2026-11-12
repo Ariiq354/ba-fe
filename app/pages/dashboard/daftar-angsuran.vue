@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DaftarAngsuranContainer from "~/features/angsuran/DaftarAngsuranContainer.vue";
+import AngsuranContainer from "~/features/angsuran/AngsuranContainer.vue";
 
 definePageMeta({
   layout: { name: "default", props: { title: "Daftar Angsuran" } },
@@ -8,5 +8,5 @@ useHead({ title: "Daftar Angsuran · Berkah Amanah" });
 </script>
 
 <template>
-  <DaftarAngsuranContainer />
+  <AngsuranContainer approval />
 </template>

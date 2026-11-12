@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
-import { authClient } from "~/utils/auth";
 
 definePageMeta({
   layout: {
@@ -12,8 +11,7 @@ useHead({
   title: "Jurnal Transaksi · Berkah Amanah",
 });
 
-const session = authClient.useSession();
-const links = computed<NavigationMenuItem[]>(() => [
+const links: NavigationMenuItem[] = [
   {
     label: "Input Transaksi",
     icon: "i-tabler-receipt-2",
@@ -24,16 +22,12 @@ const links = computed<NavigationMenuItem[]>(() => [
     icon: "i-tabler-pencil",
     to: "/dashboard/jurnal/input-manual",
   },
-  ...(session.value.data?.user.role === "admin"
-    ? [
-        {
-          label: "Master Input",
-          icon: "i-tabler-settings",
-          to: "/dashboard/jurnal/master-input",
-        },
-      ]
-    : []),
-]);
+  {
+    label: "Master Input",
+    icon: "i-tabler-settings",
+    to: "/dashboard/jurnal/master-input",
+  },
+];
 </script>
 
 <template>

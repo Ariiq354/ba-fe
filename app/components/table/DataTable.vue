@@ -60,7 +60,7 @@ const selectedIds = computed(() => {
   const ids: RowId[] = [];
   for (const [index, selected] of Object.entries(rowSelection.value)) {
     const row = data?.[Number(index)];
-    if (!selected || !row || !canSelectRow({ original: row }) || !isRowDeletable(row)) continue;
+    if (!selected || !row || !selectable || !isRowDeletable(row)) continue;
     const id = getRowId(row);
     if (id !== undefined) ids.push(id);
   }

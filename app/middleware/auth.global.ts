@@ -4,7 +4,6 @@ const routeResources = {
   "master-akun": "masterAkun",
   "master-margin": "masterMargin",
   "master-saham": "masterSaham",
-  jurnal: "jurnal",
   users: "pengguna",
   simpanan: "simpananSaya",
   "daftar-simpanan": "approvalSimpanan",

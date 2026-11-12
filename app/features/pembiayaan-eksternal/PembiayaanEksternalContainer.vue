@@ -7,13 +7,10 @@ import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { PAGE_SIZE } from "~/constants";
 import { JURNAL_LIST_KEY } from "~/features/jurnal/data";
-import { authClient } from "~/utils/auth";
 import ModalTambahPembiayaanEksternal from "./components/ModalTambahPembiayaanEksternal.vue";
 import { PEMBIAYAAN_EKSTERNAL_LIST_KEY, PEMBIAYAAN_EKSTERNAL_OPTIONS_KEY } from "./data";
 import { pembiayaanEksternalColumns, statusPelunasanLabels, statusPelunasanOptions } from "./model";
 
-const session = authClient.useSession();
-const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusPelunasan>("all");
@@ -31,8 +28,6 @@ const { data, status, error, refresh } = useApi<PembiayaanEksternalResponse>(
   {
     key: PEMBIAYAAN_EKSTERNAL_LIST_KEY,
     query: { page, limit, search, statusPelunasan: statusFilter },
-    enabled: isAdmin,
-    watch: [isAdmin],
   },
 );
 const total = computed(() => data.value?.total ?? 0);
@@ -45,7 +40,6 @@ async function refreshAfterChange() {
   ]);
 }
 function openForm() {
-  if (!isAdmin.value) return;
   openModal(ModalTambahPembiayaanEksternal, { refresh: refreshAfterChange });
 }
 </script>
@@ -54,7 +48,7 @@ function openForm() {
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-2xl font-semibold text-highlighted">Pembiayaan Eksternal</h1>
-      <UButton v-if="isAdmin" icon="i-tabler-plus" class="justify-center" @click="openForm">
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm">
         Tambah Pembiayaan
       </UButton>
     </div>
@@ -92,10 +86,10 @@ function openForm() {
         >
           <template #statusPelunasan-cell="{ row }">
             <UBadge
-              :color="statusPelunasanLabels[row.original.statusPelunasan as StatusPelunasan].color"
+              :color="statusPelunasanLabels[row.original.statusPelunasan].color"
               variant="subtle"
             >
-              {{ statusPelunasanLabels[row.original.statusPelunasan as StatusPelunasan].label }}
+              {{ statusPelunasanLabels[row.original.statusPelunasan].label }}
             </UBadge>
           </template>
           <template #tujuan-cell="{ row }">

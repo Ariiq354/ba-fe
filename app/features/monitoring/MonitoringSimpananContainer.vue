@@ -3,17 +3,12 @@ import type { MonitoringSimpanan } from "./model";
 import SelectKelompok from "~/components/select/SelectKelompok.vue";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
-import { authClient } from "~/utils/auth";
 import { monitoringSimpananColumns } from "./model";
 
-const session = authClient.useSession();
-const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const idKelompok = ref<number>();
 const { data, status, error, refresh } = useApi<{ data: MonitoringSimpanan[] }>(
   "/api/v1/simpanan/monitoring",
   {
-    enabled: isAdmin,
-    watch: [isAdmin],
     query: { idKelompok },
   },
 );

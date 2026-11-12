@@ -7,15 +7,12 @@ import { extractErrorMessage, useToastError, useToastSuccess } from "~/composabl
 import { API_URL } from "~/constants";
 import { PEMBIAYAAN_EKSTERNAL_OPTIONS_KEY } from "~/features/pembiayaan-eksternal/data";
 import { maxExternalAmount } from "~/features/pembiayaan-eksternal/model";
-import { authClient } from "~/utils/auth";
 import { getJakartaDate } from "~/utils/date";
 import { formatRupiah } from "~/utils/format";
 import { getAngsuranEksternalSchema } from "../model";
 
 const props = defineProps<{ refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
-const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const isLoading = ref(false);
 const today = getJakartaDate();
 const state = reactive({
@@ -31,8 +28,6 @@ const {
   refresh: refreshOptions,
 } = useApi<PembiayaanEksternalOptionsResponse>("/api/v1/pembiayaan-eksternal/options", {
   key: PEMBIAYAAN_EKSTERNAL_OPTIONS_KEY,
-  enabled: isAdmin,
-  watch: [isAdmin],
 });
 const options = computed(() =>
   (data.value?.data ?? []).map((item) => ({
@@ -44,9 +39,7 @@ const selectedPembiayaan = computed(() =>
   data.value?.data.find((item) => item.id === state.pembiayaanEksternalId),
 );
 const schema = computed(() => getAngsuranEksternalSchema(selectedPembiayaan.value));
-const ready = computed(
-  () => isAdmin.value && status.value === "success" && !!selectedPembiayaan.value,
-);
+const ready = computed(() => status.value === "success" && !!selectedPembiayaan.value);
 const maxPayment = computed(() =>
   Math.min(selectedPembiayaan.value?.sisaPembiayaan ?? 0, maxExternalAmount),
 );

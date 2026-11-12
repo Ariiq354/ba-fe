@@ -8,18 +8,12 @@ import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { PAGE_SIZE } from "~/constants";
 import { getAnggotaOptions, statusMutasiOptions } from "~/features/simpanan/model";
-import { authClient, can } from "~/utils/auth";
 import ModalDetailPembiayaan from "./components/ModalDetailPembiayaan.vue";
 import ModalProsesPembiayaan from "./components/ModalProsesPembiayaan.vue";
 import TabelPembiayaan from "./components/TabelPembiayaan.vue";
 import { PEMBIAYAAN_APPROVAL_LIST_KEY, refreshPembiayaanData } from "./data";
 import { canProcessPembiayaan } from "./model";
 
-const session = authClient.useSession();
-const canView = computed(() => can(session.value.data?.user.role, "approvalPembiayaan", "view"));
-const canApprove = computed(() =>
-  can(session.value.data?.user.role, "approvalPembiayaan", "manage"),
-);
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
@@ -41,10 +35,7 @@ const {
   status: membersStatus,
   error: membersError,
   refresh: refreshMembers,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  enabled: canView,
-  watch: [canView],
-});
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options");
 const memberOptions = computed(() => [
   { label: "Semua anggota", value: "all" },
   ...getAnggotaOptions(members.value?.data ?? []),
@@ -58,8 +49,6 @@ const { data, status, error, refresh } = useApi<PembiayaanResponse>("/api/v1/pem
     status: statusFilter,
     userId: targetUserId,
   },
-  enabled: canView,
-  watch: [canView],
 });
 const total = computed(() => data.value?.total ?? 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
@@ -72,13 +61,11 @@ function viewPembiayaan(item: Pembiayaan) {
   openModal(ModalDetailPembiayaan, { pembiayaan: item });
 }
 function processPembiayaan(item: Pembiayaan, action: Exclude<PembiayaanAction, "cancel">) {
-  if (status.value === "pending" || !canApprove.value || !canProcessPembiayaan(item, action))
-    return;
+  if (status.value === "pending" || !canProcessPembiayaan(item, action)) return;
   openModal(ModalProsesPembiayaan, { pembiayaan: item, action, refresh: refreshAfterChange });
 }
 function getDropdownItems(item: Pembiayaan): DropdownMenuItem[] {
-  if (item.statusApproved !== "pending" || status.value === "pending" || !canApprove.value)
-    return [];
+  if (item.statusApproved !== "pending" || status.value === "pending") return [];
   const items: DropdownMenuItem[] = [];
   if (canProcessPembiayaan(item, "transfer"))
     items.push({

@@ -7,7 +7,6 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL, PAGE_SIZE } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import ModalDetailJurnal from "./components/ModalDetailJurnal.vue";
 import ModalJurnal from "./components/ModalJurnal.vue";
 import ModalJurnalTemplate from "./components/ModalJurnalTemplate.vue";
@@ -21,8 +20,6 @@ const props = withDefaults(defineProps<{ mode?: "manual" | "transaksi" }>(), {
 const page = ref(1);
 const search = ref("");
 const limit = PAGE_SIZE;
-const session = authClient.useSession();
-const canManage = computed(() => can(session.value.data?.user.role, "jurnal", "manage"));
 
 watch(
   search,
@@ -42,7 +39,6 @@ const journals = computed(() => getJurnalSummaries(data.value?.data ?? []));
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm() {
-  if (!canManage.value) return;
   if (props.mode === "transaksi") {
     openModal(ModalJurnalTemplate, { refresh: refreshList });
     return;
@@ -55,23 +51,17 @@ function viewJurnal(jurnal: JurnalSummary) {
 }
 
 function deleteJurnal(ids: number[]) {
-  if (!canManage.value || !ids.length) return;
-  const allowedIds = new Set(journals.value.filter(canDeleteJurnal).map((jurnal) => jurnal.id));
-  const deletableIds = [...new Set(ids)].filter((id) => allowedIds.has(id));
-  if (!deletableIds.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Jurnal",
-    description: `Apakah Anda yakin ingin menghapus ${deletableIds.length} jurnal beserta seluruh rincian akunnya?`,
+    description: `Apakah Anda yakin ingin menghapus ${ids.length} jurnal beserta seluruh rincian akunnya?`,
     path: `${API_URL}/api/v1/jurnal`,
-    body: { ids: deletableIds },
-    confirmText: "Hapus",
-    cancelText: "Batal",
+    body: { ids },
     refresh: refreshList,
   });
 }
 
 function canDeleteJurnal(jurnal: JurnalSummary) {
-  return canManage.value && jurnal.kodeTransaksi.startsWith("TRX");
+  return jurnal.kodeTransaksi.startsWith("TRX");
 }
 </script>
 
@@ -86,7 +76,7 @@ function canDeleteJurnal(jurnal: JurnalSummary) {
           Kelola pencatatan transaksi dan rincian debit–kredit setiap jurnal.
         </p>
       </div>
-      <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm">
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm">
         Tambah Jurnal
       </UButton>
     </div>
@@ -117,8 +107,8 @@ function canDeleteJurnal(jurnal: JurnalSummary) {
           :columns="jurnalColumns"
           :loading="status === 'pending'"
           :total="total"
-          :selectable="canManage"
-          :deletable="canManage"
+          selectable
+          deletable
           :row-deletable="canDeleteJurnal"
           viewable
           enumerate
@@ -141,9 +131,7 @@ function canDeleteJurnal(jurnal: JurnalSummary) {
                 {{
                   search
                     ? "Coba kode transaksi lain."
-                    : canManage
-                      ? "Klik Tambah Jurnal untuk mencatat transaksi pertama."
-                      : "Belum ada jurnal yang tersedia."
+                    : "Klik Tambah Jurnal untuk mencatat transaksi pertama."
                 }}
               </p>
             </div>

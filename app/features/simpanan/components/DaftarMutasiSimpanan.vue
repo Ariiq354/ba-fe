@@ -13,7 +13,7 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { PAGE_SIZE } from "~/constants";
-import { authClient, can } from "~/utils/auth";
+import { authClient } from "~/utils/auth";
 import { APPROVAL_SIMPANAN_PENDING_KEY } from "../data";
 import {
   canCancelMutasi,
@@ -38,19 +38,6 @@ const selectedUserId = ref<number | "all">("all");
 const limit = PAGE_SIZE;
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canCancel = computed(
-  () =>
-    props.scope === "member" &&
-    can(
-      session.value.data?.user.role,
-      props.userId === actorId.value ? "simpananSaya" : "mutasiSimpanan",
-      "manage",
-    ),
-);
-const canApprove = computed(
-  () =>
-    props.scope === "members" && can(session.value.data?.user.role, "approvalSimpanan", "manage"),
-);
 
 const {
   data: members,
@@ -116,8 +103,8 @@ function viewMutasi(mutasi: MutasiSimpanan) {
 function processMutasi(mutasi: MutasiSimpanan, action: "approve" | "reject" | "cancel") {
   if (status.value === "pending" || mutasi.statusApproved !== "pending") return;
   if (action === "cancel") {
-    if (!canCancel.value || !canCancelMutasi(mutasi, actorId.value)) return;
-  } else if (!canApprove.value) {
+    if (props.scope !== "member" || !canCancelMutasi(mutasi, actorId.value)) return;
+  } else if (props.scope !== "members") {
     return;
   }
   openModal(ModalProsesMutasi, { mutasi, action, refresh: refreshAfterChange });
@@ -126,7 +113,7 @@ function processMutasi(mutasi: MutasiSimpanan, action: "approve" | "reject" | "c
 function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
   if (mutasi.statusApproved !== "pending") return [];
   const items: DropdownMenuItem[] = [];
-  if (canApprove.value) {
+  if (props.scope === "members") {
     items.push(
       {
         label: "Setujui",
@@ -141,7 +128,7 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
       },
     );
   }
-  if (canCancel.value && canCancelMutasi(mutasi, actorId.value)) {
+  if (props.scope === "member" && canCancelMutasi(mutasi, actorId.value)) {
     items.push({
       label: "Batalkan Pengajuan",
       icon: "i-tabler-ban",
@@ -224,11 +211,8 @@ function getDropdownItems(mutasi: MutasiSimpanan): DropdownMenuItem[] {
         @view="viewMutasi"
       >
         <template #statusApproved-cell="{ row }">
-          <UBadge
-            :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"
-            variant="subtle"
-          >
-            {{ statusMutasiLabels[row.original.statusApproved as StatusMutasi].label }}
+          <UBadge :color="statusMutasiLabels[row.original.statusApproved].color" variant="subtle">
+            {{ statusMutasiLabels[row.original.statusApproved].label }}
           </UBadge>
         </template>
         <template #empty>

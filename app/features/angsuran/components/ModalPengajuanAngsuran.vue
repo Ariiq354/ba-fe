@@ -19,7 +19,6 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canManage = computed(() => can(session.value.data?.user.role, "angsuran", "manage"));
 const canDelegate = computed(() => can(session.value.data?.user.role, "angsuran", "delegate"));
 const isLoading = ref(false);
 const state = reactive({
@@ -57,14 +56,10 @@ const {
   status: membersStatus,
   error: membersError,
   refresh: refreshMembers,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  enabled: canManage,
-  watch: [canManage],
-});
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options");
 const memberOptions = computed(() => getAnggotaOptions(members.value?.data ?? []));
 const memberReady = computed(
   () =>
-    canManage.value &&
     membersStatus.value === "success" &&
     memberOptions.value.some((member) => member.value === state.userId && !member.disabled) &&
     (canDelegate.value || state.userId === actorId.value),

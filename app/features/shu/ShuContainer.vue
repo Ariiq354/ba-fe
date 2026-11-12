@@ -10,7 +10,6 @@ import { shuColumns } from "./model";
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
 const isAdmin = computed(() => session.value.data?.user.role === "admin");
-const isLoggedIn = computed(() => Number.isInteger(actorId.value) && actorId.value > 0);
 const tahun = ref(new Date().getFullYear());
 const selection = ref<number>();
 
@@ -47,7 +46,6 @@ watch([actorId, isAdmin], () => {
 });
 
 const { data, status, error, refresh } = useApi<ShuResponse>("/api/v1/shu", {
-  enabled: isLoggedIn,
   query: { tahun, userId },
 });
 function updateTahun(value: number) {
@@ -103,7 +101,7 @@ function updateTahun(value: number) {
         v-else
         :data="status === 'success' ? (data?.data ?? []) : []"
         :columns="shuColumns"
-        :loading="status === 'pending' || !isLoggedIn"
+        :loading="status === 'pending'"
       >
         <template #empty>
           <p class="py-8 text-center text-muted">Belum ada SHU untuk tahun ini.</p>

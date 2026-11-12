@@ -2,14 +2,10 @@
 import type { MonitoringPembiayaan } from "./model";
 import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
-import { authClient } from "~/utils/auth";
 import { monitoringPembiayaanColumns } from "./model";
 
-const session = authClient.useSession();
-const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const { data, status, error, refresh } = useApi<{ data: MonitoringPembiayaan[] }>(
   "/api/v1/pembiayaan/monitoring",
-  { enabled: isAdmin, watch: [isAdmin] },
 );
 </script>
 

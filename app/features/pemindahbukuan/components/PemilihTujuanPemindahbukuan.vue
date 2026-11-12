@@ -7,12 +7,11 @@ import { getAnggotaOptions } from "~/features/simpanan/model";
 const props = defineProps<{
   source?: AnggotaSimpanan;
   tipe: TipePemindahbukuan;
-  enabled: boolean;
   disabled: boolean;
 }>();
 const selectedMember = defineModel<AnggotaSimpanan>();
 const conversion = computed(() => props.tipe === "tabungan_ke_saham");
-const destinationEnabled = computed(() => props.enabled && !conversion.value);
+const destinationEnabled = computed(() => !conversion.value);
 const {
   data: destinations,
   status: destinationStatus,
@@ -26,7 +25,7 @@ const {
 const selectedId = computed({
   get: () => selectedMember.value?.id,
   set: (id: number | undefined) => {
-    if (props.disabled || !props.enabled || conversion.value) return;
+    if (props.disabled || conversion.value) return;
     selectedMember.value = destinations.value?.data.find(
       (member) => member.id === id && member.id !== props.source?.id && member.noAnggota?.trim(),
     );
@@ -67,7 +66,7 @@ const destinationOptions = computed(() => {
           placeholder="Pilih anggota tujuan"
           :search-input="{ placeholder: 'Cari nama atau kelompok...' }"
           :loading="destinationStatus === 'pending'"
-          :disabled="disabled || !enabled || destinationStatus !== 'success'"
+          :disabled="disabled || destinationStatus !== 'success'"
           class="w-full"
         />
       </UFormField>

@@ -18,8 +18,6 @@ import { canCancelPemindahbukuan, tipePemindahbukuanOptions } from "./model";
 
 const session = authClient.useSession();
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canView = computed(() => can(session.value.data?.user.role, "pemindahbukuan", "view"));
-const canManage = computed(() => can(session.value.data?.user.role, "pemindahbukuan", "manage"));
 const canBuyback = computed(() =>
   can(session.value.data?.user.role, "approvalPemindahbukuan", "manage"),
 );
@@ -41,10 +39,7 @@ const {
   data: members,
   error: membersError,
   refresh: refreshMembers,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  enabled: canView,
-  watch: [canView],
-});
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options");
 const accessibleSourceIds = computed(() => members.value?.data.map((member) => member.id) ?? []);
 const tipeOptions = [{ label: "Semua jenis", value: "all" }, ...tipePemindahbukuanOptions];
 const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1/pemindahbukuan", {
@@ -56,8 +51,6 @@ const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1
     status: statusFilter,
     tipePemindahbukuan: tipe,
   },
-  enabled: canView,
-  watch: [canView],
 });
 const total = computed(() => data.value?.total ?? 0);
 
@@ -68,7 +61,7 @@ function refreshAfterChange(userIds: number[]) {
 }
 
 function openForm() {
-  if (canManage.value) openModal(ModalPengajuanPemindahbukuan, { refresh: refreshAfterChange });
+  openModal(ModalPengajuanPemindahbukuan, { refresh: refreshAfterChange });
 }
 function viewTransfer(transfer: Pemindahbukuan) {
   openModal(ModalDetailPemindahbukuan, { transfer });
@@ -76,20 +69,17 @@ function viewTransfer(transfer: Pemindahbukuan) {
 function cancelTransfer(transfer: Pemindahbukuan) {
   if (status.value === "pending" || transfer.statusApproved !== "pending") return;
   if (
-    !canManage.value ||
     !canCancelPemindahbukuan(transfer, actorId.value, accessibleSourceIds.value, canBuyback.value)
   )
     return;
   openModal(ModalProsesPemindahbukuan, {
     transfer,
     action: "cancel",
-    accessibleSourceIds: accessibleSourceIds.value,
     refresh: refreshAfterChange,
   });
 }
 function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
   if (
-    !canManage.value ||
     !canCancelPemindahbukuan(transfer, actorId.value, accessibleSourceIds.value, canBuyback.value)
   )
     return [];
@@ -113,7 +103,7 @@ function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
           Pindahkan tabungan atau saham antaranggota, atau konversikan tabungan menjadi saham.
         </p>
       </div>
-      <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm">
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm">
         Ajukan Pemindahbukuan
       </UButton>
     </div>

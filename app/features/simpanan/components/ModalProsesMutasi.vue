@@ -3,9 +3,8 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { MutasiSimpanan, RejectMutasiSchema } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { canCancelMutasi, rejectMutasiSchema } from "../model";
+import { rejectMutasiSchema } from "../model";
 
 const props = defineProps<{
   mutasi: MutasiSimpanan;
@@ -13,7 +12,6 @@ const props = defineProps<{
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
 const state = reactive({ alasanPenolakan: "" });
 const labels = {
@@ -39,15 +37,7 @@ const labels = {
     color: "warning",
   },
 } as const;
-const canProcess = computed(() => {
-  if (props.mutasi.statusApproved !== "pending") return false;
-  const role = session.value.data?.user.role;
-  if (props.action !== "cancel") return can(role, "approvalSimpanan", "manage");
-  return (
-    (can(role, "simpananSaya", "manage") || can(role, "mutasiSimpanan", "manage")) &&
-    canCancelMutasi(props.mutasi, Number(session.value.data?.user.id))
-  );
-});
+const canProcess = computed(() => props.mutasi.statusApproved === "pending");
 
 async function onConfirm(alasanPenolakan?: string) {
   if (isLoading.value || !canProcess.value) return;

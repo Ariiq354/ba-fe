@@ -7,7 +7,6 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL, PAGE_SIZE } from "~/constants";
-import { authClient } from "~/utils/auth";
 import ModalMasterInputTransaksi from "./components/ModalMasterInputTransaksi.vue";
 import { masterInputTransaksiColumns, statusFilterOptions } from "./model";
 
@@ -15,8 +14,6 @@ const page = ref(1);
 const search = ref("");
 const statusFilter = ref<StatusFilter>("all");
 const limit = PAGE_SIZE;
-const session = authClient.useSession();
-const canManage = computed(() => session.value.data?.user.role === "admin");
 
 watch(
   [search, statusFilter],
@@ -41,19 +38,15 @@ const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 const isFiltered = computed(() => !!search.value || statusFilter.value !== "all");
 
 function openForm(template?: MasterInputTransaksi) {
-  if (!canManage.value) return;
   openModal(ModalMasterInputTransaksi, { template, refresh: refreshList });
 }
 
 function deleteTemplates(ids: number[]) {
-  if (!canManage.value || !ids.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Master Input",
     description: `Hapus ${ids.length} master input yang dipilih?`,
     path: `${API_URL}/api/v1/master-input-transaksi`,
     body: { ids },
-    confirmText: "Hapus",
-    cancelText: "Batal",
     refresh: refreshList,
   });
 }
@@ -68,7 +61,7 @@ function deleteTemplates(ids: number[]) {
           Kelola template transaksi dan pasangan akun debit–kredit.
         </p>
       </div>
-      <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm()">
         Tambah Master Input
       </UButton>
     </div>
@@ -103,9 +96,9 @@ function deleteTemplates(ids: number[]) {
           :columns="masterInputTransaksiColumns"
           :loading="status === 'pending'"
           :total="total"
-          :selectable="canManage"
-          :editable="canManage"
-          :deletable="canManage"
+          selectable
+          editable
+          deletable
           enumerate
           pagination
           @edit="openForm"

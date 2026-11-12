@@ -1,28 +1,13 @@
 <script lang="ts" setup>
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 
-const props = withDefaults(
-  defineProps<{
-    path?: string;
-    body?: object;
-    refresh?: () => Promise<void> | void;
-    title?: string;
-    description?: string;
-    method?: "DELETE" | "PATCH" | "POST" | "PUT";
-    confirmText?: string;
-    cancelText?: string;
-    confirmColor?: "error" | "primary" | "secondary" | "success" | "warning" | "info" | "neutral";
-    onConfirm?: () => Promise<void> | void;
-  }>(),
-  {
-    title: "Konfirmasi",
-    description: "Apakah Anda yakin ingin menghapus item yang dipilih?",
-    method: "DELETE",
-    confirmText: "Ya",
-    cancelText: "Tidak",
-    confirmColor: "error",
-  },
-);
+const props = defineProps<{
+  path: string;
+  body: object;
+  refresh: () => Promise<void>;
+  title: string;
+  description: string;
+}>();
 
 const emit = defineEmits(["close"]);
 
@@ -30,20 +15,13 @@ const loading = ref(false);
 async function onClick() {
   loading.value = true;
   try {
-    if (props.onConfirm) {
-      await props.onConfirm();
-    } else if (props.path) {
-      await $fetch(`${props.path}`, {
-        method: props.method,
-        body: props.body,
-        credentials: "include",
-      });
-      useToastSuccess(
-        props.method === "DELETE" ? "Berhasil Hapus Data" : "Berhasil Memproses Data",
-        props.method === "DELETE" ? "Data yang dipilih telah dihapus." : "Perubahan telah disimpan.",
-      );
-    }
-    await props.refresh?.();
+    await $fetch(props.path, {
+      method: "DELETE",
+      body: props.body,
+      credentials: "include",
+    });
+    useToastSuccess("Berhasil Hapus Data", "Data yang dipilih telah dihapus.");
+    await props.refresh();
     emit("close", false);
   } catch (error) {
     useToastError(
@@ -65,12 +43,7 @@ async function onClick() {
     <template #body>
       <div class="space-y-5">
         <div class="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-200">
-          <UIcon
-            :name="confirmColor === 'error' ? 'i-tabler-alert-triangle' : 'i-tabler-help-circle'"
-            size="36"
-            :class="confirmColor === 'error' ? 'text-red-500' : 'text-primary'"
-            class="shrink-0"
-          />
+          <UIcon name="i-tabler-alert-triangle" size="36" class="shrink-0 text-red-500" />
           <div>
             {{ description }}
           </div>
@@ -86,16 +59,16 @@ async function onClick() {
         color="neutral"
         @click="emit('close')"
       >
-        {{ cancelText }}
+        Batal
       </UButton>
       <UButton
         icon="i-tabler-check"
         :loading="loading"
-        :color="confirmColor"
+        color="error"
         class="text-base"
         @click="onClick"
       >
-        {{ confirmText }}
+        Hapus
       </UButton>
     </template>
   </UModal>

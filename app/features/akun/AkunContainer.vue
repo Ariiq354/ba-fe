@@ -7,7 +7,6 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { API_URL, PAGE_SIZE } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import ModalAkun from "./components/ModalAkun.vue";
 import { akunColumns, kategoriFilterOptions } from "./model";
 
@@ -15,8 +14,6 @@ const page = ref(1);
 const search = ref("");
 const kategori = ref<KategoriFilter>("all");
 const limit = PAGE_SIZE;
-const session = authClient.useSession();
-const canManage = computed(() => can(session.value.data?.user.role, "masterAkun", "manage"));
 
 watch(
   [search, kategori],
@@ -34,19 +31,15 @@ const total = computed(() => Number(data.value?.total) || 0);
 const refreshList = usePaginatedRefresh({ page, total, error, limit, refresh });
 
 function openForm(akun?: Akun) {
-  if (!canManage.value) return;
   openModal(ModalAkun, { akun, refresh: refreshList });
 }
 
 function deleteAkun(ids: string[]) {
-  if (!canManage.value || !ids.length) return;
   openModal(ModalConfirmDelete, {
     title: "Hapus Akun",
     description: `Apakah Anda yakin ingin menghapus ${ids.length} akun yang dipilih?`,
     path: `${API_URL}/api/v1/master-akun`,
     body: { ids },
-    confirmText: "Hapus",
-    cancelText: "Batal",
     refresh: refreshList,
   });
 }
@@ -59,7 +52,7 @@ function deleteAkun(ids: string[]) {
         <h1 class="text-2xl font-semibold text-highlighted">Master Akun</h1>
         <p class="mt-1 text-sm text-muted">Kelola daftar akun untuk pencatatan keuangan.</p>
       </div>
-      <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm()">
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm()">
         Tambah Akun
       </UButton>
     </div>
@@ -99,10 +92,10 @@ function deleteAkun(ids: string[]) {
           :columns="akunColumns"
           :loading="status === 'pending'"
           :total="total"
-          :selectable="canManage"
+          selectable
           enumerate
-          :editable="canManage"
-          :deletable="canManage"
+          editable
+          deletable
           pagination
           @edit="openForm"
           @delete="deleteAkun"
@@ -133,9 +126,7 @@ function deleteAkun(ids: string[]) {
                 {{
                   search || kategori !== "all"
                     ? "Coba kata kunci atau kategori lain."
-                    : canManage
-                      ? "Klik Tambah Akun untuk membuat akun pertama."
-                      : "Belum ada akun yang tersedia."
+                    : "Klik Tambah Akun untuk membuat akun pertama."
                 }}
               </p>
             </div>

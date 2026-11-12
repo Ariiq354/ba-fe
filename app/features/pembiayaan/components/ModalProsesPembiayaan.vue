@@ -3,9 +3,8 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { Pembiayaan, PembiayaanAction, RejectPembiayaan } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
-import { canCancelPembiayaan, canProcessPembiayaan, rejectPembiayaanSchema } from "../model";
+import { canProcessPembiayaan, rejectPembiayaanSchema } from "../model";
 
 const props = defineProps<{
   pembiayaan: Pembiayaan;
@@ -13,7 +12,6 @@ const props = defineProps<{
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
 const state = reactive({ alasanPenolakan: "" });
 const labels = {
@@ -46,14 +44,7 @@ const labels = {
     color: "warning",
   },
 } as const;
-const canProcess = computed(() => {
-  if (!canProcessPembiayaan(props.pembiayaan, props.action)) return false;
-  const role = session.value.data?.user.role;
-  return props.action === "cancel"
-    ? can(role, "pembiayaan", "manage") &&
-        canCancelPembiayaan(props.pembiayaan, Number(session.value.data?.user.id))
-    : can(role, "approvalPembiayaan", "manage");
-});
+const canProcess = computed(() => canProcessPembiayaan(props.pembiayaan, props.action));
 async function onConfirm(alasanPenolakan?: string) {
   if (
     isLoading.value ||

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 import type { Angsuran } from "../model";
-import type { StatusMutasi } from "~/features/simpanan/model";
 import DataTable from "~/components/table/DataTable.vue";
 import { statusMutasiLabels } from "~/features/simpanan/model";
 import { angsuranColumns } from "../model";
@@ -30,11 +29,9 @@ const page = defineModel<number>("page", { default: 1 });
     @view="emit('view', $event)"
   >
     <template #statusApproved-cell="{ row }">
-      <UBadge
-        :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"
-        variant="subtle"
-        >{{ statusMutasiLabels[row.original.statusApproved as StatusMutasi].label }}</UBadge
-      >
+      <UBadge :color="statusMutasiLabels[row.original.statusApproved].color" variant="subtle">{{
+        statusMutasiLabels[row.original.statusApproved].label
+      }}</UBadge>
     </template>
     <template #empty>
       <div class="py-8 text-center">

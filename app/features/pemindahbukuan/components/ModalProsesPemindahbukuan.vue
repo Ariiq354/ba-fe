@@ -3,10 +3,8 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { Pemindahbukuan, RejectPemindahbukuan } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import {
-  canCancelPemindahbukuan,
   formatPemindahbukuanValue,
   getPemindahbukuanDestination,
   getPemindahbukuanNominalLabel,
@@ -17,11 +15,9 @@ import {
 const props = defineProps<{
   transfer: Pemindahbukuan;
   action: "approve" | "reject" | "cancel";
-  accessibleSourceIds?: number[];
   refresh: (userIds: number[]) => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
 const state = reactive({ alasanPenolakan: "" });
 const labels = {
@@ -47,19 +43,7 @@ const labels = {
     color: "warning",
   },
 } as const;
-const canProcess = computed(() => {
-  if (props.transfer.statusApproved !== "pending") return false;
-  const role = session.value.data?.user.role;
-  return props.action === "cancel"
-    ? can(role, "pemindahbukuan", "manage") &&
-        canCancelPemindahbukuan(
-          props.transfer,
-          Number(session.value.data?.user.id),
-          props.accessibleSourceIds ?? [],
-          can(role, "approvalPemindahbukuan", "manage"),
-        )
-    : can(role, "approvalPemindahbukuan", "manage");
-});
+const canProcess = computed(() => props.transfer.statusApproved === "pending");
 
 async function onConfirm(alasanPenolakan?: string) {
   if (

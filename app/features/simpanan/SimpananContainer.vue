@@ -54,14 +54,9 @@ const memberName = computed(() =>
     ? (session.value.data?.user.name ?? "Saya")
     : (selectedMember.value?.name ?? ""),
 );
-const canManage = computed(() => {
-  const role = session.value.data?.user.role;
-  return userId.value === actorId.value
-    ? can(role, "simpananSaya", "manage") || can(role, "inputSimpanan", "manage")
-    : canSelectMember.value &&
-        can(role, "inputSimpanan", "manage") &&
-        !!selectedMember.value?.noAnggota?.trim();
-});
+const canManage = computed(
+  () => userId.value === actorId.value || !!selectedMember.value?.noAnggota?.trim(),
+);
 
 watch([actorId, canSelectMember], () => {
   selection.value = undefined;

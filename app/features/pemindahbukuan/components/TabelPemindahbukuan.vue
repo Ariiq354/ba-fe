@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 import type { Pemindahbukuan } from "../model";
-import type { StatusMutasi } from "~/features/simpanan/model";
 import DataTable from "~/components/table/DataTable.vue";
 import { statusMutasiLabels } from "~/features/simpanan/model";
 import { formatRupiah } from "~/utils/format";
@@ -66,11 +65,8 @@ const page = defineModel<number>("page", { default: 1 });
       </p>
     </template>
     <template #statusApproved-cell="{ row }">
-      <UBadge
-        :color="statusMutasiLabels[row.original.statusApproved as StatusMutasi].color"
-        variant="subtle"
-      >
-        {{ statusMutasiLabels[row.original.statusApproved as StatusMutasi].label }}
+      <UBadge :color="statusMutasiLabels[row.original.statusApproved].color" variant="subtle">
+        {{ statusMutasiLabels[row.original.statusApproved].label }}
       </UBadge>
     </template>
     <template #empty>

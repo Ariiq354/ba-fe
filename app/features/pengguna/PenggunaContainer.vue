@@ -7,7 +7,7 @@ import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { IMAGE_URL, PAGE_SIZE } from "~/constants";
-import { authClient, can } from "~/utils/auth";
+import { authClient } from "~/utils/auth";
 import ModalDetailPengguna from "./components/ModalDetailPengguna.vue";
 import {
   canChangePenggunaRole,
@@ -25,7 +25,6 @@ const search = ref("");
 const statusFilter = ref<StatusPenggunaFilter>("all");
 const limit = PAGE_SIZE;
 const session = authClient.useSession();
-const canManage = computed(() => can(session.value.data?.user.role, "pengguna", "manage"));
 const pendingRoles = ref<Partial<Record<number, RolePengguna>>>({});
 
 watch(
@@ -63,13 +62,7 @@ function getSelectedRole(pengguna: Pengguna) {
 
 async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
   const result = rolePenggunaSchema.safeParse(value);
-  if (
-    !result.success ||
-    !canManage.value ||
-    pendingRoles.value[pengguna.id] ||
-    status.value === "pending"
-  )
-    return;
+  if (!result.success || pendingRoles.value[pengguna.id] || status.value === "pending") return;
   const role = result.data;
   if (role === (pengguna.role ?? "user") || !canChangePenggunaRole(pengguna, role)) return;
 
@@ -188,7 +181,6 @@ async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
           </template>
           <template #role-cell="{ row }">
             <USelect
-              v-if="canManage"
               :model-value="getSelectedRole(row.original)"
               :items="getRoleOptions(row.original)"
               :loading="!!pendingRoles[row.original.id]"
@@ -202,7 +194,6 @@ async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
               class="w-40"
               @update:model-value="setPenggunaRole(row.original, $event)"
             />
-            <span v-else>{{ formatPenggunaRole(row.original.role) }}</span>
           </template>
           <template #status-cell="{ row }">
             <div class="space-y-1">
@@ -223,23 +214,17 @@ async function setPenggunaRole(pengguna: Pengguna, value: unknown) {
           <template #pengelolaan-cell="{ row }">
             <UButton
               :icon="
-                canManage && getPenggunaStatus(row.original) === 'pending'
+                getPenggunaStatus(row.original) === 'pending'
                   ? 'i-tabler-user-check'
                   : 'i-tabler-eye'
               "
-              :color="
-                canManage && getPenggunaStatus(row.original) === 'pending' ? 'primary' : 'neutral'
-              "
+              :color="getPenggunaStatus(row.original) === 'pending' ? 'primary' : 'neutral'"
               size="sm"
               variant="soft"
               :disabled="status === 'pending'"
               @click="viewPengguna(row.original)"
             >
-              {{
-                canManage && getPenggunaStatus(row.original) === "pending"
-                  ? "Verifikasi"
-                  : "Lihat Profil"
-              }}
+              {{ getPenggunaStatus(row.original) === "pending" ? "Verifikasi" : "Lihat Profil" }}
             </UButton>
           </template>
           <template #empty>

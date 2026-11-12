@@ -7,18 +7,13 @@ import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import ModalGenerateShu from "~/features/shu/components/ModalGenerateShu.vue";
 import ModalPengalihanShu from "~/features/shu/components/ModalPengalihanShu.vue";
-import { authClient } from "~/utils/auth";
 import { monitoringShuColumns } from "./model";
 
-const session = authClient.useSession();
-const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const tahun = ref(new Date().getFullYear());
 const idKelompok = ref<number>();
 const { data, status, error, refresh } = useApi<{ data: MonitoringShu[] }>(
   "/api/v1/shu/monitoring",
   {
-    enabled: isAdmin,
-    watch: [isAdmin],
     query: { tahun, idKelompok },
   },
 );
@@ -28,12 +23,10 @@ const {
   error: referensiError,
   refresh: refreshReferensi,
 } = useApi<ReferensiShu>("/api/v1/shu/referensi", {
-  enabled: isAdmin,
-  watch: [isAdmin],
   query: { tahun },
 });
 const currentReferensi = computed(() =>
-  isAdmin.value && referensiStatus.value === "success" && referensi.value?.tahun === tahun.value
+  referensiStatus.value === "success" && referensi.value?.tahun === tahun.value
     ? referensi.value
     : undefined,
 );
@@ -95,7 +88,7 @@ function transferShu() {
         Semua Kelompok
       </UButton>
     </div>
-    <div v-if="isAdmin" class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-3">
       <UButton icon="i-tabler-calculator" :disabled="!canGenerate" @click="generateShu">
         Generate SHU
       </UButton>
@@ -104,7 +97,7 @@ function transferShu() {
       </UButton>
     </div>
     <UAlert
-      v-if="isAdmin && referensiError"
+      v-if="referensiError"
       title="Gagal Memuat Referensi SHU"
       color="error"
       variant="subtle"

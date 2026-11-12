@@ -8,20 +8,12 @@ import { openModal } from "~/composables/modal";
 import { usePaginatedRefresh } from "~/composables/pagination";
 import { PAGE_SIZE } from "~/constants";
 import { getAnggotaOptions, statusMutasiOptions } from "~/features/simpanan/model";
-import { authClient, can } from "~/utils/auth";
 import ModalDetailPemindahbukuan from "./components/ModalDetailPemindahbukuan.vue";
 import ModalProsesPemindahbukuan from "./components/ModalProsesPemindahbukuan.vue";
 import TabelPemindahbukuan from "./components/TabelPemindahbukuan.vue";
 import { PEMINDAHBUKUAN_MUTASI_LIST_KEY, refreshPemindahbukuanData } from "./data";
 import { tipePemindahbukuanOptions } from "./model";
 
-const session = authClient.useSession();
-const canView = computed(() =>
-  can(session.value.data?.user.role, "approvalPemindahbukuan", "view"),
-);
-const canApprove = computed(() =>
-  can(session.value.data?.user.role, "approvalPemindahbukuan", "manage"),
-);
 const page = ref(1);
 const search = ref("");
 const statusFilter = ref<"all" | StatusMutasi>("all");
@@ -45,10 +37,7 @@ const {
   status: membersStatus,
   error: membersError,
   refresh: refreshMembers,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  enabled: canView,
-  watch: [canView],
-});
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options");
 const memberOptions = computed(() => [
   { label: "Semua anggota", value: "all" },
   ...getAnggotaOptions(members.value?.data ?? []),
@@ -64,8 +53,6 @@ const { data, status, error, refresh } = useApi<PemindahbukuanResponse>("/api/v1
     tipePemindahbukuan: tipe,
     userId: targetUserId,
   },
-  enabled: canView,
-  watch: [canView],
 });
 const total = computed(() => data.value?.total ?? 0);
 
@@ -80,13 +67,12 @@ function viewTransfer(transfer: Pemindahbukuan) {
 }
 
 function processTransfer(transfer: Pemindahbukuan, action: "approve" | "reject") {
-  if (status.value === "pending" || transfer.statusApproved !== "pending" || !canApprove.value)
-    return;
+  if (status.value === "pending" || transfer.statusApproved !== "pending") return;
   openModal(ModalProsesPemindahbukuan, { transfer, action, refresh: refreshAfterChange });
 }
 
 function getDropdownItems(transfer: Pemindahbukuan): DropdownMenuItem[] {
-  if (transfer.statusApproved !== "pending" || !canApprove.value) return [];
+  if (transfer.statusApproved !== "pending") return [];
   return [
     {
       label: "Setujui",

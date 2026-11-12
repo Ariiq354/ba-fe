@@ -2,7 +2,6 @@
 import type { Pengguna, VerifikasiPenggunaResponse } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL, IMAGE_URL } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatPenggunaDate, formatPenggunaRole, getPenggunaStatus } from "../model";
 
 const props = defineProps<{
@@ -10,13 +9,8 @@ const props = defineProps<{
   refresh: () => Promise<void>;
 }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
-const canVerify = computed(
-  () =>
-    can(session.value.data?.user.role, "pengguna", "manage") &&
-    getPenggunaStatus(props.pengguna) === "pending",
-);
+const canVerify = computed(() => getPenggunaStatus(props.pengguna) === "pending");
 const imageSrc = computed(() =>
   props.pengguna.image ? `${IMAGE_URL}/${props.pengguna.image}` : undefined,
 );

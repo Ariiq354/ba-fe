@@ -3,22 +3,15 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 import type { GenerateShu, ReferensiShu } from "../model";
 import { extractErrorMessage, useToastError, useToastSuccess } from "~/composables/toast";
 import { API_URL } from "~/constants";
-import { authClient } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import { generateShuSchema } from "../model";
 
 const props = defineProps<{ referensi: ReferensiShu; refresh: () => Promise<void> }>();
 const emit = defineEmits<{ close: [] }>();
-const session = authClient.useSession();
 const isLoading = ref(false);
 const state = reactive({ totalShu: undefined as number | undefined });
 const schema = computed(() => generateShuSchema(props.referensi.batasShu));
-const canGenerate = computed(
-  () =>
-    session.value.data?.user.role === "admin" &&
-    !props.referensi.sudahDibagikan &&
-    props.referensi.batasShu > 0,
-);
+const canGenerate = computed(() => !props.referensi.sudahDibagikan && props.referensi.batasShu > 0);
 
 async function onSubmit(event: FormSubmitEvent<GenerateShu>) {
   if (isLoading.value || !canGenerate.value) return;

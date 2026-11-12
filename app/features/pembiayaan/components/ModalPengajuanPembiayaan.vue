@@ -15,7 +15,6 @@ const emit = defineEmits<{ close: [] }>();
 const session = authClient.useSession();
 const isAdmin = computed(() => session.value.data?.user.role === "admin");
 const actorId = computed(() => Number(session.value.data?.user.id));
-const canManage = computed(() => can(session.value.data?.user.role, "pembiayaan", "manage"));
 const canDelegate = computed(() => can(session.value.data?.user.role, "pembiayaan", "delegate"));
 const canOverride = computed(() =>
   can(session.value.data?.user.role, "approvalPembiayaan", "manage"),
@@ -40,10 +39,7 @@ const {
   status: membersStatus,
   error: membersError,
   refresh: refreshMembers,
-} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options", {
-  enabled: canManage,
-  watch: [canManage],
-});
+} = useApi<AnggotaOptionsResponse>("/api/v1/pengguna/options");
 const memberOptions = computed(() =>
   getAnggotaOptions(members.value?.data ?? []).map((option) =>
     option.value === actorId.value ? { ...option, label: `${option.label} (Saya)` } : option,
@@ -107,14 +103,13 @@ watch(
     () => state.jangkaWaktuBulan,
     () => state.persenMarginTahun,
     customMarginActive,
-    canManage,
     simulasiRefresh,
   ],
   (_value, _oldValue, onCleanup) => {
     simulasiMargin.value = undefined;
     simulasiError.value = "";
     simulasiLoading.value = false;
-    if (!canManage.value || (customMarginActive.value && state.persenMarginTahun === undefined)) {
+    if (customMarginActive.value && state.persenMarginTahun === undefined) {
       return;
     }
     const parsed = simulasiSchema.safeParse({
@@ -136,7 +131,6 @@ watch(
 );
 const ready = computed(
   () =>
-    canManage.value &&
     membersStatus.value === "success" &&
     memberOptions.value.some((member) => member.value === state.userId && !member.disabled) &&
     (!overrideMargin.value || (canOverride.value && state.persenMarginTahun !== undefined)),

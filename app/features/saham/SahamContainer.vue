@@ -4,15 +4,12 @@ import DataTable from "~/components/table/DataTable.vue";
 import { useApi } from "~/composables/fetch";
 import { openModal } from "~/composables/modal";
 import { PAGE_SIZE } from "~/constants";
-import { authClient, can } from "~/utils/auth";
 import { formatRupiah } from "~/utils/format";
 import HargaSahamRealtime from "./components/HargaSahamRealtime.vue";
 import ModalSaham from "./components/ModalSaham.vue";
 import { sahamColumns } from "./model";
 
 const page = ref(1);
-const session = authClient.useSession();
-const canManage = computed(() => can(session.value.data?.user.role, "masterSaham", "manage"));
 const { data, status, error, refresh } = useApi<SahamResponse>("/api/v1/master-saham", {
   query: { page, limit: PAGE_SIZE },
 });
@@ -23,21 +20,16 @@ const {
   refresh: refreshLatestPrice,
 } = useApi<HargaSahamResponse>("/api/v1/master-saham/latest");
 
-async function refreshList() {
-  await refresh();
-}
-
 async function refreshAfterCreate() {
   if (page.value !== 1) {
     page.value = 1;
     await refreshLatestPrice();
   } else {
-    await Promise.all([refreshList(), refreshLatestPrice()]);
+    await Promise.all([refresh(), refreshLatestPrice()]);
   }
 }
 
 function openForm() {
-  if (!canManage.value) return;
   openModal(ModalSaham, { refresh: refreshAfterCreate });
 }
 </script>
@@ -51,7 +43,7 @@ function openForm() {
           Kelola harga jual saham dan lihat riwayat penetapan harga, dari yang terbaru.
         </p>
       </div>
-      <UButton v-if="canManage" icon="i-tabler-plus" class="justify-center" @click="openForm">
+      <UButton icon="i-tabler-plus" class="justify-center" @click="openForm">
         Tambah Harga Saham
       </UButton>
     </div>
@@ -93,7 +85,7 @@ function openForm() {
         variant="subtle"
         icon="i-tabler-alert-circle"
         :actions="[
-          { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: refreshList },
+          { label: 'Coba lagi', color: 'error', variant: 'outline', onClick: () => refresh() },
         ]"
       />
       <DataTable
@@ -111,11 +103,7 @@ function openForm() {
             <UIcon name="i-tabler-chart-candle" class="mb-2 size-8 text-dimmed" />
             <p class="font-medium text-highlighted">Belum ada harga saham</p>
             <p class="mt-1 text-sm text-muted">
-              {{
-                canManage
-                  ? "Klik Tambah Harga Saham untuk menetapkan harga pertama."
-                  : "Belum ada riwayat harga saham yang tersedia."
-              }}
+              Klik Tambah Harga Saham untuk menetapkan harga pertama.
             </p>
           </div>
         </template>
